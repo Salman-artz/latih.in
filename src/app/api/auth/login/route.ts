@@ -9,10 +9,14 @@ import { errorResponse, handleApiError } from "@/lib/errors";
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
-    await checkRateLimit({ key: `login:${ip}`, limit: 10, windowSeconds: 60 });
+    await checkRateLimit({ key: `login-ip:${ip}`, limit: 10, windowSeconds: 60 });
 
     const body = await request.json();
     const validated = loginSchema.parse(body);
+
+    // Rate limiting per-akun untuk memitigasi serangan brute-force terdistribusi lintas IP
+    const normalizedEmail = validated.email.toLowerCase().trim();
+    await checkRateLimit({ key: `login-acc:${normalizedEmail}`, limit: 15, windowSeconds: 60 });
 
     const user = await prisma.user.findUnique({
       where: { email: validated.email },

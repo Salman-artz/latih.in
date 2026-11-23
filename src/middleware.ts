@@ -18,8 +18,11 @@ const PROTECTED_PREFIXES = [
 // Halaman khusus auth (tamu)
 const AUTH_ROUTES = ["/login", "/register"];
 
-function getSecretKey(): Uint8Array {
-  const secret = process.env.JWT_SECRET || "default_jwt_secret_must_be_set_in_env_file";
+function getSecretKey(): Uint8Array | null {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    return null;
+  }
   return new TextEncoder().encode(secret);
 }
 
@@ -32,10 +35,13 @@ export async function middleware(request: NextRequest) {
 
   if (token) {
     try {
-      const { payload } = await jwtVerify(token, getSecretKey());
-      if (payload && payload.userId) {
-        isValidSession = true;
-        userRole = (payload.role as string) || "USER";
+      const secretKey = getSecretKey();
+      if (secretKey) {
+        const { payload } = await jwtVerify(token, secretKey);
+        if (payload && payload.userId) {
+          isValidSession = true;
+          userRole = (payload.role as string) || "USER";
+        }
       }
     } catch {
       isValidSession = false;

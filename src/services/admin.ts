@@ -189,6 +189,15 @@ export async function exportRedeemCodesCSV(status = "ALL", search = "") {
     },
   });
 
+  // Fungsi sanitasi sel CSV untuk mencegah CSV / Formula Injection
+  const sanitizeCsvValue = (val: string): string => {
+    const escaped = val.replace(/"/g, '""');
+    if (/^[=+\-@\t\r]/.test(escaped)) {
+      return `"'${escaped}"`;
+    }
+    return `"${escaped}"`;
+  };
+
   const headers = ["Kode", "Durasi (Hari)", "Status", "Label Batch", "Kedaluwarsa", "Dibuat Pada", "Pemakai"];
   const rows = codes.map((c) => {
     let codeStatus = "Tersedia";
@@ -201,13 +210,13 @@ export async function exportRedeemCodesCSV(status = "ALL", search = "") {
     const createdStr = c.createdAt.toISOString();
 
     return [
-      `"${c.code}"`,
+      sanitizeCsvValue(c.code),
       c.durationDays,
-      `"${codeStatus}"`,
-      `"${c.label || "-"}"`,
-      `"${expiresStr}"`,
-      `"${createdStr}"`,
-      `"${userStr}"`,
+      sanitizeCsvValue(codeStatus),
+      sanitizeCsvValue(c.label || "-"),
+      sanitizeCsvValue(expiresStr),
+      sanitizeCsvValue(createdStr),
+      sanitizeCsvValue(userStr),
     ].join(",");
   });
 

@@ -20,6 +20,16 @@ export async function checkRateLimit({
   const windowMillis = windowSeconds * 1000;
 
   try {
+    // Pembersihan entri usang secara probabilistik (~5% request) agar tabel tidak menumpuk
+    if (Math.random() < 0.05) {
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      prisma.rateLimit
+        .deleteMany({
+          where: { windowStart: { lt: oneDayAgo } },
+        })
+        .catch(() => {});
+    }
+
     const existing = await prisma.rateLimit.findUnique({
       where: { key },
     });
