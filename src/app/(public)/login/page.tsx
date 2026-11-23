@@ -47,17 +47,17 @@ function LoginForm() {
   }
 
   return (
-    <div className="bg-white py-8 px-6 shadow-sm border border-gray-200/80 rounded-2xl sm:px-10">
+    <div className="bg-white py-8 px-6 shadow-sm border border-slate-200 rounded-lg sm:px-8">
       {errorMsg && (
-        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-700">{errorMsg}</p>
+        <div className="mb-5 p-3.5 rounded-md bg-rose-50 border border-rose-300 flex items-start gap-2.5">
+          <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+          <p className="text-xs sm:text-sm text-rose-700 font-medium">{errorMsg}</p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-1">
             Alamat Email
           </label>
           <input
@@ -67,12 +67,12 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="nama@email.com"
-            className="mt-1 block w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
+            className="block w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md text-sm text-brand-navy focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="password" className="block text-xs font-semibold text-slate-700 mb-1">
             Password
           </label>
           <input
@@ -82,14 +82,14 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="mt-1 block w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
+            className="block w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md text-sm text-brand-navy focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
           />
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-50 transition"
+          className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-md text-xs sm:text-sm font-semibold text-white bg-brand-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-50 transition shadow-sm"
         >
           {isLoading ? (
             <>
@@ -97,17 +97,17 @@ function LoginForm() {
             </>
           ) : (
             <>
-              <LogIn className="w-4 h-4" /> Masuk
+              <LogIn className="w-4 h-4" /> Masuk ke Akun
             </>
           )}
         </button>
       </form>
 
       {/* Akun demo helper */}
-      <div className="mt-6 pt-6 border-t border-gray-100 text-xs text-gray-500 space-y-1">
-        <p className="font-semibold text-gray-700">Akun Demo Pengujian:</p>
-        <p>Admin: <span className="font-mono text-gray-800">admin@demo.test</span> / <span className="font-mono text-gray-800">Demo#12345</span></p>
-        <p>Siswa: <span className="font-mono text-gray-800">user@demo.test</span> / <span className="font-mono text-gray-800">Demo#12345</span></p>
+      <div className="mt-5 pt-4 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
+        <p className="font-bold text-slate-700">Akun Demo Pengujian:</p>
+        <p>Admin: <span className="font-mono text-slate-900 font-semibold">admin@demo.test</span> / <span className="font-mono text-slate-900 font-semibold">Demo#12345</span></p>
+        <p>Siswa: <span className="font-mono text-slate-900 font-semibold">user@demo.test</span> / <span className="font-mono text-slate-900 font-semibold">Demo#12345</span></p>
       </div>
     </div>
   );

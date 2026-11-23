@@ -263,22 +263,22 @@ export default function AdminRedeemCodesPage() {
                     </td>
                     <td className="py-3.5 px-4">
                       {item.status === "AVAILABLE" && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-300">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Tersedia
                         </span>
                       )}
                       {item.status === "USED" && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-brand-blue border border-blue-200">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-blue-50 text-brand-blue border border-brand-blue/30">
                           <Clock className="w-3 h-3 text-brand-blue" /> Terpakai
                         </span>
                       )}
                       {item.status === "REVOKED" && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
-                          <XCircle className="w-3 h-3 text-red-600" /> Dicabut
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-300">
+                          <XCircle className="w-3 h-3 text-rose-600" /> Dicabut
                         </span>
                       )}
                       {item.status === "EXPIRED" && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-300">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-300">
                           Kedaluwarsa
                         </span>
                       )}

@@ -35,7 +35,7 @@ export function StartTryoutBtn({ activeAttemptId }: StartTryoutBtnProps) {
     <button
       onClick={handleStart}
       disabled={isLoading}
-      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-brand-blue hover:bg-blue-700 text-white font-semibold text-sm shadow-md transition disabled:opacity-50"
+      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md bg-brand-blue hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm transition disabled:opacity-50 shadow-sm"
     >
       {isLoading ? (
         <>

@@ -54,32 +54,32 @@ export default function RedeemPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto py-6 space-y-6">
+    <div className="max-w-xl mx-auto py-4 space-y-6">
       <div className="text-center space-y-2">
-        <div className="inline-flex p-3 rounded-2xl bg-brand-blue-50 text-brand-blue mb-2">
-          <KeyRound className="w-8 h-8" />
+        <div className="inline-flex p-2.5 rounded-md bg-brand-blue-50 text-brand-blue mb-1 border border-brand-blue/20">
+          <KeyRound className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-brand-navy">
+        <h1 className="text-xl sm:text-2xl font-bold text-brand-navy">
           Aktivasi / Perpanjang Langganan
         </h1>
-        <p className="text-sm text-gray-600">
-          Masukkan kode redeem yang kamu miliki untuk membuka seluruh akses materi dan simulasi tryout.
+        <p className="text-xs sm:text-sm text-slate-600">
+          Masukkan kode redeem voucher untuk mengaktifkan seluruh akses materi dan simulasi tryout.
         </p>
       </div>
 
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/80 shadow-sm">
+      <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
         {successData ? (
-          <div className="space-y-6 text-center py-4">
-            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
-              <CheckCircle2 className="w-8 h-8" />
+          <div className="space-y-5 text-center py-3">
+            <div className="w-12 h-12 rounded-md bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center border border-emerald-300">
+              <CheckCircle2 className="w-7 h-7" />
             </div>
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold text-brand-navy">Kode Berhasil Diaktifkan!</h2>
-              <p className="text-sm text-gray-600">
+            <div className="space-y-1.5">
+              <h2 className="text-lg font-bold text-brand-navy">Kode Berhasil Diaktifkan!</h2>
+              <p className="text-xs sm:text-sm text-slate-600">
                 Masa aktif paket Premium kamu telah berhasil ditambahkan sebesar{" "}
                 <span className="font-semibold text-brand-navy">{successData.durationDays} hari</span>.
               </p>
-              <div className="inline-block bg-emerald-50 text-emerald-800 text-xs font-semibold px-4 py-2 rounded-xl mt-2 border border-emerald-200">
+              <div className="inline-block bg-emerald-50 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-md mt-2 border border-emerald-300">
                 Aktif hingga:{" "}
                 {new Date(successData.endsAt).toLocaleDateString("id-ID", {
                   weekday: "long",
@@ -93,30 +93,30 @@ export default function RedeemPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Link
                 href="/materi"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-brand-blue text-white text-sm font-semibold hover:bg-blue-700 transition"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition"
               >
-                Mulai Belajar Materi <ArrowRight className="w-4 h-4" />
+                Mulai Belajar Materi <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <Link
                 href="/tryout"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl border border-gray-300 text-brand-navy text-sm font-semibold hover:bg-gray-50 transition"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md border border-slate-300 text-brand-navy text-xs sm:text-sm font-semibold hover:bg-slate-50 transition"
               >
                 Ke Tryout Online
               </Link>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleRedeem} className="space-y-5">
+          <form onSubmit={handleRedeem} className="space-y-4">
             {errorMsg && (
-              <div className="p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700 font-medium">{errorMsg}</p>
+              <div className="p-3.5 rounded-md bg-rose-50 border border-rose-200 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs sm:text-sm text-rose-700 font-medium">{errorMsg}</p>
               </div>
             )}
 
             <div>
-              <label htmlFor="code" className="block text-sm font-semibold text-gray-700 mb-1">
-                Kode Redeem
+              <label htmlFor="code" className="block text-xs font-bold text-brand-navy uppercase tracking-wider mb-1.5">
+                Kode Voucher / Redeem
               </label>
               <input
                 id="code"
@@ -126,17 +126,17 @@ export default function RedeemPage() {
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder="Contoh: LATIH-DEMO-0001"
-                className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl font-mono text-center text-lg tracking-wider font-bold text-brand-navy placeholder:font-sans placeholder:font-normal placeholder:tracking-normal placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition"
+                className="block w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-md font-mono text-center text-base tracking-wider font-bold text-brand-navy placeholder:font-sans placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition"
               />
-              <p className="mt-1.5 text-xs text-gray-500 text-center">
-                Spasi dan tanda hubung (-) akan dibersihkan secara otomatis.
+              <p className="mt-1.5 text-[11px] text-slate-500 text-center">
+                Format fleksibel: spasi dan tanda hubung (-) akan dibersihkan secara otomatis.
               </p>
             </div>
 
             <button
               type="submit"
               disabled={isLoading || !code.trim()}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-brand-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-50 transition shadow-sm"
+              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 rounded-md text-xs sm:text-sm font-semibold text-white bg-brand-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-50 transition shadow-sm"
             >
               {isLoading ? (
                 <>
@@ -144,7 +144,7 @@ export default function RedeemPage() {
                 </>
               ) : (
                 <>
-                  <KeyRound className="w-4 h-4" /> Tukarkan Kode
+                  <KeyRound className="w-4 h-4" /> Tukarkan Kode Sekarang
                 </>
               )}
             </button>
@@ -153,10 +153,10 @@ export default function RedeemPage() {
       </div>
 
       {/* Info demo box */}
-      <div className="bg-brand-blue-50/70 border border-brand-blue/20 p-4 rounded-xl text-xs text-brand-navy space-y-1.5">
-        <p className="font-semibold text-brand-blue">Kode Redeem Demo Tersedia:</p>
-        <p className="font-mono">LATIH-DEMO-0001, LATIH-DEMO-0002, LATIH-DEMO-0003, LATIH-DEMO-0004, LATIH-DEMO-0005</p>
-        <p className="text-gray-600">Setiap kode memberikan akses langganan Premium selama 30 hari.</p>
+      <div className="bg-brand-blue-50/70 border border-brand-blue/30 p-4 rounded-md text-xs text-brand-navy space-y-1">
+        <p className="font-bold text-brand-blue">Kode Redeem Demo:</p>
+        <p className="font-mono text-[11px]">LATIH-DEMO-0001, LATIH-DEMO-0002, LATIH-DEMO-0003, LATIH-DEMO-0004, LATIH-DEMO-0005</p>
+        <p className="text-slate-600 text-[11px]">Setiap kode mengaktifkan masa langganan 30 hari secara kumulatif.</p>
       </div>
     </div>
   );

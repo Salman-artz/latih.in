@@ -31,13 +31,13 @@ export default async function AdminDashboardPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/admin/kode"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition shadow-sm"
           >
             <PlusCircle className="w-4 h-4" /> Generate Kode
           </Link>
           <Link
             href="/admin/materi"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-300 bg-white text-brand-navy text-xs sm:text-sm font-semibold hover:bg-gray-50 transition shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-slate-300 bg-white text-brand-navy text-xs sm:text-sm font-semibold hover:bg-slate-50 transition shadow-sm"
           >
             Kelola Materi
           </Link>
@@ -47,23 +47,23 @@ export default async function AdminDashboardPage() {
       {/* STATS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Total Pengguna */}
-        <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm space-y-2">
-          <div className="flex justify-between items-center text-gray-500 text-xs font-semibold">
+        <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-2">
+          <div className="flex justify-between items-center text-slate-500 text-xs font-semibold">
             <span>Total Pengguna</span>
             <Users className="w-4 h-4 text-brand-blue" />
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-brand-navy">
             {stats.totalUsers}
           </div>
-          <div className="text-xs text-gray-500 flex items-center gap-1">
+          <div className="text-xs text-slate-500 flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
             <span className="font-semibold text-emerald-700">{stats.newUsersLast7Days}</span> baru 7 hari terakhir
           </div>
         </div>
 
         {/* Langganan Aktif */}
-        <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm space-y-2">
-          <div className="flex justify-between items-center text-gray-500 text-xs font-semibold">
+        <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-2">
+          <div className="flex justify-between items-center text-slate-500 text-xs font-semibold">
             <span>Langganan Aktif</span>
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
           </div>
@@ -77,29 +77,29 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Kode Redeem Tersedia */}
-        <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm space-y-2">
-          <div className="flex justify-between items-center text-gray-500 text-xs font-semibold">
+        <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-2">
+          <div className="flex justify-between items-center text-slate-500 text-xs font-semibold">
             <span>Kode Tersedia</span>
-            <KeyRound className="w-4 h-4 text-indigo-600" />
+            <KeyRound className="w-4 h-4 text-brand-blue" />
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-brand-navy">
             {stats.availableCodes}
           </div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-slate-500">
             Dari total {stats.totalCodes} ({stats.usedCodes} terpakai)
           </div>
         </div>
 
         {/* Total Attempt & Skor Rata-rata */}
-        <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm space-y-2">
-          <div className="flex justify-between items-center text-gray-500 text-xs font-semibold">
+        <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-2">
+          <div className="flex justify-between items-center text-slate-500 text-xs font-semibold">
             <span>Total Attempt Tryout</span>
-            <Award className="w-4 h-4 text-amber-500" />
+            <Award className="w-4 h-4 text-brand-blue" />
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-brand-navy">
             {stats.totalAttempts}
           </div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-slate-500">
             Rata-rata skor: <span className="font-bold text-brand-blue">{stats.avgScore} / 30</span> (
             {((stats.avgScore / 30) * 100).toFixed(1)}%)
           </div>
@@ -109,18 +109,18 @@ export default async function AdminDashboardPage() {
       {/* QUICK ACTIONS & NOTICES */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Modul Kode Redeem Card */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
+        <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-              <KeyRound className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-md bg-brand-navy text-white flex items-center justify-center font-bold">
+              <KeyRound className="w-4 h-4 text-brand-blue-50" />
             </div>
             <div>
               <h3 className="font-bold text-brand-navy text-base">Manajemen Kode Redeem</h3>
-              <p className="text-xs text-gray-500">Generate batch 1-100 kode, filter status, cabut, dan ekspor CSV.</p>
+              <p className="text-xs text-slate-500">Generate batch 1-100 kode, filter status, cabut, dan ekspor CSV.</p>
             </div>
           </div>
-          <div className="pt-2 flex items-center justify-between border-t border-gray-100">
-            <span className="text-xs text-gray-500">{stats.availableCodes} kode siap dibagikan</span>
+          <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+            <span className="text-xs text-slate-500">{stats.availableCodes} kode siap dibagikan</span>
             <Link
               href="/admin/kode"
               className="inline-flex items-center gap-1 text-xs font-semibold text-brand-blue hover:underline"
@@ -131,18 +131,18 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Modul Materi Video Card */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
+        <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-              <CheckCircle2 className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-md bg-brand-navy text-white flex items-center justify-center font-bold">
+              <CheckCircle2 className="w-4 h-4 text-brand-blue-50" />
             </div>
             <div>
               <h3 className="font-bold text-brand-navy text-base">Manajemen Materi Video</h3>
-              <p className="text-xs text-gray-500">Tambah konten YouTube baru, edit deskripsi, dan arsipkan materi.</p>
+              <p className="text-xs text-slate-500">Tambah konten YouTube baru, edit deskripsi, dan arsipkan materi.</p>
             </div>
           </div>
-          <div className="pt-2 flex items-center justify-between border-t border-gray-100">
-            <span className="text-xs text-gray-500">Video terintegrasi YouTube nocookie</span>
+          <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+            <span className="text-xs text-slate-500">Video terintegrasi YouTube nocookie</span>
             <Link
               href="/admin/materi"
               className="inline-flex items-center gap-1 text-xs font-semibold text-brand-blue hover:underline"

@@ -103,7 +103,7 @@ export function Navbar({ user }: NavbarProps) {
                 {user?.role === "ADMIN" && (
                   <Link
                     href="/admin"
-                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full hover:bg-amber-200 transition"
+                    className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-300 rounded hover:bg-amber-100 transition"
                   >
                     <Shield className="w-3 h-3" /> Panel Admin
                   </Link>
@@ -120,7 +120,7 @@ export function Navbar({ user }: NavbarProps) {
                   href="/profil"
                   className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-brand-blue transition"
                 >
-                  <div className="w-8 h-8 rounded-full bg-brand-blue-50 text-brand-blue flex items-center justify-center font-bold text-xs">
+                  <div className="w-8 h-8 rounded-md bg-brand-navy text-white flex items-center justify-center font-bold text-xs">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                   <span>{user.name}</span>

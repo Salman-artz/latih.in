@@ -2,16 +2,7 @@ import { getSession } from "@/lib/auth";
 import { getAttemptResult } from "@/services/tryout";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import {
-  Award,
-  Clock,
-  CheckCircle2,
-  ArrowRight,
-  RotateCcw,
-  LayoutDashboard,
-  Check,
-  X,
-} from "lucide-react";
+import { Award, Clock, ArrowLeft, RotateCcw, Check, X, BookOpen, Layers } from "lucide-react";
 
 export default async function TryoutResultPage({
   params,
@@ -25,27 +16,38 @@ export default async function TryoutResultPage({
 
   let result;
   try {
-    result = await getAttemptResult(session.userId, attemptId, session.user.role);
+    result = await getAttemptResult(session.userId, attemptId);
   } catch {
     notFound();
   }
 
-  const durationMin = Math.floor(result.durationSeconds / 60);
-  const durationSec = result.durationSeconds % 60;
+  // Hitung durasi pengerjaan dalam menit & detik
+  let durationMin = 0;
+  let durationSec = 0;
+  if (result.submittedAt && result.startedAt) {
+    const diffSeconds = Math.max(
+      0,
+      Math.floor(
+        (new Date(result.submittedAt).getTime() - new Date(result.startedAt).getTime()) / 1000
+      )
+    );
+    durationMin = Math.floor(diffSeconds / 60);
+    durationSec = diffSeconds % 60;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-16">
-      {/* SCORE HEADER HERO */}
-      <div className="bg-gradient-to-br from-brand-navy via-slate-900 to-brand-navy text-white rounded-3xl p-6 sm:p-10 shadow-xl text-center space-y-6">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 text-brand-blue-50 text-xs font-semibold">
-          <Award className="w-4 h-4 text-amber-400" /> Hasil Evaluasi Simulasi
+    <div className="max-w-4xl mx-auto space-y-6 pb-16">
+      {/* SCORE HEADER HERO - Solid Navy */}
+      <div className="bg-brand-navy text-white rounded-lg p-6 sm:p-8 shadow-sm border border-slate-800 text-center space-y-6">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/20 bg-white/10 text-brand-blue-50 text-xs font-semibold uppercase tracking-wider">
+          <Layers className="w-3.5 h-3.5 text-brand-blue-50" /> Hasil Evaluasi Simulasi
         </div>
 
-        <div className="space-y-2">
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+        <div className="space-y-1">
+          <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight">
             {result.tryoutTitle}
           </h1>
-          <p className="text-gray-300 text-xs sm:text-sm">
+          <p className="text-slate-300 text-xs">
             Diselesaikan pada{" "}
             {result.submittedAt
               ? new Date(result.submittedAt).toLocaleDateString("id-ID", {
@@ -60,168 +62,159 @@ export default async function TryoutResultPage({
         </div>
 
         {/* Big Score Box */}
-        <div className="inline-block bg-white/10 backdrop-blur-md px-8 py-6 rounded-2xl border border-white/10 shadow-inner">
-          <div className="text-xs uppercase tracking-wider text-gray-300 font-semibold mb-1">
+        <div className="inline-block bg-white/5 px-8 py-5 rounded-md border border-white/10">
+          <div className="text-[11px] uppercase tracking-wider text-slate-300 font-semibold mb-1">
             Skor Total
           </div>
-          <div className="text-4xl sm:text-6xl font-extrabold text-white">
+          <div className="text-4xl sm:text-5xl font-extrabold text-white">
             {result.score}{" "}
-            <span className="text-xl sm:text-2xl font-normal text-gray-400">/ {result.maxScore}</span>
+            <span className="text-lg sm:text-xl font-normal text-slate-400">/ {result.maxScore}</span>
           </div>
-          <div className="mt-2 text-sm sm:text-base font-bold text-amber-400">
+          <div className="mt-1.5 text-xs sm:text-sm font-bold text-amber-300">
             Nilai Akhir: {result.percent}%
           </div>
         </div>
 
         {/* Durasi & Statistik Mini */}
-        <div className="flex items-center justify-center gap-6 text-xs sm:text-sm text-gray-300 border-t border-white/10 pt-4 max-w-sm mx-auto">
+        <div className="flex items-center justify-center gap-6 text-xs text-slate-300 border-t border-white/10 pt-4 max-w-sm mx-auto">
           <div className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-brand-blue" />
+            <Clock className="w-3.5 h-3.5 text-brand-blue-50" />
             <span>Durasi: {durationMin}m {durationSec}s</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>{result.score} Butir Benar</span>
+            <Award className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Total: 30 Butir Soal</span>
           </div>
         </div>
 
-        {/* Action Quick Links */}
+        {/* Navigation Action Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <Link
             href="/tryout"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-brand-blue hover:bg-blue-600 text-white font-semibold text-xs sm:text-sm shadow-md transition"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-brand-blue hover:bg-blue-600 text-white font-semibold text-xs transition shadow-sm"
           >
-            <RotateCcw className="w-4 h-4" /> Kerjakan Ulang Tryout
+            <RotateCcw className="w-3.5 h-3.5" /> Ulangi Tryout
           </Link>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white/15 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm transition"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/10 transition"
           >
-            <LayoutDashboard className="w-4 h-4" /> Dashboard
-          </Link>
-          <Link
-            href="/riwayat"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white/15 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm transition"
-          >
-            Lihat Riwayat <ArrowRight className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5" /> Kembali ke Dashboard
           </Link>
         </div>
       </div>
 
-      {/* PEMBAHASAN DETAIL 10 SOAL */}
-      <div className="space-y-6">
-        <div className="flex justify-between items-center px-1">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-brand-navy">
-              Pembahasan & Analisis Soal
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-              Pelajari kunci jawaban dan penjelasan di setiap butir pernyataan di bawah ini.
-            </p>
-          </div>
-          <span className="text-xs font-bold text-gray-400">10 Soal</span>
+      {/* RINCIAN PEMBAHASAN PER SOAL */}
+      <div className="space-y-6 pt-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-brand-navy flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-brand-blue" /> Pembahasan Soal & Kunci Jawaban
+          </h2>
+          <span className="text-xs text-slate-500 font-medium">
+            10 Stimulus Soal
+          </span>
         </div>
 
-        <div className="space-y-6">
-          {result.questions.map((q) => (
-            <div
-              key={q.id}
-              className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden"
-            >
-              {/* Question Header */}
-              <div className="p-5 sm:p-6 bg-gray-50/60 border-b border-gray-100 flex justify-between items-center">
-                <span className="text-xs font-bold px-3 py-1 bg-brand-navy text-white rounded-lg">
-                  Soal #{q.order}
-                </span>
-                <span className="text-xs font-bold text-gray-700">
-                  Benar: <span className="text-brand-blue">{q.correctCount}</span> dari 3 Pernyataan
-                </span>
-              </div>
+        {result.questions.map((q) => (
+          <div
+            key={q.id}
+            className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 space-y-5"
+          >
+            {/* Header Soal */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <span className="font-bold text-brand-navy text-sm uppercase tracking-wider">
+                Soal #{q.order}
+              </span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                Skor Soal: {q.correctCount} / 3 Benar
+              </span>
+            </div>
 
-              {/* Stem / Stimulus */}
-              <div className="p-5 sm:p-6 border-b border-gray-100">
-                <p className="text-sm sm:text-base text-gray-800 leading-relaxed font-normal">
-                  {q.stem}
-                </p>
-              </div>
+            {/* Stimulus Bacaan */}
+            <div className="bg-slate-50 p-4 rounded-md border border-slate-200 text-slate-800 text-xs sm:text-sm leading-relaxed whitespace-pre-line font-medium">
+              {q.stem}
+            </div>
 
-              {/* Statements & Explanations */}
-              <div className="p-5 sm:p-6 space-y-4">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                  Rincian 3 Pernyataan:
-                </h4>
+            {/* List 3 Pernyataan & Pembahasan */}
+            <div className="space-y-4">
+              <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                Rincian 3 Pernyataan:
+              </h4>
 
-                <div className="space-y-4">
-                  {q.statements.map((stmt) => (
-                    <div
-                      key={stmt.id}
-                      className={`p-4 sm:p-5 rounded-xl border ${
-                        stmt.isCorrect
-                          ? "bg-emerald-50/30 border-emerald-200"
-                          : "bg-rose-50/30 border-rose-200"
-                      }`}
-                    >
-                      {/* Statement Text & Result Badge */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-2.5 text-sm sm:text-base text-gray-900 flex-grow">
-                          <span className="w-5 h-5 rounded-full bg-gray-200 text-gray-700 font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
-                            {stmt.order}
-                          </span>
-                          <span className="font-medium leading-snug">{stmt.text}</span>
-                        </div>
-
-                        {stmt.isCorrect ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 flex-shrink-0">
-                            <Check className="w-3.5 h-3.5" /> Benar (+1)
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 flex-shrink-0">
-                            <X className="w-3.5 h-3.5" /> Salah (0)
-                          </span>
-                        )}
+              <div className="space-y-3">
+                {q.statements.map((stmt) => (
+                  <div
+                    key={stmt.id}
+                    className={`p-4 rounded-md border ${
+                      stmt.isCorrect
+                        ? "bg-emerald-50/40 border-emerald-300"
+                        : "bg-rose-50/40 border-rose-300"
+                    }`}
+                  >
+                    {/* Statement Text & Result Badge */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-900 flex-grow">
+                        <span className="w-5 h-5 rounded bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5 border border-slate-300">
+                          {stmt.order}
+                        </span>
+                        <span className="font-medium leading-snug">{stmt.text}</span>
                       </div>
 
-                      {/* Answers Comparison */}
-                      <div className="mt-3 pt-3 border-t border-gray-200/60 flex flex-wrap items-center gap-4 text-xs">
-                        <div>
-                          <span className="text-gray-500">Jawaban Kamu: </span>
-                          <span
-                            className={`font-bold ${
-                              stmt.userAnswer === null
-                                ? "text-gray-400 italic"
-                                : stmt.isCorrect
-                                ? "text-emerald-700"
-                                : "text-rose-700"
-                            }`}
-                          >
-                            {stmt.userAnswer === null
-                              ? "Tidak Dijawab"
-                              : stmt.userAnswer
-                              ? "Benar"
-                              : "Salah"}
-                          </span>
-                        </div>
+                      {stmt.isCorrect ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex-shrink-0">
+                          <Check className="w-3 h-3" /> Benar (+1)
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800 border border-rose-300 flex-shrink-0">
+                          <X className="w-3 h-3" /> Salah (0)
+                        </span>
+                      )}
+                    </div>
 
-                        <div>
-                          <span className="text-gray-500">Kunci Jawaban: </span>
-                          <span className="font-bold text-brand-navy">
-                            {stmt.isTrue ? "Benar" : "Salah"}
-                          </span>
-                        </div>
+                    {/* Answers Comparison */}
+                    <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex flex-wrap items-center gap-4 text-xs">
+                      <div>
+                        <span className="text-slate-500">Jawaban Kamu: </span>
+                        <span
+                          className={`font-bold ${
+                            stmt.userAnswer === null
+                              ? "text-slate-400 italic"
+                              : stmt.isCorrect
+                              ? "text-emerald-700"
+                              : "text-rose-700"
+                          }`}
+                        >
+                          {stmt.userAnswer === null
+                            ? "Tidak Dijawab"
+                            : stmt.userAnswer
+                            ? "Benar"
+                            : "Salah"}
+                        </span>
                       </div>
 
-                      {/* Explanation */}
-                      <div className="mt-3 p-3 rounded-lg bg-white border border-gray-100 text-xs text-gray-700 leading-relaxed">
-                        <span className="font-bold text-brand-blue">Pembahasan: </span>
-                        {stmt.explanation}
+                      <div>
+                        <span className="text-slate-500">Kunci Jawaban: </span>
+                        <span className="font-bold text-slate-800">
+                          {stmt.isTrue ? "Benar" : "Salah"}
+                        </span>
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    {/* Explanation */}
+                    {stmt.explanation && (
+                      <div className="mt-3 bg-white p-3 rounded border border-slate-200 text-xs text-slate-700 leading-relaxed">
+                        <span className="font-bold text-brand-navy block mb-0.5">
+                          💡 Pembahasan:
+                        </span>
+                        {stmt.explanation}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -33,10 +33,10 @@ export function ProgressToggleBtn({ materialId, initialCompleted }: ProgressTogg
     <button
       onClick={handleToggle}
       disabled={isLoading}
-      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition shadow-sm ${
+      className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs sm:text-sm font-semibold transition border ${
         isCompleted
-          ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
-          : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+          ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
+          : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
       }`}
     >
       {isLoading ? (

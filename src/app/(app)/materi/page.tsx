@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { getUserSubscription } from "@/services/subscription";
 import { getMaterialsForUser } from "@/services/material";
-import { Lock, PlayCircle, CheckCircle2, ArrowRight, KeyRound, Sparkles } from "lucide-react";
+import { Lock, PlayCircle, CheckCircle2, ArrowRight, KeyRound, BookOpen } from "lucide-react";
 
 export default async function MateriListPage() {
   const session = await getSession();
@@ -13,26 +13,26 @@ export default async function MateriListPage() {
   // Jika belum berlangganan: Tampilkan state terkunci dengan pesan edukatif & tombol redeem
   if (!sub.isActive) {
     return (
-      <div className="max-w-2xl mx-auto py-12 text-center space-y-6">
-        <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 mx-auto flex items-center justify-center">
-          <Lock className="w-8 h-8" />
+      <div className="max-w-xl mx-auto py-12 text-center space-y-6">
+        <div className="w-14 h-14 rounded-lg bg-amber-50 text-amber-600 mx-auto flex items-center justify-center border border-amber-200">
+          <Lock className="w-7 h-7" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-brand-navy">
-            Materi Belajar Masih Terkunci
+          <h1 className="text-xl sm:text-2xl font-bold text-brand-navy">
+            Materi Belajar Terkunci
           </h1>
-          <p className="text-gray-600 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
-            Seluruh kurikulum materi video dan simulasi tryout hanya dapat diakses oleh pengguna dengan paket langganan aktif.
+          <p className="text-slate-600 text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
+            Seluruh kurikulum materi video dan simulasi tryout hanya dapat diakses oleh pengguna dengan status langganan aktif.
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm max-w-md mx-auto space-y-4">
-          <p className="text-xs text-gray-500">
-            Punya kode redeem dari buku atau program promosi? Aktifkan sekarang tanpa biaya tambahan.
+        <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm max-w-md mx-auto space-y-4">
+          <p className="text-xs text-slate-500">
+            Punya kode redeem voucher dari buku atau kemitraan? Aktifkan sekarang tanpa biaya.
           </p>
           <Link
             href="/redeem"
-            className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-brand-blue text-white font-semibold text-sm hover:bg-blue-700 transition shadow-sm"
+            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-md bg-brand-blue text-white font-semibold text-xs sm:text-sm hover:bg-blue-700 transition"
           >
             <KeyRound className="w-4 h-4" /> Masukkan Kode Redeem
           </Link>
@@ -47,29 +47,29 @@ export default async function MateriListPage() {
   const totalCount = materials.length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header & Progres Belajar */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/80 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-6">
+      <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-blue-50 text-brand-blue text-xs font-semibold mb-2">
-            <Sparkles className="w-3.5 h-3.5" /> Modul Belajar Mandiri
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-brand-blue/30 bg-brand-blue-50 text-brand-blue text-xs font-semibold mb-2">
+            <BookOpen className="w-3.5 h-3.5" /> Modul Belajar Mandiri
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-brand-navy">
+          <h1 className="text-xl sm:text-2xl font-bold text-brand-navy">
             Materi Video Pembelajaran
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Tonton dan pahami konsep penalaran umum dan literasi sebelum mengerjakan tryout.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Simak dan pahami materi penalaran dan literasi untuk memperkuat konsep sebelum tryout.
           </p>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 min-w-[220px]">
-          <div className="flex justify-between items-center text-xs font-semibold text-gray-600 mb-2">
+        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 min-w-[220px]">
+          <div className="flex justify-between items-center text-xs font-semibold text-slate-600 mb-2">
             <span>Progres Kamu</span>
-            <span className="text-brand-blue">{completedCount} / {totalCount} Selesai</span>
+            <span className="text-brand-blue font-bold">{completedCount} / {totalCount} Selesai</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-slate-200 rounded-sm h-2 overflow-hidden">
             <div
-              className="bg-brand-blue h-2 rounded-full transition-all duration-300"
+              className="bg-brand-blue h-2 rounded-sm transition-all duration-300"
               style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
             />
           </div>
@@ -81,35 +81,37 @@ export default async function MateriListPage() {
         {materials.map((item) => (
           <div
             key={item.id}
-            className="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between"
+            className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm hover:border-brand-blue/50 transition flex flex-col justify-between"
           >
             <div>
               {/* Thumbnail Container */}
-              <div className="aspect-video bg-gray-900 relative group overflow-hidden">
+              <div className="aspect-video bg-slate-900 relative group overflow-hidden">
                 <img
                   src={`https://img.youtube.com/vi/${item.youtubeId}/mqdefault.jpg`}
                   alt={item.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90"
                 />
                 <div className="absolute inset-0 bg-brand-navy/30 flex items-center justify-center">
-                  <PlayCircle className="w-12 h-12 text-white/90 drop-shadow-md group-hover:scale-110 transition" />
+                  <div className="w-10 h-10 rounded-md bg-white/90 text-brand-navy flex items-center justify-center">
+                    <PlayCircle className="w-6 h-6" />
+                  </div>
                 </div>
                 {item.isCompleted && (
-                  <div className="absolute top-3 right-3 bg-emerald-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Selesai
+                  <div className="absolute top-3 right-3 bg-emerald-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded flex items-center gap-1 shadow-sm">
+                    <CheckCircle2 className="w-3 h-3" /> Selesai
                   </div>
                 )}
               </div>
 
               {/* Detail Text */}
               <div className="p-5 space-y-2">
-                <div className="text-xs font-bold text-brand-blue uppercase tracking-wider">
+                <div className="text-[11px] font-bold text-brand-blue uppercase tracking-wider">
                   Materi #{item.order}
                 </div>
-                <h3 className="font-bold text-brand-navy text-base line-clamp-2 leading-snug">
+                <h3 className="font-bold text-brand-navy text-sm sm:text-base line-clamp-2 leading-snug">
                   {item.title}
                 </h3>
-                <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                   {item.description}
                 </p>
               </div>
@@ -119,9 +121,9 @@ export default async function MateriListPage() {
             <div className="p-5 pt-0">
               <Link
                 href={`/materi/${item.id}`}
-                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-gray-300 text-sm font-semibold text-brand-navy hover:bg-brand-blue-50 hover:text-brand-blue hover:border-brand-blue/30 transition"
+                className="w-full inline-flex items-center justify-center gap-2 py-2 px-4 rounded-md border border-slate-300 text-xs sm:text-sm font-semibold text-brand-navy hover:bg-brand-blue-50 hover:text-brand-blue hover:border-brand-blue/40 transition"
               >
-                {item.isCompleted ? "Tonton Ulang" : "Mulai Belajar"} <ArrowRight className="w-4 h-4" />
+                {item.isCompleted ? "Tonton Ulang" : "Mulai Belajar"} <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>

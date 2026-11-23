@@ -41,7 +41,7 @@ export default async function MaterialDetailPage({
       </div>
 
       {/* Video Container (16:9 responsive aspect ratio) */}
-      <div className="bg-black rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+      <div className="bg-black rounded-lg overflow-hidden shadow-sm border border-slate-200">
         <div className="relative w-full aspect-video">
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${material.youtubeId}?rel=0&modestbranding=1`}
@@ -54,7 +54,7 @@ export default async function MaterialDetailPage({
       </div>
 
       {/* Content Meta & Progress Toggle */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/80 shadow-sm space-y-6">
+      <div className="bg-white p-6 sm:p-7 rounded-lg border border-slate-200 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4 pb-6 border-b border-gray-100">
           <div className="space-y-2">
             <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
