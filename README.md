@@ -109,7 +109,34 @@ Mengacu pada prinsip rekayasa perangkat lunak dengan tenggat waktu terbatas (tec
 
 ---
 
-## 💻 Panduan Menjalankan di Komputer Lokal
+## 🚀 Panduan Deployment ke Vercel
+
+Aplikasi dirancang agar sepenuhnya *stateless* dan siap di-deploy ke Vercel dengan database PostgreSQL (Sumopod / Neon):
+
+### 1. Import Proyek di Vercel
+1. Buka dashboard [Vercel](https://vercel.com) lalu klik **Add New...** $\rightarrow$ **Project**.
+2. Pilih repositori GitHub: `https://github.com/Salman-artz/latih.in`.
+3. Framework Preset akan otomatis terdeteksi sebagai **Next.js**.
+
+### 2. Konfigurasi Environment Variables di Vercel
+Tambahkan variabel lingkungan berikut di tab **Environment Variables**:
+
+| Variable | Nilai Rekomendasi / Produksi | Deskripsi |
+|---|---|---|
+| `DATABASE_URL` | `postgresql://uUy6v6HC2deVSK42U.jkt1_005:45317da5946f08aaa7b1b817@pgsql-dbas-jkt1-005.sumobase.my.id:6432/dbe8554b6bfc629c8f?schema=latih_in&pgbouncer=true` | Koneksi PostgreSQL Sumopod dengan schema khusus `latih_in` & flag PgBouncer |
+| `JWT_SECRET` | `latih-in-super-secure-jwt-secret-key-production-ready-min-48-chars-long-2026` | Kunci rahasia HS256 untuk penandatanganan token JWT sesi cookie |
+| `APP_URL` | `https://latih-in.vercel.app` *(sesuaikan dengan domain Vercel kamu)* | URL domain publik aplikasi |
+| `NODE_ENV` | `production` | Mode produksi |
+
+> [!NOTE]
+> Database Sumopod pada host `pgsql-dbas-jkt1-005.sumobase.my.id:6432` menggunakan schema `latih_in` yang **telah dimigrasi dan di-seed data lengkap** (akun admin, user demo, 5 kode redeem, 5 modul materi video, dan paket tryout 10 soal/30 butir). Setelah deploy di Vercel, aplikasi langsung dapat diuji coba tanpa perlu menjalankan seed ulang.
+
+### 3. Deploy
+1. Klik tombol **Deploy**.
+2. Vercel akan menjalankan `prisma generate && next build` dan menyajikan aplikasi secara global.
+3. Setelah deployment selesai, salin URL Vercel dan perbarui `APP_URL`.
+
+---
 
 ### Prasyarat
 - Node.js versi 20 ke atas (`node -v`)
