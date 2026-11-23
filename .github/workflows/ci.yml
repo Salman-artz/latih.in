@@ -10,6 +10,26 @@ jobs:
   test-and-lint:
     name: Code Quality & Unit Tests
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: latih_in_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/latih_in_test?schema=public"
+      JWT_SECRET: "ci-test-jwt-secret-key-production-ready-min-48-chars-long-2026"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,6 +51,9 @@ jobs:
 
       - name: ESLint Check
         run: npm run lint
+
+      - name: Setup Database Schema
+        run: npx prisma db push
 
       - name: Run Vitest Suite (Unit, Scoring & Concurrency)
         run: npm test
