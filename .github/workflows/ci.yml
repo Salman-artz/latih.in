@@ -27,7 +27,7 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/latih_in_test?schema=public"
+      DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/latih_in_test?schema=public"
       JWT_SECRET: "ci-test-jwt-secret-key-production-ready-min-48-chars-long-2026"
 
     steps:
@@ -53,7 +53,7 @@ jobs:
         run: npm run lint
 
       - name: Setup Database Schema
-        run: npx prisma db push
+        run: npx prisma db push --accept-data-loss --skip-generate
 
       - name: Run Vitest Suite (Unit, Scoring & Concurrency)
         run: npm test
