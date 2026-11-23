@@ -80,6 +80,34 @@ export default function AdminMaterialsPage() {
   async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError("");
+
+    const titleTrimmed = formTitle.trim();
+    if (titleTrimmed.length < 3) {
+      setFormError("Judul materi minimal 3 karakter");
+      return;
+    }
+    if (titleTrimmed.length > 200) {
+      setFormError("Judul materi maksimal 200 karakter");
+      return;
+    }
+
+    const descTrimmed = formDesc.trim();
+    if (descTrimmed.length < 5) {
+      setFormError("Deskripsi materi minimal 5 karakter");
+      return;
+    }
+
+    if (!formYoutube.trim()) {
+      setFormError("URL atau ID video YouTube wajib diisi");
+      return;
+    }
+
+    const orderNum = Number(formOrder);
+    if (isNaN(orderNum) || orderNum < 1) {
+      setFormError("Nomor urut tampilan minimal 1");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {

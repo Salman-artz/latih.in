@@ -21,6 +21,21 @@ function LoginForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg("");
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setErrorMsg("Alamat email wajib diisi");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setErrorMsg("Format email tidak valid");
+      return;
+    }
+    if (!password) {
+      setErrorMsg("Password wajib diisi");
+      return;
+    }
+
     setIsLoading(true);
 
     try {

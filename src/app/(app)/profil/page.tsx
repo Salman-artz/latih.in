@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, KeyRound, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { User, KeyRound, CheckCircle2, AlertCircle, Loader2, Check, X } from "lucide-react";
+import { validatePassword } from "@/lib/validators/auth";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<{
@@ -34,18 +35,24 @@ export default function ProfilePage() {
     loadMe();
   }, []);
 
+  const hasMinLength = newPassword.length >= 8;
+  const hasUppercase = /[A-Z]/.test(newPassword);
+  const hasLowercase = /[a-z]/.test(newPassword);
+  const hasNumber = /[0-9]/.test(newPassword);
+
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
     setMsgSuccess("");
     setMsgError("");
 
-    if (newPassword.length < 8) {
-      setMsgError("Password baru minimal 8 karakter");
+    if (!currentPassword) {
+      setMsgError("Password saat ini wajib diisi");
       return;
     }
 
-    if (!/^(?=.*[A-Za-z])(?=.*\d)/.test(newPassword)) {
-      setMsgError("Password baru harus mengandung huruf dan angka");
+    const valResult = validatePassword(newPassword);
+    if (!valResult.isValid) {
+      setMsgError(valResult.error || "Password baru belum memenuhi syarat");
       return;
     }
 
@@ -172,9 +179,31 @@ export default function ProfilePage() {
               required
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Minimal 8 karakter huruf dan angka"
+              placeholder="Minimal 8 karakter kombinasi"
               className="block w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md text-sm text-brand-navy placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
             />
+            {/* Checklist Syarat Password Baru */}
+            <div className="mt-2 p-2.5 bg-slate-50 border border-slate-200 rounded-md space-y-1 text-[11px]">
+              <p className="font-semibold text-slate-700">Ketentuan password baru:</p>
+              <div className="grid grid-cols-2 gap-1 text-slate-600">
+                <span className={`inline-flex items-center gap-1.5 ${hasMinLength ? "text-emerald-700 font-medium" : ""}`}>
+                  {hasMinLength ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5 text-slate-400" />}
+                  Min. 8 karakter
+                </span>
+                <span className={`inline-flex items-center gap-1.5 ${hasUppercase ? "text-emerald-700 font-medium" : ""}`}>
+                  {hasUppercase ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5 text-slate-400" />}
+                  1 huruf besar (A-Z)
+                </span>
+                <span className={`inline-flex items-center gap-1.5 ${hasLowercase ? "text-emerald-700 font-medium" : ""}`}>
+                  {hasLowercase ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5 text-slate-400" />}
+                  1 huruf kecil (a-z)
+                </span>
+                <span className={`inline-flex items-center gap-1.5 ${hasNumber ? "text-emerald-700 font-medium" : ""}`}>
+                  {hasNumber ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5 text-slate-400" />}
+                  1 angka (0-9)
+                </span>
+              </div>
+            </div>
           </div>
 
           <div>

@@ -82,6 +82,24 @@ export default function AdminRedeemCodesPage() {
 
   async function handleGenerateBatch(e: React.FormEvent) {
     e.preventDefault();
+
+    const countNum = Number(batchCount);
+    if (isNaN(countNum) || countNum < 1 || countNum > 100) {
+      alert("Jumlah kode harus antara 1 sampai 100");
+      return;
+    }
+
+    const durationNum = Number(batchDuration);
+    if (isNaN(durationNum) || durationNum < 1 || durationNum > 730) {
+      alert("Durasi masa aktif harus antara 1 sampai 730 hari");
+      return;
+    }
+
+    if (batchLabel && batchLabel.trim().length > 100) {
+      alert("Label batch maksimal 100 karakter");
+      return;
+    }
+
     setIsGenerating(true);
     setGenerateResult(null);
 

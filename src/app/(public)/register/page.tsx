@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
-import { UserPlus, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
+import { UserPlus, AlertCircle, Loader2, ArrowLeft, Check, X } from "lucide-react";
+import { validatePassword } from "@/lib/validators/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -17,20 +18,39 @@ export default function RegisterPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Status kriteria password
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg("");
 
-    if (name.trim().length < 2) {
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2) {
       setErrorMsg("Nama minimal 2 karakter");
       return;
     }
-    if (password.length < 8) {
-      setErrorMsg("Password minimal 8 karakter");
+    if (trimmedName.length > 80) {
+      setErrorMsg("Nama maksimal 80 karakter");
       return;
     }
-    if (!/^(?=.*[A-Za-z])(?=.*\d)/.test(password)) {
-      setErrorMsg("Password harus mengandung kombinasi huruf dan angka");
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setErrorMsg("Alamat email wajib diisi");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setErrorMsg("Format email tidak valid");
+      return;
+    }
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setErrorMsg(passwordValidation.error || "Password belum memenuhi syarat");
       return;
     }
 
@@ -40,7 +60,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name: trimmedName, email: trimmedEmail, password }),
       });
 
       const data = await res.json();
@@ -135,12 +155,32 @@ export default function RegisterPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimal 8 karakter huruf dan angka"
+                placeholder="Minimal 8 karakter kombinasi"
                 className="block w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md text-sm text-brand-navy placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
               />
-              <p className="mt-1 text-[11px] text-slate-500">
-                Minimal 8 karakter, harus mengandung huruf dan angka.
-              </p>
+              
+              {/* Syarat Keamanan Password */}
+              <div className="mt-2 p-2.5 bg-slate-50 border border-slate-200 rounded-md space-y-1 text-[11px]">
+                <p className="font-semibold text-slate-700">Ketentuan password:</p>
+                <div className="grid grid-cols-2 gap-1 text-slate-600">
+                  <span className={`inline-flex items-center gap-1.5 ${hasMinLength ? "text-emerald-700 font-medium" : ""}`}>
+                    {hasMinLength ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5 text-slate-400" />}
+                    Min. 8 karakter
+                  </span>
+                  <span className={`inline-flex items-center gap-1.5 ${hasUppercase ? "text-emerald-700 font-medium" : ""}`}>
+                    {hasUppercase ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5 text-slate-400" />}
+                    1 huruf besar (A-Z)
+                  </span>
+                  <span className={`inline-flex items-center gap-1.5 ${hasLowercase ? "text-emerald-700 font-medium" : ""}`}>
+                    {hasLowercase ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5 text-slate-400" />}
+                    1 huruf kecil (a-z)
+                  </span>
+                  <span className={`inline-flex items-center gap-1.5 ${hasNumber ? "text-emerald-700 font-medium" : ""}`}>
+                    {hasNumber ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5 text-slate-400" />}
+                    1 angka (0-9)
+                  </span>
+                </div>
+              </div>
             </div>
 
             <button

@@ -23,6 +23,18 @@ export function RedeemForm() {
       setErrorMsg("Silakan masukkan kode redeem");
       return;
     }
+    if (clean.length < 8) {
+      setErrorMsg("Kode redeem minimal 8 karakter");
+      return;
+    }
+    if (clean.length > 16) {
+      setErrorMsg("Kode redeem maksimal 16 karakter");
+      return;
+    }
+    if (!/^[A-Z0-9]+$/.test(clean)) {
+      setErrorMsg("Kode redeem hanya boleh berisi huruf dan angka");
+      return;
+    }
 
     setIsLoading(true);
 
