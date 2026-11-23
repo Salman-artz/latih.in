@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/errors";
-import { AttemptStatus, ContentStatus, Prisma } from "@prisma/client";
+import { ContentStatus, Prisma } from "@prisma/client";
 import { extractYoutubeId } from "@/lib/validators/admin";
 
 // Karakter tanpa ambigu (tanpa 0, O, 1, I)
@@ -15,119 +15,20 @@ export function generateRandomCodeString(length = 12): string {
   return result;
 }
 
+import { getAdminStatsUseCase, generateRedeemCodesUseCase } from "@/core/container";
+
 export async function getAdminStats() {
-  const now = new Date();
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-  const [
-    totalUsers,
-    newUsersLast7Days,
-    activeSubscriptions,
-    expiringSubscriptions,
-    totalCodes,
-    usedCodes,
-    revokedCodes,
-    submittedAttempts,
-  ] = await Promise.all([
-    prisma.user.count(),
-    prisma.user.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
-    prisma.subscription.count({ where: { endsAt: { gt: now } } }),
-    prisma.subscription.count({ where: { endsAt: { gt: now, lte: sevenDaysLater } } }),
-    prisma.redeemCode.count(),
-    prisma.redeemCode.count({ where: { isUsed: true } }),
-    prisma.redeemCode.count({ where: { revokedAt: { not: null } } }),
-    prisma.attempt.findMany({
-      where: { status: AttemptStatus.SUBMITTED, isTest: false },
-      select: { score: true },
-    }),
-  ]);
-
-  const availableCodes = await prisma.redeemCode.count({
-    where: {
-      isUsed: false,
-      revokedAt: null,
-      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-    },
-  });
-
-  const totalAttemptCount = submittedAttempts.length;
-  const avgScore =
-    totalAttemptCount > 0
-      ? Number(
-          (
-            submittedAttempts.reduce((acc, curr) => acc + (curr.score ?? 0), 0) /
-            totalAttemptCount
-          ).toFixed(1)
-        )
-      : 0;
-
-  return {
-    totalUsers,
-    newUsersLast7Days,
-    activeSubscriptions,
-    expiringSubscriptions,
-    totalCodes,
-    availableCodes,
-    usedCodes,
-    revokedCodes,
-    totalAttempts: totalAttemptCount,
-    avgScore,
-  };
+  return await getAdminStatsUseCase.execute();
 }
 
-export async function generateRedeemCodesBatch({
-  adminId,
-  count,
-  durationDays,
-  label,
-  expiresAt,
-}: {
+export async function generateRedeemCodesBatch(params: {
   adminId: string;
   count: number;
   durationDays: number;
   label?: string;
   expiresAt?: Date | null;
 }) {
-  const generatedCodes: string[] = [];
-  const maxAttempts = count * 5;
-  let attempts = 0;
-
-  while (generatedCodes.length < count && attempts < maxAttempts) {
-    attempts++;
-    const candidate = generateRandomCodeString(12);
-
-    // Pastikan tidak duplikat di list saat ini
-    if (generatedCodes.includes(candidate)) continue;
-
-    // Cek keunikan di database
-    const exists = await prisma.redeemCode.findUnique({
-      where: { code: candidate },
-    });
-
-    if (!exists) {
-      generatedCodes.push(candidate);
-    }
-  }
-
-  if (generatedCodes.length < count) {
-    throw new AppError("Gagal menghasilkan seluruh kode unik, silakan coba lagi", 500, "GENERATION_FAILED");
-  }
-
-  await prisma.redeemCode.createMany({
-    data: generatedCodes.map((code) => ({
-      code,
-      durationDays,
-      label: label || null,
-      expiresAt: expiresAt || null,
-      createdById: adminId,
-    })),
-  });
-
-  return {
-    count: generatedCodes.length,
-    codes: generatedCodes,
-  };
+  return await generateRedeemCodesUseCase.execute(params);
 }
 
 export async function getAdminRedeemCodes({

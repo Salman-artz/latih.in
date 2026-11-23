@@ -74,8 +74,14 @@ Mengacu pada prinsip rekayasa perangkat lunak dengan tenggat waktu terbatas (tec
 
 ## 🛠️ Tech Stack & Keputusan Teknis
 
-- **Framework:** Next.js 15 (App Router) — Monolit Fullstack.
+- **Framework:** Next.js 15 (App Router) — Monolit Fullstack dengan **Clean Architecture**.
   - *Alasan:* Menghilangkan *overhead* konfigurasi CORS lintas domain, menyatukan definisi tipe data dan skema validasi Zod antara frontend dan backend, serta memudahkan deployment satu atap di Vercel.
+- **Pola Arsitektur (Clean Architecture):**
+  - **Domain Layer (`src/core/domain/`):** Entitas bisnis murni (`UserEntity`, `SubscriptionEntity`, `TryoutEntity`, dll.) dan abstraksi antarmuka repositori (*repository ports*) yang bebas ketergantungan dari framework eksternal.
+  - **Use Cases Layer (`src/core/use-cases/`):** Aturan bisnis aplikasi dengan prinsip *Single Responsibility* (Auth, Redeem, Subscription, Materials, Tryout, Admin).
+  - **Infrastructure Layer (`src/infrastructure/`):** Implementasi repositori berbasis Prisma ORM, adapter keamanan JWT (`JoseTokenService`), dan adapter hash password (`BcryptPasswordHasher`).
+  - **Dependency Injection Container (`src/core/container.ts`):** Komposisi sentral (*composition root*) yang menginstansiasi repositori dan use case secara terisolasi dan mudah di-mock pada saat pengujian.
+  - **Presentation Layer (`src/app/` & `src/components/`):** Route Handler API tipis dan React Server Components yang mendelegasikan eksekusi langsung ke use case.
 - **Bahasa:** TypeScript (Strict Mode).
 - **Database & ORM:** PostgreSQL + Prisma ORM.
 - **Autentikasi & Kriptografi:** `jose` (JWT) + `bcryptjs` (Cost 10).
@@ -158,39 +164,33 @@ Mengacu pada prinsip rekayasa perangkat lunak dengan tenggat waktu terbatas (tec
 
 ---
 
-## 📁 Struktur Direktori
+## 📁 Struktur Direktori (Clean Architecture)
 
 ```text
 latih.in/
 ├── prisma/
 │   ├── schema.prisma            # Skema PostgreSQL (11 Model, Relasi, Indeks)
 │   ├── seed.ts                  # Script seeding data demo (idempotent)
-│   └── seed-data/
-│       ├── materials.ts         # Data kurikulum 5 video pembelajaran
-│       └── tryouts.ts           # 10 Soal stimulus, 30 pernyataan, kunci & pembahasan
-├── public/
-│   └── brand/                   # Aset logo wordmark resmi latih.in
+│   └── seed-data/               # Modul materi & paket tryout demo
+├── public/                      # Aset statis & logo wordmark resmi
 ├── src/
-│   ├── app/
+│   ├── core/                    # INTI BISNIS (Clean Architecture)
+│   │   ├── domain/
+│   │   │   ├── entities/        # Entitas domain (User, Subscription, Tryout, dll.)
+│   │   │   └── repositories/    # Interfaces / Ports Repositori
+│   │   ├── use-cases/           # Application Use Cases (Auth, Redeem, Tryout, Admin)
+│   │   └── container.ts         # Dependency Injection / Composition Root
+│   ├── infrastructure/          # ADAPTER & IMPLEMENTASI EKSTERNAL
+│   │   ├── repositories/        # Implementasi Repositori Prisma ORM
+│   │   └── security/            # Jose JWT Service & Bcrypt Hasher Service
+│   ├── app/                     # PRESENTATION LAYER (Next.js 15 App Router)
 │   │   ├── (public)/            # Landing page (/), /login, /register
 │   │   ├── (app)/               # /dashboard, /redeem, /materi, /tryout, /riwayat, /profil
 │   │   ├── (admin)/admin/       # /admin (Statistik), /admin/kode, /admin/materi
-│   │   ├── api/                 # 17 Endpoint API (Auth, Me, Redeem, Materi, Tryout, Admin)
-│   │   ├── layout.tsx           # Root layout dengan font Poppins & Inter
-│   │   └── icon.svg             # Favicon huruf 'l' navy + dot biru
-│   ├── components/
-│   │   ├── layout/              # Navbar responsif & Footer
-│   │   ├── ui/                  # Logo fallback, Banner langganan
-│   │   ├── materi/              # Toggle tombol status materi selesai
-│   │   └── tryout/              # Komponen tombol start & ujian tryout
-│   ├── lib/
-│   │   ├── auth.ts              # Enkripsi JWT jose, cookie session httpOnly
-│   │   ├── db.ts                # Prisma Client Singleton
-│   │   ├── errors.ts            # AppError & formatter response JSON seragam
-│   │   ├── rate-limit.ts        # Database-backed rate limiter
-│   │   └── validators/          # Skema validasi Zod (Auth, Redeem, Tryout, Admin)
+│   │   └── api/                 # 17 Route Handler tipis yang memanggil Use Cases
+│   ├── components/              # Komponen UI Reusable (Navbar, Footer, Tryout, Video)
+│   ├── lib/                     # Utilitas singleton db, errors, & validator Zod
 │   ├── middleware.ts            # Proteksi rute & verifikasi token JWT
-│   ├── services/                # Logika bisnis (Auth, Redeem, Materi, Tryout, Admin)
 │   └── tests/                   # Pengujian Vitest & script checklist verifikasi
 ├── vitest.config.ts             # Konfigurasi runner Vitest
 ├── tailwind.config.ts           # Konfigurasi tema & token warna brand

@@ -2,9 +2,10 @@ import { prisma } from "../lib/db";
 import { redeemCode } from "../services/redeem";
 import { getMaterialsForUser } from "../services/material";
 import { startOrResumeAttempt, getAttemptForExam, saveAnswers, submitAttempt, getAttemptResult } from "../services/tryout";
-import { getAdminStats, generateRedeemCodesBatch, revokeRedeemCode, exportRedeemCodesCSV } from "../services/admin";
+import { generateRedeemCodesBatch, revokeRedeemCode, exportRedeemCodesCSV } from "../services/admin";
 import bcrypt from "bcryptjs";
 import { Role } from "@prisma/client";
+import { AppError } from "../lib/errors";
 
 async function runChecklist() {
   console.log("=================================================");
@@ -45,8 +46,8 @@ async function runChecklist() {
   let materiRejected = false;
   try {
     await getMaterialsForUser(newUser.id);
-  } catch (e: any) {
-    if (e.statusCode === 403 && e.code === "SUBSCRIPTION_REQUIRED") {
+  } catch (e: unknown) {
+    if (e instanceof AppError && e.statusCode === 403 && e.code === "SUBSCRIPTION_REQUIRED") {
       materiRejected = true;
     }
   }
@@ -68,8 +69,8 @@ async function runChecklist() {
   let reuseRejected = false;
   try {
     await redeemCode(newUser.id, validCode);
-  } catch (e: any) {
-    if (e.code === "CODE_ALREADY_USED") {
+  } catch (e: unknown) {
+    if (e instanceof AppError && e.code === "CODE_ALREADY_USED") {
       reuseRejected = true;
     }
   }
@@ -143,8 +144,8 @@ async function runChecklist() {
   let resubmitRejected = false;
   try {
     await submitAttempt(newUser.id, startRes.attemptId);
-  } catch (e: any) {
-    if (e.code === "ALREADY_SUBMITTED") {
+  } catch (e: unknown) {
+    if (e instanceof AppError && e.code === "ALREADY_SUBMITTED") {
       resubmitRejected = true;
     }
   }
@@ -161,8 +162,8 @@ async function runChecklist() {
   let unauthorizedAccessBlocked = false;
   try {
     await getAttemptResult(otherUser.id, startRes.attemptId, Role.USER);
-  } catch (e: any) {
-    if (e.statusCode === 404) {
+  } catch (e: unknown) {
+    if (e instanceof AppError && e.statusCode === 404) {
       unauthorizedAccessBlocked = true;
     }
   }
@@ -187,8 +188,8 @@ async function runChecklist() {
   let revokedRedeemRejected = false;
   try {
     await redeemCode(newUser.id, batchRes.codes[0]);
-  } catch (e: any) {
-    if (e.code === "CODE_REVOKED") {
+  } catch (e: unknown) {
+    if (e instanceof AppError && e.code === "CODE_REVOKED") {
       revokedRedeemRejected = true;
     }
   }
