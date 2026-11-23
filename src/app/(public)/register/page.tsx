@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
-import { UserPlus, AlertCircle, Loader2 } from "lucide-react";
+import { UserPlus, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -60,13 +60,24 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      {/* Tombol Kembali ke Landing Page */}
+      <div className="w-full max-w-md mx-auto mb-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-brand-blue transition group px-1 py-1"
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span>Kembali ke Beranda</span>
+        </Link>
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Logo height={34} />
-        <h2 className="mt-6 text-2xl font-bold tracking-tight text-brand-navy">
+        <h2 className="mt-5 sm:mt-6 text-xl sm:text-2xl font-bold tracking-tight text-brand-navy">
           Daftar Akun Baru
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-xs sm:text-sm text-gray-600">
           Sudah memiliki akun?{" "}
           <Link href="/login" className="font-semibold text-brand-blue hover:underline">
             Masuk sekarang
@@ -74,8 +85,8 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 shadow-sm border border-slate-200 rounded-lg sm:px-8">
+      <div className="mt-6 sm:mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-6 sm:py-8 px-4 sm:px-8 shadow-sm border border-slate-200 rounded-lg">
           {errorMsg && (
             <div className="mb-5 p-3.5 rounded-md bg-rose-50 border border-rose-300 flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />

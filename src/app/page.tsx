@@ -11,7 +11,6 @@ import {
   ArrowRight,
   ShieldCheck,
   Clock,
-  Layers,
   HelpCircle,
 } from "lucide-react";
 
@@ -29,11 +28,6 @@ export default async function HomePage() {
         <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl space-y-6">
-              {/* Utilitarian Badge - No Capsule */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-brand-blue/30 bg-brand-blue-50 text-brand-blue text-xs font-semibold uppercase tracking-wider">
-                <Layers className="w-3.5 h-3.5" /> Platform Belajar & Simulasi Ujian Mandiri
-              </div>
-
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-brand-navy leading-[1.15]">
                 Belajar dari video, <br />
                 latihan lewat <span className="text-brand-blue underline decoration-brand-blue/30 decoration-wavy">tryout</span>.

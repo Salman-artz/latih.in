@@ -160,7 +160,7 @@ export default function AdminRedeemCodesPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleExportCSV}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 text-xs sm:text-sm font-semibold hover:bg-gray-50 transition shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 text-xs sm:text-sm font-semibold hover:bg-gray-50 transition shadow-sm"
           >
             <Download className="w-4 h-4" /> Ekspor CSV
           </button>
@@ -169,7 +169,7 @@ export default function AdminRedeemCodesPage() {
               setGenerateResult(null);
               setShowGenerateModal(true);
             }}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition shadow-sm"
           >
             <Plus className="w-4 h-4" /> Generate Batch
           </button>
@@ -177,7 +177,7 @@ export default function AdminRedeemCodesPage() {
       </div>
 
       {/* FILTER & PENCARIAN */}
-      <div className="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="bg-white p-4 rounded-lg border border-gray-200/80 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
         {/* Status Filter Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 text-xs font-semibold">
           {[
@@ -213,12 +213,12 @@ export default function AdminRedeemCodesPage() {
               placeholder="Cari kode atau label..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
+              className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
             />
           </div>
           <button
             type="submit"
-            className="px-3.5 py-1.5 bg-brand-navy text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition"
+            className="px-3.5 py-1.5 bg-brand-navy text-white rounded-md text-xs font-semibold hover:bg-slate-800 transition"
           >
             Cari
           </button>
@@ -226,7 +226,7 @@ export default function AdminRedeemCodesPage() {
       </div>
 
       {/* TABLE DATA */}
-      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200/80 shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="py-16 flex flex-col items-center justify-center space-y-2">
             <Loader2 className="w-6 h-6 animate-spin text-brand-blue" />
@@ -347,7 +347,7 @@ export default function AdminRedeemCodesPage() {
       {/* MODAL GENERATE BATCH */}
       {showGenerateModal && (
         <div className="fixed inset-0 z-50 bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-gray-100 space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-gray-100 space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center pb-2 border-b border-gray-100">
               <h3 className="text-lg font-bold text-brand-navy">Generate Batch Kode Redeem</h3>
               <button
@@ -360,10 +360,10 @@ export default function AdminRedeemCodesPage() {
 
             {generateResult ? (
               <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-800">
+                <div className="p-4 rounded-md bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-800">
                   ✅ Berhasil membuat <strong>{generateResult.length} kode unik</strong> baru!
                 </div>
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 font-mono text-xs max-h-48 overflow-y-auto space-y-1">
+                <div className="p-3 bg-gray-50 rounded-md border border-gray-200 font-mono text-xs max-h-48 overflow-y-auto space-y-1">
                   {generateResult.map((c, i) => (
                     <div key={i} className="py-0.5 select-all">
                       {c}
@@ -373,7 +373,7 @@ export default function AdminRedeemCodesPage() {
                 <div className="flex justify-end pt-2">
                   <button
                     onClick={() => setShowGenerateModal(false)}
-                    className="px-5 py-2.5 bg-brand-blue text-white rounded-xl text-xs sm:text-sm font-semibold"
+                    className="px-5 py-2.5 bg-brand-blue text-white rounded-md text-xs sm:text-sm font-semibold"
                   >
                     Selesai & Tutup
                   </button>
@@ -392,7 +392,7 @@ export default function AdminRedeemCodesPage() {
                     required
                     value={batchCount}
                     onChange={(e) => setBatchCount(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
                 </div>
 
@@ -407,7 +407,7 @@ export default function AdminRedeemCodesPage() {
                     required
                     value={batchDuration}
                     onChange={(e) => setBatchDuration(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
                 </div>
 
@@ -421,7 +421,7 @@ export default function AdminRedeemCodesPage() {
                     value={batchLabel}
                     onChange={(e) => setBatchLabel(e.target.value)}
                     placeholder="Contoh: Promo Buku Liniswara Batch 1"
-                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
                 </div>
 
@@ -433,7 +433,7 @@ export default function AdminRedeemCodesPage() {
                     type="datetime-local"
                     value={batchExpires}
                     onChange={(e) => setBatchExpires(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
                 </div>
 
@@ -441,14 +441,14 @@ export default function AdminRedeemCodesPage() {
                   <button
                     type="button"
                     onClick={() => setShowGenerateModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-xl text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-300 rounded-md text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={isGenerating}
-                    className="inline-flex items-center gap-1.5 px-5 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-5 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-md text-xs sm:text-sm font-semibold shadow disabled:opacity-50"
                   >
                     {isGenerating ? (
                       <>

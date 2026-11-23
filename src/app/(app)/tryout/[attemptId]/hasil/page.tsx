@@ -2,7 +2,7 @@ import { getSession } from "@/lib/auth";
 import { getAttemptResult } from "@/services/tryout";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { Award, Clock, ArrowLeft, RotateCcw, Check, X, BookOpen, Layers } from "lucide-react";
+import { Award, Clock, ArrowLeft, RotateCcw, Check, X, BookOpen } from "lucide-react";
 
 export default async function TryoutResultPage({
   params,
@@ -39,10 +39,6 @@ export default async function TryoutResultPage({
     <div className="max-w-4xl mx-auto space-y-6 pb-16">
       {/* SCORE HEADER HERO - Solid Navy */}
       <div className="bg-brand-navy text-white rounded-lg p-6 sm:p-8 shadow-sm border border-slate-800 text-center space-y-6">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/20 bg-white/10 text-brand-blue-50 text-xs font-semibold uppercase tracking-wider">
-          <Layers className="w-3.5 h-3.5 text-brand-blue-50" /> Hasil Evaluasi Simulasi
-        </div>
-
         <div className="space-y-1">
           <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight">
             {result.tryoutTitle}

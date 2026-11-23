@@ -105,4 +105,31 @@ describe("Logika Transaksi Redeem & Konkurensi", () => {
     expect(fulfilled.length).toBe(1);
     expect(rejected.length).toBe(1);
   });
+
+  it("administrator tidak dapat melakukan redeem kode", async () => {
+    if (!hasDatabase) return;
+    const adminUser = await prisma.user.upsert({
+      where: { email: "test-admin-redeem@demo.test" },
+      update: { role: "ADMIN" },
+      create: {
+        email: "test-admin-redeem@demo.test",
+        name: "Test Admin",
+        passwordHash: "dummy",
+        role: "ADMIN",
+      },
+    });
+
+    const adminCode = `TESTADM${Date.now()}`;
+    await prisma.redeemCode.create({
+      data: {
+        code: adminCode,
+        durationDays: 30,
+        isUsed: false,
+      },
+    });
+
+    await expect(redeemCode(adminUser.id, adminCode)).rejects.toThrow(
+      "Administrator tidak dapat melakukan redeem kode atau berlangganan"
+    );
+  });
 });

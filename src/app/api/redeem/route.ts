@@ -12,6 +12,14 @@ export async function POST(request: NextRequest) {
       return errorResponse("Autentikasi diperlukan", 401, "UNAUTHORIZED");
     }
 
+    if (session.user.role === "ADMIN") {
+      return errorResponse(
+        "Administrator tidak dapat melakukan redeem kode atau berlangganan. Fitur ini khusus untuk akun Siswa.",
+        403,
+        "ADMIN_CANNOT_REDEEM"
+      );
+    }
+
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
     await checkRateLimit({ key: `redeem:${ip}`, limit: 10, windowSeconds: 60 });
 

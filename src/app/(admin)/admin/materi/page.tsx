@@ -155,14 +155,14 @@ export default function AdminMaterialsPage() {
 
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition shadow-sm self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition shadow-sm self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" /> Tambah Materi Baru
         </button>
       </div>
 
       {/* LIST MATERI */}
-      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200/80 shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="py-16 flex flex-col items-center justify-center space-y-2">
             <Loader2 className="w-6 h-6 animate-spin text-brand-blue" />
@@ -181,7 +181,7 @@ export default function AdminMaterialsPage() {
                 className="p-5 flex flex-col md:flex-row justify-between md:items-center gap-4 hover:bg-gray-50/50 transition"
               >
                 <div className="flex items-start gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-brand-blue-50 text-brand-blue flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
+                  <div className="w-9 h-9 rounded-md bg-brand-blue-50 text-brand-blue flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
                     #{item.order}
                   </div>
                   <div className="space-y-1">
@@ -248,7 +248,7 @@ export default function AdminMaterialsPage() {
       {/* MODAL TAMBAH / UBAH MATERI */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-gray-100 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-lg max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-gray-100 space-y-5 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-2 border-b border-gray-100">
               <h3 className="text-lg font-bold text-brand-navy">
                 {editingItem ? "Ubah Materi Pembelajaran" : "Tambah Materi Pembelajaran"}
@@ -262,7 +262,7 @@ export default function AdminMaterialsPage() {
             </div>
 
             {formError && (
-              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2">
+              <div className="p-3.5 rounded-md bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{formError}</span>
               </div>
@@ -279,7 +279,7 @@ export default function AdminMaterialsPage() {
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   placeholder="Contoh: Teknik Membaca Kritis..."
-                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 />
               </div>
 
@@ -293,7 +293,7 @@ export default function AdminMaterialsPage() {
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
                   placeholder="Tuliskan poin-poin utama materi..."
-                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 />
               </div>
 
@@ -307,7 +307,7 @@ export default function AdminMaterialsPage() {
                   value={formYoutube}
                   onChange={(e) => setFormYoutube(e.target.value)}
                   placeholder="https://www.youtube.com/watch?v=... atau youtu.be/..."
-                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 />
                 <p className="mt-1 text-[11px] text-gray-500">
                   ID video 11 karakter akan diekstrak secara otomatis dari URL.
@@ -324,7 +324,7 @@ export default function AdminMaterialsPage() {
                   required
                   value={formOrder}
                   onChange={(e) => setFormOrder(Number(e.target.value))}
-                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 />
               </div>
 
@@ -332,14 +332,14 @@ export default function AdminMaterialsPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-xl text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-5 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-md text-xs sm:text-sm font-semibold shadow disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>

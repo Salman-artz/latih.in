@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { getUserSubscription } from "@/services/subscription";
 import { getMaterialsForUser } from "@/services/material";
-import { Lock, PlayCircle, CheckCircle2, ArrowRight, KeyRound, BookOpen } from "lucide-react";
+import { Lock, PlayCircle, CheckCircle2, ArrowRight, KeyRound } from "lucide-react";
 
 export default async function MateriListPage() {
   const session = await getSession();
@@ -10,8 +10,8 @@ export default async function MateriListPage() {
 
   const sub = await getUserSubscription(session.userId);
 
-  // Jika belum berlangganan: Tampilkan state terkunci dengan pesan edukatif & tombol redeem
-  if (!sub.isActive) {
+  // Jika belum berlangganan: Tampilkan state terkunci dengan pesan edukatif & tombol redeem (khusus Siswa)
+  if (!sub.isActive && session.user.role !== "ADMIN") {
     return (
       <div className="max-w-xl mx-auto py-12 text-center space-y-6">
         <div className="w-14 h-14 rounded-lg bg-amber-50 text-amber-600 mx-auto flex items-center justify-center border border-amber-200">
@@ -51,9 +51,6 @@ export default async function MateriListPage() {
       {/* Header & Progres Belajar */}
       <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-brand-blue/30 bg-brand-blue-50 text-brand-blue text-xs font-semibold mb-2">
-            <BookOpen className="w-3.5 h-3.5" /> Modul Belajar Mandiri
-          </div>
           <h1 className="text-xl sm:text-2xl font-bold text-brand-navy">
             Materi Video Pembelajaran
           </h1>

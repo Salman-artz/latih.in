@@ -3,7 +3,7 @@ import { getUserSubscription } from "@/services/subscription";
 import { prisma } from "@/lib/db";
 import { StartTryoutBtn } from "@/components/tryout/StartTryoutBtn";
 import Link from "next/link";
-import { Lock, Clock, Award, KeyRound, CheckCircle2, Layers } from "lucide-react";
+import { Lock, Clock, Award, KeyRound, CheckCircle2 } from "lucide-react";
 
 export default async function TryoutIndexPage() {
   const session = await getSession();
@@ -55,9 +55,6 @@ export default async function TryoutIndexPage() {
     <div className="max-w-3xl mx-auto py-4 space-y-6">
       {/* Title */}
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-brand-blue/30 bg-brand-blue-50 text-brand-blue text-xs font-semibold">
-          <Layers className="w-3.5 h-3.5" /> Paket Latihan Resmi
-        </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy">
           Simulasi Tryout Literasi & Penalaran
         </h1>

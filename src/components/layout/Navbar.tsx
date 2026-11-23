@@ -92,20 +92,22 @@ export function Navbar({ user }: NavbarProps) {
                 >
                   Riwayat
                 </Link>
-                <Link
-                  href="/redeem"
-                  className={`text-sm font-medium transition ${
-                    pathname === "/redeem" ? "text-brand-blue font-semibold" : "text-gray-600 hover:text-brand-blue"
-                  }`}
-                >
-                  Redeem Kode
-                </Link>
+                {user?.role !== "ADMIN" && (
+                  <Link
+                    href="/redeem"
+                    className={`text-sm font-medium transition ${
+                      pathname === "/redeem" ? "text-brand-blue font-semibold" : "text-gray-600 hover:text-brand-blue"
+                    }`}
+                  >
+                    Redeem Kode
+                  </Link>
+                )}
                 {user?.role === "ADMIN" && (
                   <Link
                     href="/admin"
-                    className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-300 rounded hover:bg-amber-100 transition"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-300 rounded hover:bg-amber-100 transition"
                   >
-                    <Shield className="w-3 h-3" /> Panel Admin
+                    <Shield className="w-3.5 h-3.5 text-amber-600" /> Panel Admin
                   </Link>
                 )}
               </>
@@ -228,13 +230,15 @@ export function Navbar({ user }: NavbarProps) {
               >
                 Riwayat Tryout
               </Link>
-              <Link
-                href="/redeem"
-                onClick={() => setIsOpen(false)}
-                className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-brand-blue-50 rounded-md"
-              >
-                Redeem Kode
-              </Link>
+              {user?.role !== "ADMIN" && (
+                <Link
+                  href="/redeem"
+                  onClick={() => setIsOpen(false)}
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-brand-blue-50 rounded-md"
+                >
+                  Redeem Kode
+                </Link>
+              )}
               <Link
                 href="/profil"
                 onClick={() => setIsOpen(false)}
@@ -246,9 +250,9 @@ export function Navbar({ user }: NavbarProps) {
                 <Link
                   href="/admin"
                   onClick={() => setIsOpen(false)}
-                  className="px-3 py-2 text-sm font-semibold text-amber-700 bg-amber-50 rounded-md"
+                  className="px-3 py-2 text-sm font-semibold text-amber-700 bg-amber-50 rounded-md flex items-center gap-1.5"
                 >
-                  Panel Admin
+                  <Shield className="w-4 h-4 text-amber-600" /> Panel Admin
                 </Link>
               )}
             </div>

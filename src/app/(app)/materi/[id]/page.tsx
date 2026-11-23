@@ -15,7 +15,7 @@ export default async function MaterialDetailPage({
   if (!session) redirect("/login");
 
   const sub = await getUserSubscription(session.userId);
-  if (!sub.isActive) {
+  if (!sub.isActive && session.user.role !== "ADMIN") {
     redirect("/materi");
   }
 

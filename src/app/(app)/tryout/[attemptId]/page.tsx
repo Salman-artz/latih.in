@@ -190,7 +190,7 @@ export default function TryoutExamPage({
         <p className="text-sm text-gray-600">{errorMsg || "Data tidak ditemukan"}</p>
         <button
           onClick={() => router.push("/tryout")}
-          className="px-5 py-2.5 rounded-xl bg-brand-blue text-white text-sm font-semibold"
+          className="px-5 py-2.5 rounded-md bg-brand-blue text-white text-sm font-semibold"
         >
           Kembali ke Menu Tryout
         </button>
@@ -212,12 +212,12 @@ export default function TryoutExamPage({
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
       {/* TOP BAR: TIMER & AUTOSAVE STATUS */}
-      <div className="bg-white px-4 sm:px-6 py-3.5 rounded-2xl border border-gray-200/80 shadow-sm flex items-center justify-between sticky top-16 z-30 backdrop-blur-md">
+      <div className="bg-white px-4 sm:px-6 py-3.5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between sticky top-16 z-30 backdrop-blur-md">
         <div className="flex items-center space-x-3">
-          <span className="text-xs font-bold px-2.5 py-1 bg-brand-blue-50 text-brand-blue rounded-lg">
+          <span className="text-xs font-bold px-2.5 py-1 bg-brand-blue-50 text-brand-blue rounded-md border border-brand-blue/20">
             Soal {currentQIndex + 1} / {exam.questions.length}
           </span>
-          <span className="hidden sm:inline-block text-xs text-gray-500">
+          <span className="hidden sm:inline-block text-xs text-slate-500">
             {saveStatus === "SAVING" && "Menyimpan perubahan..."}
             {saveStatus === "SAVED" && "Semua jawaban tersimpan"}
             {saveStatus === "ERROR" && "Gagal menyimpan, periksa koneksi"}
@@ -226,13 +226,13 @@ export default function TryoutExamPage({
 
         {/* Timer display */}
         <div
-          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-mono text-sm font-bold border transition ${
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs sm:text-sm font-bold border transition ${
             isTimeLow
-              ? "bg-red-50 text-red-600 border-red-200 animate-pulse"
-              : "bg-gray-50 text-brand-navy border-gray-200"
+              ? "bg-rose-50 text-rose-600 border-rose-300 animate-pulse"
+              : "bg-slate-50 text-brand-navy border-slate-200"
           }`}
         >
-          <Clock className="w-4 h-4" />
+          <Clock className="w-4 h-4 text-brand-blue" />
           <span>{timeFormatted}</span>
         </div>
       </div>
@@ -240,24 +240,24 @@ export default function TryoutExamPage({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* AREA SOAL & PERNYATAAN (KIRI) */}
         <div className="lg:col-span-3 space-y-6">
-          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200/80 shadow-sm space-y-6">
+          <div className="bg-white p-5 sm:p-8 rounded-lg border border-slate-200 shadow-sm space-y-6">
             {/* Stimulus / Stem Soal */}
             <div className="space-y-3">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Stimulus Bacaan / Teks Soal #{currentQuestion.order}
               </span>
-              <div className="p-4 sm:p-5 rounded-xl bg-gray-50/80 border border-gray-100 text-sm sm:text-base text-gray-800 leading-relaxed font-normal">
+              <div className="p-4 sm:p-5 rounded-md bg-slate-50 border border-slate-200 text-sm sm:text-base text-slate-800 leading-relaxed font-normal">
                 {currentQuestion.stem}
               </div>
             </div>
 
             {/* 3 Pernyataan Benar/Salah */}
-            <div className="space-y-4 pt-2 border-t border-gray-100">
+            <div className="space-y-4 pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-brand-navy">
                   Pilihlah Benar (B) atau Salah (S) untuk setiap pernyataan berikut:
                 </h3>
-                <span className="text-xs text-gray-400">3 Butir</span>
+                <span className="text-xs text-slate-400">3 Butir</span>
               </div>
 
               <div className="space-y-3.5">
@@ -268,18 +268,18 @@ export default function TryoutExamPage({
                   return (
                     <div
                       key={stmt.id}
-                      className={`p-4 rounded-xl border transition ${
+                      className={`p-3.5 sm:p-4 rounded-md border transition ${
                         isAnswered
                           ? "bg-brand-blue-50/20 border-brand-blue/30"
-                          : "bg-white border-gray-200"
+                          : "bg-white border-slate-200"
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-start gap-2.5 text-sm text-slate-800 flex-grow">
+                        <div className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-800 flex-grow">
                           <span className="w-5 h-5 rounded bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5 border border-slate-200">
                             {stmt.order}
                           </span>
-                          <p className="leading-snug">{stmt.text}</p>
+                          <p className="leading-relaxed">{stmt.text}</p>
                         </div>
 
                         {/* Toggle Tombol Benar / Salah */}
@@ -316,12 +316,12 @@ export default function TryoutExamPage({
             </div>
 
             {/* Navigasi Bawah Soal */}
-            <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
+            <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => setCurrentQIndex((prev) => Math.max(0, prev - 1))}
                 disabled={currentQIndex === 0}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-30 disabled:pointer-events-none transition"
+                className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-md border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none transition"
               >
                 <ChevronLeft className="w-4 h-4" /> Sebelumnya
               </button>
@@ -331,7 +331,7 @@ export default function TryoutExamPage({
                   <button
                     type="button"
                     onClick={() => setCurrentQIndex((prev) => Math.min(exam.questions.length - 1, prev + 1))}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-brand-blue text-white text-sm font-semibold hover:bg-blue-700 transition shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-md bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition shadow-sm"
                   >
                     Berikutnya <ChevronRight className="w-4 h-4" />
                   </button>
@@ -339,7 +339,7 @@ export default function TryoutExamPage({
                   <button
                     type="button"
                     onClick={() => setShowSubmitModal(true)}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-md bg-emerald-600 text-white text-xs sm:text-sm font-semibold hover:bg-emerald-700 transition shadow-sm"
                   >
                     <Send className="w-4 h-4" /> Submit Tryout
                   </button>
@@ -351,8 +351,8 @@ export default function TryoutExamPage({
 
         {/* PETA NOMOR SOAL & SUBMIT BUTTON (KANAN) */}
         <div className="space-y-4">
-          <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
-            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+          <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
               <h4 className="text-xs font-bold text-brand-navy uppercase tracking-wider">
                 Navigasi Soal
               </h4>
@@ -374,14 +374,14 @@ export default function TryoutExamPage({
                     key={q.id}
                     type="button"
                     onClick={() => setCurrentQIndex(idx)}
-                    className={`h-11 rounded-xl text-xs font-bold flex flex-col items-center justify-center border transition relative ${
+                    className={`h-11 rounded-md text-xs font-bold flex flex-col items-center justify-center border transition relative ${
                       isActive
                         ? "bg-brand-blue text-white border-brand-blue shadow-sm ring-2 ring-brand-blue/30"
                         : isFullyAnswered
                         ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
                         : isPartiallyAnswered
                         ? "bg-amber-50 text-amber-800 border-amber-300"
-                        : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
                     <span>{idx + 1}</span>
@@ -437,19 +437,19 @@ export default function TryoutExamPage({
               </p>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-2 text-xs sm:text-sm">
+            <div className="bg-slate-50 p-4 rounded-md border border-slate-200 space-y-2 text-xs sm:text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Pernyataan Terjawab:</span>
+                <span className="text-slate-600">Pernyataan Terjawab:</span>
                 <span className="font-bold text-emerald-700">{answeredCount} butir</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Pernyataan Kosong:</span>
-                <span className={`font-bold ${emptyCount > 0 ? "text-amber-700" : "text-gray-700"}`}>
+                <span className="text-slate-600">Pernyataan Kosong:</span>
+                <span className={`font-bold ${emptyCount > 0 ? "text-amber-700" : "text-slate-700"}`}>
                   {emptyCount} butir
                 </span>
               </div>
               {emptyCount > 0 && (
-                <div className="pt-2 border-t border-gray-200 text-xs text-amber-800 leading-relaxed">
+                <div className="pt-2 border-t border-slate-200 text-xs text-amber-800 leading-relaxed">
                   ⚠️ <strong>Perhatian:</strong> {emptyCount} butir pernyataan yang dikosongkan tidak memperoleh poin (dihitung 0).
                 </div>
               )}
@@ -460,7 +460,7 @@ export default function TryoutExamPage({
                 type="button"
                 onClick={() => setShowSubmitModal(false)}
                 disabled={isSubmitting}
-                className="px-4 py-2.5 rounded-xl border border-gray-300 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                className="px-4 py-2.5 rounded-md border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
               >
                 Kembali Periksa
               </button>
@@ -468,7 +468,7 @@ export default function TryoutExamPage({
                 type="button"
                 onClick={handleConfirmSubmit}
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow transition disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow transition disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <>

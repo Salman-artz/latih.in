@@ -1,58 +1,61 @@
-"use client";
-
-import { useState } from "react";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
-import { KeyRound, CheckCircle2, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import { KeyRound, Shield, ArrowLeft } from "lucide-react";
+import { RedeemForm } from "@/components/redeem/RedeemForm";
 
-export default function RedeemPage() {
-  const [code, setCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [successData, setSuccessData] = useState<{
-    endsAt: string;
-    durationDays: number;
-  } | null>(null);
+export const dynamic = "force-dynamic";
 
-  async function handleRedeem(e: React.FormEvent) {
-    e.preventDefault();
-    setErrorMsg("");
-    setSuccessData(null);
+export default async function RedeemPage() {
+  const session = await getSession();
+  if (!session) redirect("/login");
 
-    const clean = code.trim().toUpperCase().replace(/[-\s]/g, "");
-    if (!clean) {
-      setErrorMsg("Silakan masukkan kode redeem");
-      return;
-    }
+  // Jika Administrator: Tampilkan penjelasan bahwa Admin tidak bisa redeem/berlangganan
+  if (session.user.role === "ADMIN") {
+    return (
+      <div className="max-w-xl mx-auto py-6 sm:py-12 space-y-6">
+        <div className="bg-white p-6 sm:p-8 rounded-lg border border-slate-200 shadow-sm text-center space-y-5">
+          <div className="w-14 h-14 rounded-md bg-amber-50 text-amber-600 mx-auto flex items-center justify-center border border-amber-300">
+            <Shield className="w-8 h-8" />
+          </div>
 
-    setIsLoading(true);
+          <div className="space-y-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-brand-navy">
+              Administrator Tidak Dapat Menukarkan Kode
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+              Fitur redeem kode voucher dan aktivasi paket langganan secara eksklusif diperuntukkan bagi akun <strong>Siswa</strong>. Sebagai Administrator, tugas Anda adalah mengatur, membuat (*generate*), dan membagikan kode voucher kepada siswa melalui Panel Admin.
+            </p>
+          </div>
 
-    try {
-      const res = await fetch("/api/redeem", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: clean }),
-      });
+          <div className="bg-slate-50 p-4 rounded-md border border-slate-200 text-xs text-slate-600 text-left space-y-1.5">
+            <p className="font-semibold text-slate-800">Petunjuk Pengujian Akun:</p>
+            <ul className="list-disc list-inside space-y-1 text-slate-600">
+              <li>Untuk mengelola kode voucher: Buka menu <strong>Kelola Kode</strong> di Panel Admin.</li>
+              <li>Untuk menguji alur penukaran kode & simulasi siswa: Masuk menggunakan akun Siswa demo (<code className="bg-slate-200 px-1 py-0.5 rounded text-brand-navy">user@demo.test</code> / <code className="bg-slate-200 px-1 py-0.5 rounded text-brand-navy">Demo#12345</code>).</li>
+            </ul>
+          </div>
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setErrorMsg(data.error?.message || "Penukaran kode redeem gagal");
-        setIsLoading(false);
-        return;
-      }
-
-      setSuccessData({
-        endsAt: data.subscription.endsAt,
-        durationDays: data.subscription.durationDays,
-      });
-      setCode("");
-      setIsLoading(false);
-    } catch {
-      setErrorMsg("Gagal menghubungi server, silakan coba lagi");
-      setIsLoading(false);
-    }
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Link
+              href="/admin/kode"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition shadow-sm"
+            >
+              <KeyRound className="w-4 h-4" /> Kelola Kode di Panel Admin
+            </Link>
+            <Link
+              href="/dashboard"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md border border-slate-300 text-brand-navy text-xs sm:text-sm font-semibold hover:bg-slate-50 transition"
+            >
+              <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
+  // Jika Siswa: Tampilkan formulir penukaran kode
   return (
     <div className="max-w-xl mx-auto py-4 space-y-6">
       <div className="text-center space-y-2">
@@ -67,95 +70,12 @@ export default function RedeemPage() {
         </p>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
-        {successData ? (
-          <div className="space-y-5 text-center py-3">
-            <div className="w-12 h-12 rounded-md bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center border border-emerald-300">
-              <CheckCircle2 className="w-7 h-7" />
-            </div>
-            <div className="space-y-1.5">
-              <h2 className="text-lg font-bold text-brand-navy">Kode Berhasil Diaktifkan!</h2>
-              <p className="text-xs sm:text-sm text-slate-600">
-                Masa aktif paket Premium kamu telah berhasil ditambahkan sebesar{" "}
-                <span className="font-semibold text-brand-navy">{successData.durationDays} hari</span>.
-              </p>
-              <div className="inline-block bg-emerald-50 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-md mt-2 border border-emerald-300">
-                Aktif hingga:{" "}
-                {new Date(successData.endsAt).toLocaleDateString("id-ID", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <Link
-                href="/materi"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition"
-              >
-                Mulai Belajar Materi <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <Link
-                href="/tryout"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md border border-slate-300 text-brand-navy text-xs sm:text-sm font-semibold hover:bg-slate-50 transition"
-              >
-                Ke Tryout Online
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleRedeem} className="space-y-4">
-            {errorMsg && (
-              <div className="p-3.5 rounded-md bg-rose-50 border border-rose-200 flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
-                <p className="text-xs sm:text-sm text-rose-700 font-medium">{errorMsg}</p>
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="code" className="block text-xs font-bold text-brand-navy uppercase tracking-wider mb-1.5">
-                Kode Voucher / Redeem
-              </label>
-              <input
-                id="code"
-                type="text"
-                required
-                maxLength={20}
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="Contoh: LATIH-DEMO-0001"
-                className="block w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-md font-mono text-center text-base tracking-wider font-bold text-brand-navy placeholder:font-sans placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition"
-              />
-              <p className="mt-1.5 text-[11px] text-slate-500 text-center">
-                Format fleksibel: spasi dan tanda hubung (-) akan dibersihkan secara otomatis.
-              </p>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading || !code.trim()}
-              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 rounded-md text-xs sm:text-sm font-semibold text-white bg-brand-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-50 transition shadow-sm"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Memvalidasi Kode...
-                </>
-              ) : (
-                <>
-                  <KeyRound className="w-4 h-4" /> Tukarkan Kode Sekarang
-                </>
-              )}
-            </button>
-          </form>
-        )}
-      </div>
+      <RedeemForm />
 
       {/* Info demo box */}
       <div className="bg-brand-blue-50/70 border border-brand-blue/30 p-4 rounded-md text-xs text-brand-navy space-y-1">
         <p className="font-bold text-brand-blue">Kode Redeem Demo:</p>
-        <p className="font-mono text-[11px]">LATIH-DEMO-0001, LATIH-DEMO-0002, LATIH-DEMO-0003, LATIH-DEMO-0004, LATIH-DEMO-0005</p>
+        <p className="font-mono text-[11px] break-words">LATIH-DEMO-0001, LATIH-DEMO-0002, LATIH-DEMO-0003, LATIH-DEMO-0004, LATIH-DEMO-0005</p>
         <p className="text-slate-600 text-[11px]">Setiap kode mengaktifkan masa langganan 30 hari secara kumulatif.</p>
       </div>
     </div>

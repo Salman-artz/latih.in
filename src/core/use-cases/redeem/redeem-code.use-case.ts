@@ -8,6 +8,19 @@ export class RedeemCodeUseCase {
     const now = new Date();
 
     return await prisma.$transaction(async (tx) => {
+      // Administrator dilarang me-redeem kode atau berlangganan
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+      });
+      if (user?.role === "ADMIN") {
+        throw new AppError(
+          "Administrator tidak dapat melakukan redeem kode atau berlangganan. Fitur ini khusus untuk akun Siswa.",
+          403,
+          "ADMIN_CANNOT_REDEEM"
+        );
+      }
+
       const updateResult = await tx.redeemCode.updateMany({
         where: {
           code,

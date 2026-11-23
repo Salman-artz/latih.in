@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
-import { LogIn, AlertCircle, Loader2 } from "lucide-react";
+import { LogIn, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -115,13 +115,24 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      {/* Tombol Kembali ke Landing Page */}
+      <div className="w-full max-w-md mx-auto mb-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-brand-blue transition group px-1 py-1"
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span>Kembali ke Beranda</span>
+        </Link>
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Logo height={34} />
-        <h2 className="mt-6 text-2xl font-bold tracking-tight text-brand-navy">
+        <h2 className="mt-5 sm:mt-6 text-xl sm:text-2xl font-bold tracking-tight text-brand-navy">
           Masuk ke Akun Kamu
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-xs sm:text-sm text-gray-600">
           Belum punya akun?{" "}
           <Link href="/register" className="font-semibold text-brand-blue hover:underline">
             Daftar sekarang
@@ -129,7 +140,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="mt-6 sm:mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Suspense fallback={<div className="p-8 text-center text-sm text-gray-500">Memuat formulir masuk...</div>}>
           <LoginForm />
         </Suspense>
