@@ -1,0 +1,170 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum SubscriptionSource {
+  REDEEM
+  MANUAL
+}
+
+model User {
+  id            String             @id @default(cuid())
+  name          String
+  email         String             @unique
+  passwordHash  String
+  role          Role               @default(USER)
+  isActive      Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+  subscriptions Subscription[]
+  attempts      Attempt[]
+  progress      MaterialProgress[]
+}
+
+model RedeemCode {
+  id           String        @id @default(cuid())
+  code         String        @unique
+  durationDays Int           @default(30)
+  expiresAt    DateTime?
+  label        String?
+  isUsed       Boolean       @default(false)
+  usedById     String?
+  usedAt       DateTime?
+  revokedAt    DateTime?
+  revokedById  String?
+  createdById  String?
+  createdAt    DateTime      @default(now())
+  subscription Subscription?
+}
+
+model Subscription {
+  id          String             @id @default(cuid())
+  userId      String
+  codeId      String?            @unique
+  source      SubscriptionSource @default(REDEEM)
+  startsAt    DateTime
+  endsAt      DateTime
+  grantedById String?
+  note        String?
+  createdAt   DateTime           @default(now())
+
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code RedeemCode? @relation(fields: [codeId], references: [id])
+
+  @@index([userId, endsAt])
+}
+
+model Material {
+  id          String             @id @default(cuid())
+  title       String
+  description String
+  youtubeId   String
+  order       Int                @default(1)
+  status      ContentStatus      @default(PUBLISHED)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  progress    MaterialProgress[]
+}
+
+model MaterialProgress {
+  id         String   @id @default(cuid())
+  userId     String
+  materialId String
+  watchedAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, materialId])
+}
+
+model Tryout {
+  id              String        @id @default(cuid())
+  title           String
+  durationMinutes Int           @default(20)
+  status          ContentStatus @default(PUBLISHED)
+  createdAt       DateTime      @default(now())
+  questions       Question[]
+  attempts        Attempt[]
+}
+
+model Question {
+  id       String @id @default(cuid())
+  tryoutId String
+  order    Int
+  stem     String
+
+  tryout     Tryout      @relation(fields: [tryoutId], references: [id], onDelete: Cascade)
+  statements Statement[]
+
+  @@unique([tryoutId, order])
+}
+
+model Statement {
+  id          String  @id @default(cuid())
+  questionId  String
+  order       Int
+  text        String
+  isTrue      Boolean
+  explanation String
+
+  question Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers  AttemptAnswer[]
+
+  @@unique([questionId, order])
+}
+
+model Attempt {
+  id          String        @id @default(cuid())
+  userId      String
+  tryoutId    String
+  status      AttemptStatus @default(IN_PROGRESS)
+  startedAt   DateTime      @default(now())
+  submittedAt DateTime?
+  score       Int?
+  isTest      Boolean       @default(false)
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tryout  Tryout          @relation(fields: [tryoutId], references: [id], onDelete: Cascade)
+  answers AttemptAnswer[]
+
+  @@index([userId, status])
+}
+
+model AttemptAnswer {
+  id          String  @id @default(cuid())
+  attemptId   String
+  statementId String
+  answer      Boolean
+
+  attempt   Attempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  statement Statement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, statementId])
+}
+
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  count       Int      @default(1)
+  windowStart DateTime @default(now())
+}
