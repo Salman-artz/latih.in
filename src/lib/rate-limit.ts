@@ -7,6 +7,22 @@ interface RateLimitOptions {
   windowSeconds?: number; // default: 60 (1 menit)
 }
 
+// In-memory fallback limiter jika DB table belum siap atau koneksi terganggu
+const memoryStore = new Map<string, { count: number; resetAt: number }>();
+
+function checkMemoryRateLimit(key: string, limit: number, windowSeconds: number): void {
+  const now = Date.now();
+  const entry = memoryStore.get(key);
+  if (!entry || now > entry.resetAt) {
+    memoryStore.set(key, { count: 1, resetAt: now + windowSeconds * 1000 });
+    return;
+  }
+  if (entry.count >= limit) {
+    throw new AppError("Terlalu banyak percobaan, coba lagi nanti", 429, "RATE_LIMIT_EXCEEDED");
+  }
+  entry.count += 1;
+}
+
 /**
  * Database-backed rate limiter (Serverless compatible, no in-memory state).
  * Menghitung batas percobaan per key (misal: "login:127.0.0.1").
@@ -73,7 +89,7 @@ export async function checkRateLimit({
     if (error instanceof AppError) {
       throw error;
     }
-    // Jika ada kegagalan DB rate limit, catat tapi jangan blokir alur jika tidak kritis
-    console.error("Rate limit check error:", error);
+    // Fallback ke in-memory limiter jika DB RateLimit belum dibuat / koneksi error
+    checkMemoryRateLimit(key, limit, windowSeconds);
   }
 }
