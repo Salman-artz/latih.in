@@ -138,7 +138,29 @@ Tambahkan variabel lingkungan berikut di tab **Environment Variables**:
 
 ---
 
-### Prasyarat
+## 🐳 Docker & CI/CD GitHub Actions
+
+### 1. Menjalankan via Docker Compose (Lokal)
+Aplikasi telah dilengkapi dengan konfigurasi multi-stage build `Dockerfile` (Next.js 15 Standalone) dan `docker-compose.yml` yang mencakup service PostgreSQL mandiri:
+
+```powershell
+# Menjalankan aplikasi dan database PostgreSQL lokal via Docker
+docker compose up --build -d
+
+# Memeriksa log aplikasi
+docker compose logs -f app
+```
+Aplikasi dapat diakses di `http://localhost:3000`.
+
+### 2. CI/CD GitHub Actions Pipeline
+Setiap *push* atau *pull request* ke branch `main` secara otomatis memicu workflow `.github/workflows/ci.yml` yang menjalankan:
+1. **Code Quality & Typecheck:** Validasi `npx tsc --noEmit` & `eslint`.
+2. **Automated Unit & Integration Test:** Eksekusi Vitest (skoring, validasi, dan konkurensi database).
+3. **Docker Build & Smoke Test:** Pembangunan image Docker menggunakan Docker Buildx dengan layer caching GitHub Actions (`gha`) untuk menjamin image production selalu valid dan bebas broken build.
+
+---
+
+## 💻 Panduan Menjalankan di Komputer Lokal
 - Node.js versi 20 ke atas (`node -v`)
 - PostgreSQL terpasang lokal (port 5432)
 - Git dan PowerShell (Windows)
