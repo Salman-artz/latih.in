@@ -119,17 +119,17 @@ Aplikasi dirancang agar sepenuhnya *stateless* dan siap di-deploy ke Vercel deng
 3. Framework Preset akan otomatis terdeteksi sebagai **Next.js**.
 
 ### 2. Konfigurasi Environment Variables di Vercel
-Tambahkan variabel lingkungan berikut di tab **Environment Variables**:
+Tambahkan variabel lingkungan berikut di tab **Environment Variables** (lihat panduan pada berkas `.env.example`):
 
-| Variable | Nilai Rekomendasi / Produksi | Deskripsi |
+| Variable | Contoh / Format | Deskripsi |
 |---|---|---|
-| `DATABASE_URL` | `postgresql://uUy6v6HC2deVSK42U.jkt1_005:45317da5946f08aaa7b1b817@pgsql-dbas-jkt1-005.sumobase.my.id:6432/dbe8554b6bfc629c8f?schema=latih_in&pgbouncer=true` | Koneksi PostgreSQL Sumopod dengan schema khusus `latih_in` & flag PgBouncer |
-| `JWT_SECRET` | `latih-in-super-secure-jwt-secret-key-production-ready-min-48-chars-long-2026` | Kunci rahasia HS256 untuk penandatanganan token JWT sesi cookie |
-| `APP_URL` | `https://latih-in.vercel.app` *(sesuaikan dengan domain Vercel kamu)* | URL domain publik aplikasi |
+| `DATABASE_URL` | `postgresql://<user>:<password>@<host>:<port>/<database>?schema=<schema>&pgbouncer=true` | Connection string PostgreSQL (gunakan flag pgbouncer jika menggunakan pooler) |
+| `JWT_SECRET` | String acak minimal 48 karakter | Kunci rahasia HS256 untuk penandatanganan token JWT sesi cookie |
+| `APP_URL` | `https://<domain-kamu>.vercel.app` | URL domain publik aplikasi |
 | `NODE_ENV` | `production` | Mode produksi |
 
 > [!NOTE]
-> Database Sumopod pada host `pgsql-dbas-jkt1-005.sumobase.my.id:6432` menggunakan schema `latih_in` yang **telah dimigrasi dan di-seed data lengkap** (akun admin, user demo, 5 kode redeem, 5 modul materi video, dan paket tryout 10 soal/30 butir). Setelah deploy di Vercel, aplikasi langsung dapat diuji coba tanpa perlu menjalankan seed ulang.
+> Pastikan database PostgreSQL tujuan telah dimigrasi dan di-seed datanya. Setelah deploy di Vercel, aplikasi langsung dapat diuji coba.
 
 ### 3. Deploy
 1. Klik tombol **Deploy**.
@@ -177,13 +177,7 @@ Setiap *push* atau *pull request* ke branch `main` secara otomatis memicu workfl
    ```powershell
    Copy-Item .env.example .env
    ```
-   Pastikan isi `.env` sesuai dengan konfigurasi lokal:
-   ```env
-   DATABASE_URL="postgresql://postgres:password_kamu@localhost:5432/latih_in?schema=public"
-   JWT_SECRET="latih-in-super-secure-jwt-secret-key-production-ready-min-48-chars-long-2026"
-   APP_URL="http://localhost:3000"
-   NODE_ENV="development"
-   ```
+   Sesuaikan konfigurasi koneksi database lokal kamu di dalam `.env`.
 
 3. **Install Dependensi:**
    ```powershell
