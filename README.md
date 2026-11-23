@@ -9,7 +9,7 @@
 ## 🔗 Tautan & Akun Demo
 
 - **URL Demo Production:** [Menunggu deploy Vercel - lihat bagian Deployment di bawah](#-deployment)
-- **Repositori GitHub:** [Menunggu remote push - lihat bagian Deployment di bawah](#-deployment)
+- **Repositori GitHub:** [https://github.com/Salman-artz/latih.in](https://github.com/Salman-artz/latih.in)
 
 ### 🔑 Akun Demo (Disediakan via Seed Database)
 
