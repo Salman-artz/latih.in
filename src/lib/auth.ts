@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { Role } from "@prisma/client";
@@ -64,7 +65,7 @@ export async function clearSessionCookie() {
   });
 }
 
-export async function getSession() {
+export const getSession = cache(async () => {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get(COOKIE_NAME)?.value;
@@ -99,4 +100,4 @@ export async function getSession() {
     console.error("Error getSession:", error);
     return null;
   }
-}
+});

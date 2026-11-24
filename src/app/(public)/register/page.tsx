@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { UserPlus, AlertCircle, Loader2, ArrowLeft, Check, X } from "lucide-react";
 import { validatePassword } from "@/lib/validators/auth";
@@ -10,8 +9,6 @@ import { validatePassword } from "@/lib/validators/auth";
 export const dynamic = "force-dynamic";
 
 export default function RegisterPage() {
-  const router = useRouter();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -71,8 +68,7 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      window.location.href = "/dashboard";
     } catch {
       setErrorMsg("Gagal menghubungi server, periksa koneksi internet kamu");
       setIsLoading(false);

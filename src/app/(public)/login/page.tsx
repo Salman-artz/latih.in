@@ -2,14 +2,13 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { LogIn, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
@@ -53,8 +52,7 @@ function LoginForm() {
         return;
       }
 
-      router.push(callbackUrl);
-      router.refresh();
+      window.location.href = callbackUrl;
     } catch {
       setErrorMsg("Gagal menghubungi server, periksa koneksi internet kamu");
       setIsLoading(false);

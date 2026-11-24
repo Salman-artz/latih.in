@@ -54,6 +54,8 @@ model RedeemCode {
   createdById  String?
   createdAt    DateTime      @default(now())
   subscription Subscription?
+
+  @@index([isUsed, revokedAt])
 }
 
 model Subscription {
@@ -83,6 +85,8 @@ model Material {
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
   progress    MaterialProgress[]
+
+  @@index([status, order])
 }
 
 model MaterialProgress {
