@@ -103,8 +103,12 @@ export default function AdminMaterialsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 300 * 1024 * 1024) {
-      setFormError("Ukuran file video melebihi batas maksimal 300MB");
+    const maxCloudinaryBytes = 100 * 1024 * 1024; // 100MB batas ketat paket Cloudinary Free
+    if (file.size > maxCloudinaryBytes) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      setFormError(
+        `File video kamu berukuran ${sizeMB} MB. Akun Cloudinary (Free Plan) membatasi ukuran maksimal video sebesar 100 MB per file. Silakan kompres video menjadi di bawah 100 MB atau gunakan opsi YouTube (tanpa batasan ukuran).`
+      );
       return;
     }
 
@@ -571,8 +575,8 @@ export default function AdminMaterialsPage() {
                             <span className="text-xs font-semibold text-brand-navy">
                               Klik untuk pilih file video (.mp4, .webm)
                             </span>
-                            <span className="text-[11px] text-gray-400">
-                              Maksimal 300MB • Direct Upload Cepat dengan Progress Bar
+                            <span className="text-[11px] text-gray-500">
+                              Maksimal 100MB (Batas Cloudinary Free) • Opsi YouTube Bebas Ukuran
                             </span>
                           </>
                         )}
