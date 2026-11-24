@@ -4,7 +4,9 @@ export interface MaterialEntity {
   id: string;
   title: string;
   description: string;
-  youtubeId: string;
+  youtubeId?: string | null;
+  videoType?: string;
+  videoUrl?: string | null;
   order: number;
   status: ContentStatus;
   createdAt: Date;

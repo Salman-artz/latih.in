@@ -47,17 +47,59 @@ export const updateRedeemCodeSchema = z.object({
   expiresAt: z.string().datetime().optional().nullable(),
 });
 
-export const materialSchema = z.object({
-  title: z.string().min(3, "Judul minimal 3 karakter").max(200, "Judul maksimal 200 karakter").trim(),
-  description: z.string().min(5, "Deskripsi minimal 5 karakter").trim(),
-  youtubeUrl: z
-    .string()
-    .min(1, "URL atau ID YouTube wajib diisi")
-    .refine((val) => extractYoutubeId(val) !== null, {
-      message: "Format URL atau ID video YouTube tidak valid",
-    }),
-  order: z.number().int().min(1, "Urutan minimal 1").default(1),
+export const materialSchema = z
+  .object({
+    title: z.string().min(3, "Judul minimal 3 karakter").max(200, "Judul maksimal 200 karakter").trim(),
+    description: z.string().min(5, "Deskripsi minimal 5 karakter").trim(),
+    videoType: z.enum(["YOUTUBE", "CLOUDINARY"]).default("YOUTUBE"),
+    youtubeUrl: z.string().optional().nullable(),
+    videoUrl: z.string().url("URL video tidak valid").optional().nullable(),
+    order: z.number().int().min(1, "Urutan minimal 1").default(1),
+  })
+  .refine(
+    (data) => {
+      if (data.videoType === "YOUTUBE") {
+        return Boolean(data.youtubeUrl && extractYoutubeId(data.youtubeUrl) !== null);
+      }
+      if (data.videoType === "CLOUDINARY") {
+        return Boolean(data.videoUrl && data.videoUrl.trim().length > 0);
+      }
+      return true;
+    },
+    {
+      message: "Tautan video (YouTube atau URL Video Cloudinary) wajib valid",
+      path: ["videoUrl"],
+    }
+  );
+
+export const createTryoutSchema = z.object({
+  title: z.string().min(3, "Judul tryout minimal 3 karakter").max(100, "Judul tryout maksimal 100 karakter").trim(),
+  durationMinutes: z.number().int().min(1, "Durasi minimal 1 menit").max(180, "Durasi maksimal 180 menit").default(20),
+  status: z.enum(["PUBLISHED", "DRAFT"]).default("PUBLISHED"),
+});
+
+export const updateTryoutSchema = z.object({
+  title: z.string().min(3, "Judul tryout minimal 3 karakter").max(100, "Judul tryout maksimal 100 karakter").trim().optional(),
+  durationMinutes: z.number().int().min(1, "Durasi minimal 1 menit").max(180, "Durasi maksimal 180 menit").optional(),
+  status: z.enum(["PUBLISHED", "DRAFT"]).optional(),
+});
+
+export const statementInputSchema = z.object({
+  id: z.string().optional(),
+  order: z.number().int().min(1).default(1),
+  text: z.string().min(1, "Teks pernyataan wajib diisi").trim(),
+  isTrue: z.boolean(),
+  explanation: z.string().min(1, "Pembahasan kunci jawaban wajib diisi").trim(),
+});
+
+export const questionInputSchema = z.object({
+  order: z.number().int().min(1).default(1),
+  stem: z.string().min(5, "Teks soal / stimulus bacaan minimal 5 karakter").trim(),
+  statements: z.array(statementInputSchema).min(1, "Minimal harus ada 1 pernyataan").max(10, "Maksimal 10 pernyataan per soal"),
 });
 
 export type GenerateCodesInput = z.infer<typeof generateCodesSchema>;
 export type MaterialInput = z.infer<typeof materialSchema>;
+export type CreateTryoutInput = z.infer<typeof createTryoutSchema>;
+export type UpdateTryoutInput = z.infer<typeof updateTryoutSchema>;
+export type QuestionInput = z.infer<typeof questionInputSchema>;

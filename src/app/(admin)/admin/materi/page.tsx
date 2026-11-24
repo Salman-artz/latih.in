@@ -9,13 +9,17 @@ import {
   AlertCircle,
   Loader2,
   ExternalLink,
+  UploadCloud,
+  CheckCircle2,
 } from "lucide-react";
 
 interface AdminMaterialItem {
   id: string;
   title: string;
   description: string;
-  youtubeId: string;
+  youtubeId?: string | null;
+  videoType?: string;
+  videoUrl?: string | null;
   order: number;
   status: "PUBLISHED" | "DRAFT";
   _count: {
@@ -33,7 +37,11 @@ export default function AdminMaterialsPage() {
 
   const [formTitle, setFormTitle] = useState("");
   const [formDesc, setFormDesc] = useState("");
+  const [videoSource, setVideoSource] = useState<"YOUTUBE" | "CLOUDINARY">("YOUTUBE");
   const [formYoutube, setFormYoutube] = useState("");
+  const [formVideoUrl, setFormVideoUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccessMsg, setUploadSuccessMsg] = useState("");
   const [formOrder, setFormOrder] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
@@ -61,7 +69,10 @@ export default function AdminMaterialsPage() {
     setEditingItem(null);
     setFormTitle("");
     setFormDesc("");
+    setVideoSource("YOUTUBE");
     setFormYoutube("");
+    setFormVideoUrl("");
+    setUploadSuccessMsg("");
     setFormOrder(materials.length + 1);
     setFormError("");
     setShowModal(true);
@@ -71,10 +82,52 @@ export default function AdminMaterialsPage() {
     setEditingItem(item);
     setFormTitle(item.title);
     setFormDesc(item.description);
-    setFormYoutube(`https://www.youtube.com/watch?v=${item.youtubeId}`);
+    if (item.videoType === "CLOUDINARY" || item.videoUrl) {
+      setVideoSource("CLOUDINARY");
+      setFormVideoUrl(item.videoUrl || "");
+      setFormYoutube("");
+    } else {
+      setVideoSource("YOUTUBE");
+      setFormYoutube(item.youtubeId ? `https://www.youtube.com/watch?v=${item.youtubeId}` : "");
+      setFormVideoUrl("");
+    }
+    setUploadSuccessMsg("");
     setFormOrder(item.order);
     setFormError("");
     setShowModal(true);
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setFormError("");
+    setUploadSuccessMsg("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/upload-video", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setFormError(data.error?.message || "Gagal mengunggah video ke Cloudinary");
+        setIsUploading(false);
+        return;
+      }
+
+      setFormVideoUrl(data.url);
+      setUploadSuccessMsg("Video berhasil diunggah ke Cloudinary!");
+    } catch {
+      setFormError("Gagal mengunggah video karena kendala koneksi");
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   async function handleFormSubmit(e: React.FormEvent) {
@@ -97,8 +150,13 @@ export default function AdminMaterialsPage() {
       return;
     }
 
-    if (!formYoutube.trim()) {
+    if (videoSource === "YOUTUBE" && !formYoutube.trim()) {
       setFormError("URL atau ID video YouTube wajib diisi");
+      return;
+    }
+
+    if (videoSource === "CLOUDINARY" && !formVideoUrl.trim()) {
+      setFormError("Silakan unggah video atau masukkan URL video Cloudinary");
       return;
     }
 
@@ -116,15 +174,32 @@ export default function AdminMaterialsPage() {
         : "/api/admin/materials";
       const method = editingItem ? "PUT" : "POST";
 
+      const bodyPayload: {
+        title: string;
+        description: string;
+        videoType: string;
+        order: number;
+        youtubeUrl?: string | null;
+        videoUrl?: string | null;
+      } = {
+        title: formTitle,
+        description: formDesc,
+        videoType: videoSource,
+        order: Number(formOrder),
+      };
+
+      if (videoSource === "YOUTUBE") {
+        bodyPayload.youtubeUrl = formYoutube;
+        bodyPayload.videoUrl = null;
+      } else {
+        bodyPayload.videoUrl = formVideoUrl;
+        bodyPayload.youtubeUrl = null;
+      }
+
       const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: formTitle,
-          description: formDesc,
-          youtubeUrl: formYoutube,
-          order: Number(formOrder),
-        }),
+        body: JSON.stringify(bodyPayload),
       });
 
       const data = await res.json();
@@ -231,7 +306,13 @@ export default function AdminMaterialsPage() {
                       {item.description}
                     </p>
                     <div className="flex items-center gap-4 text-xs text-gray-400 pt-1">
-                      <span className="font-mono">YouTube ID: {item.youtubeId}</span>
+                      {item.videoType === "CLOUDINARY" || item.videoUrl ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-blue bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                          <UploadCloud className="w-3 h-3" /> Cloudinary Video
+                        </span>
+                      ) : (
+                        <span className="font-mono">YouTube ID: {item.youtubeId || "-"}</span>
+                      )}
                       <span>• Ditonton oleh {item._count.progress} pengguna</span>
                     </div>
                   </div>
@@ -239,15 +320,27 @@ export default function AdminMaterialsPage() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 self-end md:self-center">
-                  <a
-                    href={`https://www.youtube.com/watch?v=${item.youtubeId}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:text-brand-blue hover:bg-gray-50 transition"
-                    title="Buka di YouTube"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
+                  {item.videoUrl ? (
+                    <a
+                      href={item.videoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:text-brand-blue hover:bg-gray-50 transition"
+                      title="Buka Video"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  ) : item.youtubeId ? (
+                    <a
+                      href={`https://www.youtube.com/watch?v=${item.youtubeId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:text-brand-blue hover:bg-gray-50 transition"
+                      title="Buka di YouTube"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  ) : null}
                   <button
                     onClick={() => handleOpenEdit(item)}
                     className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:text-brand-blue hover:bg-gray-50 transition"
@@ -325,22 +418,123 @@ export default function AdminMaterialsPage() {
                 />
               </div>
 
+              {/* Pilihan Sumber Video */}
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  URL Video YouTube atau ID
+                <label className="block text-xs font-semibold text-gray-700 mb-2">
+                  Format / Sumber Video Materi
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={formYoutube}
-                  onChange={(e) => setFormYoutube(e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=... atau youtu.be/..."
-                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
-                />
-                <p className="mt-1 text-[11px] text-gray-500">
-                  ID video 11 karakter akan diekstrak secara otomatis dari URL.
-                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVideoSource("YOUTUBE");
+                      setFormError("");
+                    }}
+                    className={`py-2 px-3 rounded-md border text-center transition ${
+                      videoSource === "YOUTUBE"
+                        ? "bg-brand-navy text-white border-brand-navy shadow-sm"
+                        : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    YouTube Link / ID
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVideoSource("CLOUDINARY");
+                      setFormError("");
+                    }}
+                    className={`py-2 px-3 rounded-md border text-center transition ${
+                      videoSource === "CLOUDINARY"
+                        ? "bg-brand-navy text-white border-brand-navy shadow-sm"
+                        : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    Upload Video (Cloudinary)
+                  </button>
+                </div>
               </div>
+
+              {videoSource === "YOUTUBE" ? (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    URL Video YouTube atau ID
+                  </label>
+                  <input
+                    type="text"
+                    required={videoSource === "YOUTUBE"}
+                    value={formYoutube}
+                    onChange={(e) => setFormYoutube(e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=... atau youtu.be/..."
+                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  />
+                  <p className="mt-1 text-[11px] text-gray-500">
+                    ID video 11 karakter akan diekstrak secara otomatis dari URL YouTube.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Unggah File Video ke Cloudinary
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center bg-gray-50/50 hover:bg-gray-50 transition">
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={handleFileUpload}
+                        disabled={isUploading}
+                        className="hidden"
+                        id="cloudinary-video-upload"
+                      />
+                      <label
+                        htmlFor="cloudinary-video-upload"
+                        className="cursor-pointer flex flex-col items-center justify-center gap-1.5"
+                      >
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="w-6 h-6 animate-spin text-brand-blue" />
+                            <span className="text-xs font-semibold text-brand-blue">
+                              Sedang mengunggah video ke Cloudinary...
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <UploadCloud className="w-6 h-6 text-gray-400" />
+                            <span className="text-xs font-semibold text-brand-navy">
+                              Klik untuk pilih file video (.mp4, .webm)
+                            </span>
+                            <span className="text-[11px] text-gray-400">
+                              Maksimal 100MB
+                            </span>
+                          </>
+                        )}
+                      </label>
+                    </div>
+
+                    {uploadSuccessMsg && (
+                      <div className="mt-2 p-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded text-xs flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                        <span>{uploadSuccessMsg}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      URL Video Cloudinary (atau paste link video langsung)
+                    </label>
+                    <input
+                      type="url"
+                      required={videoSource === "CLOUDINARY"}
+                      value={formVideoUrl}
+                      onChange={(e) => setFormVideoUrl(e.target.value)}
+                      placeholder="https://res.cloudinary.com/.../video/upload/..."
+                      className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm font-mono text-xs focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">

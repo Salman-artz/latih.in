@@ -81,7 +81,9 @@ model Material {
   id          String             @id @default(cuid())
   title       String
   description String
-  youtubeId   String
+  youtubeId   String?
+  videoType   String             @default("YOUTUBE")
+  videoUrl    String?
   order       Int                @default(1)
   status      ContentStatus      @default(PUBLISHED)
   createdAt   DateTime           @default(now())

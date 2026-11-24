@@ -15,6 +15,7 @@ import {
   Shield,
   Video,
   BarChart3,
+  BookOpen,
 } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -134,15 +135,15 @@ export default async function DashboardPage() {
       {/* MENU AKSI CEPAT / FITUR */}
       {isAdmin ? (
         /* Action Cards untuk Administrator */
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-          <div className="bg-white p-5 sm:p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="w-9 h-9 rounded-md bg-brand-navy text-white flex items-center justify-center font-bold">
                 <KeyRound className="w-5 h-5 text-brand-blue-50" />
               </div>
               <h3 className="text-base font-bold text-brand-navy">Kelola Kode Redeem</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Generate batch kode voucher 1-100 kode, filter status, cabut voucher, dan ekspor data ke format CSV.
+                Generate batch kode, atur kuota multi-pengguna, edit, cabut voucher, dan ekspor CSV.
               </p>
               <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 text-[11px] text-slate-700">
                 Tersedia: <span className="font-bold text-brand-blue">{adminAvailableCodes} kode</span> siap dibagikan ke pengguna.
@@ -156,14 +157,14 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
-          <div className="bg-white p-5 sm:p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+          <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="w-9 h-9 rounded-md bg-brand-navy text-white flex items-center justify-center font-bold">
                 <Video className="w-5 h-5 text-brand-blue-50" />
               </div>
               <h3 className="text-base font-bold text-brand-navy">Kelola Materi Video</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Tambah materi YouTube baru, kelola urutan kurikulum, ubah judul, dan arsipkan konten secara aman.
+                Tambah materi YouTube atau upload file video Cloudinary, atur urutan, dan kelola arsip.
               </p>
               <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 text-[11px] text-slate-700">
                 Aktif: <span className="font-bold text-brand-blue">{totalMaterials} modul video</span> dipublikasikan.
@@ -177,7 +178,28 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
-          <div className="bg-white p-5 sm:p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+          <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+            <div className="space-y-3">
+              <div className="w-9 h-9 rounded-md bg-brand-navy text-white flex items-center justify-center font-bold">
+                <BookOpen className="w-5 h-5 text-brand-blue-50" />
+              </div>
+              <h3 className="text-base font-bold text-brand-navy">Kelola Tryout & Soal</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Buat paket simulasi ujian, kelola butir stimulus bacaan, dan atur kunci jawaban Benar/Salah.
+              </p>
+              <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 text-[11px] text-slate-700">
+                Simulasi: <span className="font-bold text-brand-blue">Tryout Mandiri</span> interaktif.
+              </div>
+            </div>
+            <Link
+              href="/admin/tryout"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-brand-blue hover:text-blue-800 transition pt-2 border-t border-slate-100"
+            >
+              Buka Manajemen Tryout <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="w-9 h-9 rounded-md bg-brand-navy text-white flex items-center justify-center font-bold">
                 <BarChart3 className="w-5 h-5 text-brand-blue-50" />

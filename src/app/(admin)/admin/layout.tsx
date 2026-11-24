@@ -8,6 +8,7 @@ import {
   Video,
   ArrowLeft,
   Shield,
+  BookOpen,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -63,6 +64,13 @@ export default async function AdminLayout({
               >
                 <Video className="w-4 h-4 text-emerald-600" />
                 <span className="hidden sm:inline">Materi Video</span>
+              </Link>
+              <Link
+                href="/admin/tryout"
+                className="px-3 py-1.5 rounded-lg text-gray-700 hover:bg-gray-100 transition flex items-center gap-1.5"
+              >
+                <BookOpen className="w-4 h-4 text-purple-600" />
+                <span className="hidden sm:inline">Tryout & Soal</span>
               </Link>
 
               <div className="h-4 w-px bg-gray-300 mx-1" />

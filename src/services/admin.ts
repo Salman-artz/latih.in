@@ -337,19 +337,35 @@ export async function getAdminMaterials() {
 export async function createAdminMaterial(data: {
   title: string;
   description: string;
-  youtubeUrl: string;
+  videoType?: string;
+  youtubeUrl?: string | null;
+  videoUrl?: string | null;
   order: number;
 }) {
-  const youtubeId = extractYoutubeId(data.youtubeUrl);
-  if (!youtubeId) {
-    throw new AppError("URL atau ID YouTube tidak valid", 400, "INVALID_YOUTUBE_URL");
+  const videoType = data.videoType || (data.videoUrl ? "CLOUDINARY" : "YOUTUBE");
+  let youtubeId: string | null = null;
+
+  if (videoType === "YOUTUBE") {
+    if (!data.youtubeUrl) {
+      throw new AppError("URL atau ID YouTube wajib diisi", 400, "INVALID_YOUTUBE_URL");
+    }
+    youtubeId = extractYoutubeId(data.youtubeUrl);
+    if (!youtubeId) {
+      throw new AppError("URL atau ID YouTube tidak valid", 400, "INVALID_YOUTUBE_URL");
+    }
+  } else if (videoType === "CLOUDINARY") {
+    if (!data.videoUrl) {
+      throw new AppError("URL video Cloudinary wajib diisi", 400, "INVALID_VIDEO_URL");
+    }
   }
 
   return await prisma.material.create({
     data: {
       title: data.title,
       description: data.description,
+      videoType,
       youtubeId,
+      videoUrl: data.videoUrl || null,
       order: data.order,
       status: ContentStatus.PUBLISHED,
     },
@@ -361,7 +377,9 @@ export async function updateAdminMaterial(
   data: {
     title?: string;
     description?: string;
-    youtubeUrl?: string;
+    videoType?: string;
+    youtubeUrl?: string | null;
+    videoUrl?: string | null;
     order?: number;
     status?: ContentStatus;
   }
@@ -376,12 +394,25 @@ export async function updateAdminMaterial(
   if (data.description !== undefined) updateData.description = data.description;
   if (data.order !== undefined) updateData.order = data.order;
   if (data.status !== undefined) updateData.status = data.status;
-  if (data.youtubeUrl) {
-    const youtubeId = extractYoutubeId(data.youtubeUrl);
-    if (!youtubeId) {
-      throw new AppError("URL atau ID YouTube tidak valid", 400, "INVALID_YOUTUBE_URL");
+
+  if (data.videoType !== undefined) {
+    updateData.videoType = data.videoType;
+  }
+
+  if (data.videoUrl !== undefined) {
+    updateData.videoUrl = data.videoUrl;
+  }
+
+  if (data.youtubeUrl !== undefined) {
+    if (data.youtubeUrl) {
+      const youtubeId = extractYoutubeId(data.youtubeUrl);
+      if (!youtubeId) {
+        throw new AppError("URL atau ID YouTube tidak valid", 400, "INVALID_YOUTUBE_URL");
+      }
+      updateData.youtubeId = youtubeId;
+    } else {
+      updateData.youtubeId = null;
     }
-    updateData.youtubeId = youtubeId;
   }
 
   return await prisma.material.update({
