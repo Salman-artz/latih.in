@@ -363,12 +363,12 @@ export default function AdminTryoutQuestionsPage({
 
           <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
             <a
-              href={`/api/admin/tryouts/${tryoutId}/questions/template`}
-              download
+              href={`/api/admin/tryouts/${tryoutId}/questions/template?format=xlsx`}
+              download="template-soal-tryout.xlsx"
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 text-xs font-semibold hover:bg-gray-50 transition shadow-sm"
-              title="Unduh format template CSV untuk pengisian soal secara massal"
+              title="Unduh format template Excel (.xlsx) rapi lengkap dengan petunjuk pengisian"
             >
-              <Download className="w-3.5 h-3.5" /> Template CSV
+              <Download className="w-3.5 h-3.5 text-emerald-600" /> Template Excel (.xlsx)
             </a>
 
             <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 text-xs font-semibold hover:bg-gray-50 transition shadow-sm cursor-pointer">
@@ -378,12 +378,12 @@ export default function AdminTryoutQuestionsPage({
                 </>
               ) : (
                 <>
-                  <Upload className="w-3.5 h-3.5" /> Import CSV
+                  <Upload className="w-3.5 h-3.5 text-brand-blue" /> Impor Excel / CSV
                 </>
               )}
               <input
                 type="file"
-                accept=".csv"
+                accept=".xlsx,.xls,.csv"
                 onChange={handleImportCsv}
                 disabled={isImporting}
                 className="hidden"

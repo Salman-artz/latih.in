@@ -19,26 +19,27 @@ export async function POST(
 
     const { id: tryoutId } = await params;
 
-    let csvText = "";
+    let fileInput: string | Buffer = "";
     const contentType = request.headers.get("content-type") || "";
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
       const file = formData.get("file") as File | null;
       if (!file) {
-        return errorResponse("File CSV tidak ditemukan", 400, "FILE_MISSING");
+        return errorResponse("File spreadsheet tidak ditemukan", 400, "FILE_MISSING");
       }
-      csvText = await file.text();
+      const arrayBuffer = await file.arrayBuffer();
+      fileInput = Buffer.from(arrayBuffer);
     } else {
       const body = await request.json();
-      csvText = body.csvText || "";
+      fileInput = body.csvText || "";
     }
 
-    if (!csvText || csvText.trim().length === 0) {
-      return errorResponse("Isi file CSV tidak boleh kosong", 400, "EMPTY_CSV");
+    if (!fileInput || (typeof fileInput === "string" && fileInput.trim().length === 0)) {
+      return errorResponse("Isi file spreadsheet tidak boleh kosong", 400, "EMPTY_FILE");
     }
 
-    const result = await importTryoutQuestionsFromCsv(tryoutId, csvText);
+    const result = await importTryoutQuestionsFromCsv(tryoutId, fileInput);
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     return handleApiError(error);

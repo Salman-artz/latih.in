@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/errors";
 import { ContentStatus } from "@prisma/client";
 import { toCsvString, parseCsvString } from "@/lib/csv-helper";
+import * as XLSX from "xlsx";
 
 export async function getAdminTryouts() {
   return await prisma.tryout.findMany({
@@ -286,9 +287,119 @@ export function getQuestionTemplateCsv(): string {
       "BENAR",
       "Mahasiswa tanpa sertifikat dipastikan tidak lulus karena sertifikat adalah syarat wajib lulus.",
     ],
+    [
+      3,
+      "Kecerdasan Buatan (AI) berkembang pesat dalam dekade terakhir. Meskipun automasi meningkatkan produktivitas hingga 40%, laporan riset ketenagakerjaan mencatat bahwa pekerjaan yang membutuhkan empati, kepemimpinan, dan komunikasi interpersonal justru mengalami kenaikan permintaan pasar sebesar 25%.",
+      "Automasi teknologi berkontribusi terhadap penurunan seluruh jenis lapangan pekerjaan.",
+      "SALAH",
+      "Pekerjaan berbasis empati dan kepemimpinan justru mengalami kenaikan permintaan sebesar 25%.",
+      "Peningkatan produktivitas akibat automasi tercatat mencapai 40%.",
+      "BENAR",
+      "Sesuai kutipan teks, automasi terbukti meningkatkan produktivitas kerja hingga 40%.",
+      "Keterampilan komunikasi interpersonal diprediksi semakin tidak dibutuhkan di era AI.",
+      "SALAH",
+      "Permintaan pasar untuk keterampilan interpersonal justru meningkat sebesar 25%.",
+    ],
   ];
 
-  return toCsvString(CSV_QUESTION_HEADERS, sampleRows);
+  // Tambahkan UTF-8 BOM (\uFEFF) agar jika dibuka di Excel langsung rapi per kolom
+  return "\uFEFF" + toCsvString(CSV_QUESTION_HEADERS, sampleRows);
+}
+
+export function getQuestionTemplateXlsx(): Buffer {
+  const petunjukRows = [
+    ["PANDUAN PENGISIAN TEMPLATE SOAL TRYOUT (latih.in)"],
+    [""],
+    ["Ketentuan Format Soal:"],
+    ["1. Buka sheet 'Template Soal' di sebelah tab ini untuk mengisi butir soal."],
+    ["2. Setiap 1 baris mewakili 1 Soal (Stimulus Teks / Kasus Panjang)."],
+    ["3. Setiap 1 Soal wajib memiliki tepat 3 Butir Pernyataan yang dijawab BENAR atau SALAH."],
+    ["4. Kolom 'Kunci' harus diisi persis dengan kata: BENAR atau SALAH."],
+    ["5. Kolom 'Pembahasan' wajib diisi penjelasan edukatif mengapa butir tersebut bernilai Benar atau Salah."],
+    ["6. Kolom lebar sudah disesuaikan agar teks bacaan panjang mudah dibaca."],
+    ["7. Setelah selesai mengisi, simpan file ini dan unggah langsung ke menu Kelola Tryout di website latih.in."],
+    [""],
+    ["Struktur Kolom Sheet 'Template Soal':"],
+    ["A. Nomor Soal          : Nomor urut soal (1, 2, 3, dst.)"],
+    ["B. Teks Stimulus Soal   : Paragraf bacaan / stimulus / narasi soal"],
+    ["C. Pernyataan 1         : Kalimat pernyataan butir pertama"],
+    ["D. Kunci 1              : BENAR atau SALAH"],
+    ["E. Pembahasan 1         : Penjelasan kunci pernyataan pertama"],
+    ["F. Pernyataan 2         : Kalimat pernyataan butir kedua"],
+    ["G. Kunci 2              : BENAR atau SALAH"],
+    ["H. Pembahasan 2         : Penjelasan kunci pernyataan kedua"],
+    ["I. Pernyataan 3         : Kalimat pernyataan butir ketiga"],
+    ["J. Kunci 3              : BENAR atau SALAH"],
+    ["K. Pembahasan 3         : Penjelasan kunci pernyataan ketiga"],
+  ];
+
+  const wsPetunjuk = XLSX.utils.aoa_to_sheet(petunjukRows);
+  wsPetunjuk["!cols"] = [{ wch: 85 }];
+
+  const sampleData = [
+    [
+      1,
+      "Sebuah survei membaca di kalangan siswa menunjukkan bahwa 65% siswa lebih memilih membaca artikel digital daripada buku cetak. Namun, 75% siswa menyatakan mereka lebih mengingat rincian cerita saat membaca buku fisik.",
+      "Mayoritas responden survei lebih menikmati format digital untuk membaca.",
+      "BENAR",
+      "Sebanyak 65% siswa (mayoritas) memilih artikel digital dibanding buku cetak.",
+      "Retensi ingatan siswa terbukti lebih tinggi saat membaca melalui layar digital.",
+      "SALAH",
+      "Sebanyak 75% siswa lebih mengingat rincian saat membaca buku fisik, bukan digital.",
+      "Kenyamanan membaca format digital selalu berbanding lurus dengan pemahaman mendalam.",
+      "SALAH",
+      "Peneliti menyimpulkan kenyamanan digital tidak selalu menjamin pemahaman informasi mendalam.",
+    ],
+    [
+      2,
+      "Semua peserta pelatihan robotika yang lulus ujian praktik wajib memiliki sertifikat elektronika dasar. Sebagian mahasiswa teknik elektro tidak memiliki sertifikat tersebut. Farhan adalah mahasiswa teknik elektro yang telah lulus ujian praktik.",
+      "Farhan pasti memiliki sertifikat elektronika dasar.",
+      "BENAR",
+      "Farhan telah lulus ujian praktik, dan semua yang lulus wajib memiliki sertifikat tersebut.",
+      "Semua mahasiswa teknik elektro lulus ujian praktik pelatihan robotika.",
+      "SALAH",
+      "Teks hanya menyebutkan sebagian mahasiswa tidak memiliki sertifikat, tidak ada premis semua lulus.",
+      "Ada mahasiswa teknik elektro yang tidak mengikuti atau tidak lulus ujian praktik.",
+      "BENAR",
+      "Mahasiswa tanpa sertifikat dipastikan tidak lulus karena sertifikat adalah syarat wajib lulus.",
+    ],
+    [
+      3,
+      "Kecerdasan Buatan (AI) berkembang pesat dalam dekade terakhir. Meskipun automasi meningkatkan produktivitas hingga 40%, laporan riset ketenagakerjaan mencatat bahwa pekerjaan yang membutuhkan empati, kepemimpinan, dan komunikasi interpersonal justru mengalami kenaikan permintaan pasar sebesar 25%.",
+      "Automasi teknologi berkontribusi terhadap penurunan seluruh jenis lapangan pekerjaan.",
+      "SALAH",
+      "Pekerjaan berbasis empati dan kepemimpinan justru mengalami kenaikan permintaan sebesar 25%.",
+      "Peningkatan produktivitas akibat automasi tercatat mencapai 40%.",
+      "BENAR",
+      "Sesuai kutipan teks, automasi terbukti meningkatkan produktivitas kerja hingga 40%.",
+      "Keterampilan komunikasi interpersonal diprediksi semakin tidak dibutuhkan di era AI.",
+      "SALAH",
+      "Permintaan pasar untuk keterampilan interpersonal justru meningkat sebesar 25%.",
+    ],
+  ];
+
+  const wsSoal = XLSX.utils.aoa_to_sheet([CSV_QUESTION_HEADERS, ...sampleData]);
+
+  // Lebar kolom rapi dan proporsional untuk Excel
+  wsSoal["!cols"] = [
+    { wch: 12 }, // Nomor Soal
+    { wch: 60 }, // Teks Stimulus Soal
+    { wch: 35 }, // Pernyataan 1
+    { wch: 22 }, // Kunci 1 (BENAR/SALAH)
+    { wch: 40 }, // Pembahasan 1
+    { wch: 35 }, // Pernyataan 2
+    { wch: 22 }, // Kunci 2 (BENAR/SALAH)
+    { wch: 40 }, // Pembahasan 2
+    { wch: 35 }, // Pernyataan 3
+    { wch: 22 }, // Kunci 3 (BENAR/SALAH)
+    { wch: 40 }, // Pembahasan 3
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, wsPetunjuk, "Petunjuk Pengisian");
+  XLSX.utils.book_append_sheet(wb, wsSoal, "Template Soal");
+
+  return XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer;
 }
 
 export async function exportTryoutQuestionsCsv(tryoutId: string): Promise<string> {
@@ -333,19 +444,43 @@ export async function exportTryoutQuestionsCsv(tryoutId: string): Promise<string
   return toCsvString(CSV_QUESTION_HEADERS, rows);
 }
 
-export async function importTryoutQuestionsFromCsv(tryoutId: string, csvText: string) {
+export async function importTryoutQuestionsFromCsv(tryoutId: string, csvInput: string | Buffer) {
   const tryout = await prisma.tryout.findUnique({ where: { id: tryoutId } });
   if (!tryout) {
     throw new AppError("Paket tryout tidak ditemukan", 404, "NOT_FOUND");
   }
 
-  const parsed = parseCsvString(csvText);
-  if (parsed.length <= 1) {
-    throw new AppError("File CSV kosong atau hanya berisi baris header", 400, "EMPTY_CSV");
+  let dataRows: string[][] = [];
+
+  if (Buffer.isBuffer(csvInput)) {
+    try {
+      const wb = XLSX.read(csvInput, { type: "buffer" });
+      const sheetName =
+        wb.SheetNames.find((s) => s.toLowerCase().includes("soal")) ||
+        wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      const rawRows = XLSX.utils.sheet_to_json<unknown[]>(ws, {
+        header: 1,
+        defval: "",
+      });
+      if (rawRows.length > 1) {
+        dataRows = rawRows.slice(1).map((r) => (r as unknown[]).map((c) => String(c ?? "")));
+      }
+    } catch {
+      const parsed = parseCsvString(csvInput.toString("utf8"));
+      if (parsed.length > 1) dataRows = parsed.slice(1);
+    }
+  } else {
+    const parsed = parseCsvString(csvInput);
+    if (parsed.length > 1) {
+      dataRows = parsed.slice(1);
+    }
   }
 
-  // Baris pertama adalah header, proses baris ke-2 dst
-  const dataRows = parsed.slice(1);
+  if (dataRows.length === 0) {
+    throw new AppError("File spreadsheet kosong atau hanya berisi baris header", 400, "EMPTY_CSV");
+  }
+
   const questionsToCreate: {
     stem: string;
     statements: { text: string; isTrue: boolean; explanation: string }[];
