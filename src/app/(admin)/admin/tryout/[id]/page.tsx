@@ -16,6 +16,7 @@ import {
   Download,
   Upload,
 } from "lucide-react";
+import { ModalDialog, ModalDialogState } from "@/components/ui/ModalDialog";
 
 interface AdminStatementItem {
   id: string;
@@ -65,6 +66,10 @@ export default function AdminTryoutQuestionsPage({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [isImporting, setIsImporting] = useState(false);
+  const [dialogState, setDialogState] = useState<ModalDialogState>({
+    isOpen: false,
+    message: "",
+  });
 
   async function loadDetail() {
     setIsLoading(true);
@@ -117,7 +122,12 @@ export default function AdminTryoutQuestionsPage({
 
   function handleAddStatementRow() {
     if (formStatements.length >= 6) {
-      alert("Maksimal 6 pernyataan per butir soal");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Batas Maksimal",
+        message: "Maksimal 6 pernyataan per butir soal",
+      });
       return;
     }
     setFormStatements((prev) => [
@@ -133,7 +143,12 @@ export default function AdminTryoutQuestionsPage({
 
   function handleRemoveStatementRow(index: number) {
     if (formStatements.length <= 1) {
-      alert("Minimal harus ada 1 pernyataan");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Batas Minimal",
+        message: "Minimal harus ada 1 pernyataan per butir soal",
+      });
       return;
     }
     setFormStatements((prev) =>
@@ -203,24 +218,41 @@ export default function AdminTryoutQuestionsPage({
     }
   }
 
-  async function handleDeleteQuestion(q: AdminQuestionItem) {
-    if (!confirm(`Apakah kamu yakin ingin menghapus Soal #${q.order}?`)) {
-      return;
-    }
-
+  async function executeDeleteQuestion(q: AdminQuestionItem) {
     try {
       const res = await fetch(`/api/admin/tryouts/${tryoutId}/questions/${q.id}`, {
         method: "DELETE",
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error?.message || "Gagal menghapus soal");
+        setDialogState({
+          isOpen: true,
+          type: "danger",
+          title: "Gagal Menghapus Soal",
+          message: data.error?.message || "Gagal menghapus soal",
+        });
       } else {
         loadDetail();
       }
     } catch {
-      alert("Terjadi kendala jaringan");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Kendala Jaringan",
+        message: "Terjadi kendala jaringan saat menghapus soal",
+      });
     }
+  }
+
+  function handleDeleteQuestion(q: AdminQuestionItem) {
+    setDialogState({
+      isOpen: true,
+      type: "danger",
+      title: "Hapus Butir Soal",
+      message: `Apakah kamu yakin ingin menghapus Soal #${q.order}? Seluruh pernyataan dan pembahasan di dalamnya akan ikut terhapus.`,
+      confirmLabel: "Hapus Soal",
+      onConfirm: () => executeDeleteQuestion(q),
+    });
   }
 
   async function handleImportCsv(e: React.ChangeEvent<HTMLInputElement>) {
@@ -238,13 +270,28 @@ export default function AdminTryoutQuestionsPage({
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error?.message || "Gagal mengimpor file CSV");
+        setDialogState({
+          isOpen: true,
+          type: "danger",
+          title: "Gagal Impor CSV",
+          message: data.error?.message || "Gagal mengimpor file CSV",
+        });
       } else {
-        alert(data.message || `Berhasil mengimpor ${data.importedCount} butir soal!`);
+        setDialogState({
+          isOpen: true,
+          type: "success",
+          title: "Impor Berhasil",
+          message: data.message || `Berhasil mengimpor ${data.importedCount} butir soal!`,
+        });
         loadDetail();
       }
     } catch {
-      alert("Terjadi kendala jaringan saat mengimpor CSV");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Kendala Jaringan",
+        message: "Terjadi kendala jaringan saat mengimpor CSV",
+      });
     } finally {
       setIsImporting(false);
       e.target.value = "";
@@ -659,6 +706,11 @@ export default function AdminTryoutQuestionsPage({
           </div>
         </div>
       )}
+
+      <ModalDialog
+        state={dialogState}
+        onClose={() => setDialogState((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

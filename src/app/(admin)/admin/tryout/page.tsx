@@ -14,6 +14,7 @@ import {
   FileQuestion,
   ArrowRight,
 } from "lucide-react";
+import { ModalDialog, ModalDialogState } from "@/components/ui/ModalDialog";
 
 interface AdminTryoutItem {
   id: string;
@@ -39,6 +40,10 @@ export default function AdminTryoutListPage() {
   const [formStatus, setFormStatus] = useState<"PUBLISHED" | "DRAFT">("PUBLISHED");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [dialogState, setDialogState] = useState<ModalDialogState>({
+    isOpen: false,
+    message: "",
+  });
 
   async function loadTryouts() {
     setIsLoading(true);
@@ -126,28 +131,41 @@ export default function AdminTryoutListPage() {
     }
   }
 
-  async function handleDelete(item: AdminTryoutItem) {
-    if (
-      !confirm(
-        `Apakah kamu yakin ingin menghapus paket tryout "${item.title}"? Seluruh soal dan riwayat attempt di dalamnya akan ikut terhapus.`
-      )
-    ) {
-      return;
-    }
-
+  async function executeDelete(item: AdminTryoutItem) {
     try {
       const res = await fetch(`/api/admin/tryouts/${item.id}`, {
         method: "DELETE",
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error?.message || "Gagal menghapus tryout");
+        setDialogState({
+          isOpen: true,
+          type: "danger",
+          title: "Gagal Menghapus Tryout",
+          message: data.error?.message || "Gagal menghapus tryout",
+        });
       } else {
         loadTryouts();
       }
     } catch {
-      alert("Terjadi kendala koneksi");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Kendala Koneksi",
+        message: "Terjadi kendala koneksi saat menghapus tryout",
+      });
     }
+  }
+
+  function handleDelete(item: AdminTryoutItem) {
+    setDialogState({
+      isOpen: true,
+      type: "danger",
+      title: "Hapus Paket Tryout",
+      message: `Apakah kamu yakin ingin menghapus paket tryout "${item.title}"? Seluruh butir soal dan riwayat attempt di dalamnya akan ikut terhapus.`,
+      confirmLabel: "Hapus Paket",
+      onConfirm: () => executeDelete(item),
+    });
   }
 
   return (
@@ -357,6 +375,11 @@ export default function AdminTryoutListPage() {
           </div>
         </div>
       )}
+
+      <ModalDialog
+        state={dialogState}
+        onClose={() => setDialogState((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

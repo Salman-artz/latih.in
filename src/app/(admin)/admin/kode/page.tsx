@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Edit2,
 } from "lucide-react";
+import { ModalDialog, ModalDialogState } from "@/components/ui/ModalDialog";
 
 interface RedeemCodeItem {
   id: string;
@@ -66,6 +67,10 @@ export default function AdminRedeemCodesPage() {
 
   // Action State
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [dialogState, setDialogState] = useState<ModalDialogState>({
+    isOpen: false,
+    message: "",
+  });
 
   const loadCodes = useCallback(async () => {
     setIsLoading(true);
@@ -120,24 +125,44 @@ export default function AdminRedeemCodesPage() {
 
     const countNum = Number(batchCount);
     if (isNaN(countNum) || countNum < 1 || countNum > 100) {
-      alert("Jumlah kode harus antara 1 sampai 100");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Input Tidak Valid",
+        message: "Jumlah kode harus antara 1 sampai 100",
+      });
       return;
     }
 
     const durationNum = Number(batchDuration);
     if (isNaN(durationNum) || durationNum < 1 || durationNum > 730) {
-      alert("Durasi masa aktif harus antara 1 sampai 730 hari");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Input Tidak Valid",
+        message: "Durasi masa aktif harus antara 1 sampai 730 hari",
+      });
       return;
     }
 
     const maxUsesNum = Number(batchMaxUses);
     if (isNaN(maxUsesNum) || maxUsesNum < 1 || maxUsesNum > 1000) {
-      alert("Jatah kuota pengguna harus antara 1 sampai 1000 pengguna");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Input Tidak Valid",
+        message: "Jatah kuota pengguna harus antara 1 sampai 1000 pengguna",
+      });
       return;
     }
 
     if (batchLabel && batchLabel.trim().length > 100) {
-      alert("Label batch maksimal 100 karakter");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Input Tidak Valid",
+        message: "Label batch maksimal 100 karakter",
+      });
       return;
     }
 
@@ -160,7 +185,12 @@ export default function AdminRedeemCodesPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error?.message || "Gagal generate kode");
+        setDialogState({
+          isOpen: true,
+          type: "danger",
+          title: "Gagal Generate Kode",
+          message: data.error?.message || "Gagal generate kode",
+        });
         setIsGenerating(false);
         return;
       }
@@ -169,7 +199,12 @@ export default function AdminRedeemCodesPage() {
       setIsGenerating(false);
       loadCodes();
     } catch {
-      alert("Terjadi kesalahan koneksi");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Kendala Jaringan",
+        message: "Terjadi kesalahan koneksi saat generate kode",
+      });
       setIsGenerating(false);
     }
   }
@@ -228,11 +263,7 @@ export default function AdminRedeemCodesPage() {
     }
   }
 
-  async function handleRevoke(id: string) {
-    if (!confirm("Apakah kamu yakin ingin mencabut kode redeem ini? Kode yang dicabut tidak dapat digunakan lagi.")) {
-      return;
-    }
-
+  async function executeRevoke(id: string) {
     setActionLoadingId(id);
     try {
       const res = await fetch(`/api/admin/redeem-codes/${id}/revoke`, {
@@ -240,15 +271,36 @@ export default function AdminRedeemCodesPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error?.message || "Gagal mencabut kode");
+        setDialogState({
+          isOpen: true,
+          type: "danger",
+          title: "Gagal Mencabut Kode",
+          message: data.error?.message || "Gagal mencabut kode",
+        });
       } else {
         loadCodes();
       }
     } catch {
-      alert("Terjadi kendala jaringan");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Kendala Jaringan",
+        message: "Terjadi kendala jaringan saat mencabut kode",
+      });
     } finally {
       setActionLoadingId(null);
     }
+  }
+
+  function handleRevoke(id: string) {
+    setDialogState({
+      isOpen: true,
+      type: "confirm",
+      title: "Konfirmasi Cabut Kode",
+      message: "Apakah kamu yakin ingin mencabut kode redeem ini? Kode yang dicabut tidak dapat digunakan lagi oleh pengguna.",
+      confirmLabel: "Cabut Kode",
+      onConfirm: () => executeRevoke(id),
+    });
   }
 
   function handleExportCSV() {
@@ -818,6 +870,11 @@ export default function AdminRedeemCodesPage() {
           </div>
         </div>
       )}
+
+      <ModalDialog
+        state={dialogState}
+        onClose={() => setDialogState((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

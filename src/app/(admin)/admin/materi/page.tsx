@@ -12,6 +12,7 @@ import {
   UploadCloud,
   CheckCircle2,
 } from "lucide-react";
+import { ModalDialog, ModalDialogState } from "@/components/ui/ModalDialog";
 
 interface AdminMaterialItem {
   id: string;
@@ -47,6 +48,10 @@ export default function AdminMaterialsPage() {
   const [formOrder, setFormOrder] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [dialogState, setDialogState] = useState<ModalDialogState>({
+    isOpen: false,
+    message: "",
+  });
 
   async function loadMaterials() {
     setIsLoading(true);
@@ -277,12 +282,7 @@ export default function AdminMaterialsPage() {
     }
   }
 
-  async function handleArchive(item: AdminMaterialItem) {
-    const actionText = item.status === "PUBLISHED" ? "mengarsipkan" : "mengaktifkan kembali";
-    if (!confirm(`Apakah kamu yakin ingin ${actionText} materi "${item.title}"?`)) {
-      return;
-    }
-
+  async function executeArchive(item: AdminMaterialItem) {
     try {
       const res = await fetch(`/api/admin/materials/${item.id}`, {
         method: "PUT",
@@ -295,11 +295,33 @@ export default function AdminMaterialsPage() {
       if (res.ok) {
         loadMaterials();
       } else {
-        alert("Gagal memperbarui status materi");
+        setDialogState({
+          isOpen: true,
+          type: "danger",
+          title: "Gagal Mengubah Status",
+          message: "Gagal memperbarui status materi",
+        });
       }
     } catch {
-      alert("Terjadi kendala jaringan");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Kendala Jaringan",
+        message: "Terjadi kendala jaringan saat memperbarui status materi",
+      });
     }
+  }
+
+  function handleArchive(item: AdminMaterialItem) {
+    const actionText = item.status === "PUBLISHED" ? "mengarsipkan" : "mengaktifkan kembali";
+    setDialogState({
+      isOpen: true,
+      type: "confirm",
+      title: `Konfirmasi ${item.status === "PUBLISHED" ? "Arsipkan" : "Aktifkan"} Materi`,
+      message: `Apakah kamu yakin ingin ${actionText} materi "${item.title}"?`,
+      confirmLabel: item.status === "PUBLISHED" ? "Arsipkan" : "Aktifkan",
+      onConfirm: () => executeArchive(item),
+    });
   }
 
   return (
@@ -647,6 +669,11 @@ export default function AdminMaterialsPage() {
           </div>
         </div>
       )}
+
+      <ModalDialog
+        state={dialogState}
+        onClose={() => setDialogState((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

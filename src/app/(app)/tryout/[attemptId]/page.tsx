@@ -13,6 +13,7 @@ import {
   Check,
   X,
 } from "lucide-react";
+import { ModalDialog, ModalDialogState } from "@/components/ui/ModalDialog";
 
 interface StatementItem {
   id: string;
@@ -54,6 +55,10 @@ export default function TryoutExamPage({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+  const [dialogState, setDialogState] = useState<ModalDialogState>({
+    isOpen: false,
+    message: "",
+  });
 
   const answersRef = useRef(answers);
   answersRef.current = answers;
@@ -162,13 +167,23 @@ export default function TryoutExamPage({
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error?.message || "Gagal mengumpulkan tryout");
+        setDialogState({
+          isOpen: true,
+          type: "danger",
+          title: "Gagal Mengumpulkan Tryout",
+          message: data.error?.message || "Gagal mengumpulkan tryout",
+        });
         setIsSubmitting(false);
         return;
       }
       router.push(`/tryout/${attemptId}/hasil`);
     } catch {
-      alert("Terjadi kendala jaringan saat submit");
+      setDialogState({
+        isOpen: true,
+        type: "danger",
+        title: "Kendala Jaringan",
+        message: "Terjadi kendala jaringan saat submit, silakan coba lagi.",
+      });
       setIsSubmitting(false);
     }
   }
@@ -484,6 +499,11 @@ export default function TryoutExamPage({
           </div>
         </div>
       )}
+
+      <ModalDialog
+        state={dialogState}
+        onClose={() => setDialogState((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }
