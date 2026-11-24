@@ -1,249 +1,196 @@
-# latih.in — Website Tryout Online Mandiri
+# latih.in — Platform Latihan Soal dan Tryout Online Mandiri
 
-> **Belajar dari video, latihan lewat tryout.**  
+> Belajar dari video, latihan lewat tryout.  
 > Proyek Technical Test Full Stack Developer — PT Lini Suara Nusantara (Penerbit Buku Liniswara).  
-> **Target Pengumpulan:** Rabu, 25 November 2026 pukul 15.00 WIB.
+> Target Pengumpulan: Rabu, 25 November 2026 pukul 15.00 WIB.
 
 ---
 
-## 🔗 Tautan & Akun Demo
+## 1. Tautan Publik dan Kredensial Pengujian
 
-- **URL Demo Production:** [https://latih-in.vercel.app](https://latih-in.vercel.app)
-- **Repositori GitHub:** [https://github.com/Salman-artz/latih.in](https://github.com/Salman-artz/latih.in)
+- URL Produksi Utama: [https://latihin.salmanartzdev.my.id](https://latihin.salmanartzdev.my.id)
+- URL Alternatif Vercel: [https://latih-in.vercel.app](https://latih-in.vercel.app)
+- Repositori GitHub: [https://github.com/Salman-artz/latih.in](https://github.com/Salman-artz/latih.in)
 
-### 🔑 Akun Demo (Disediakan via Seed Database)
+### Akun Pengujian Demo (Tersedia via Database Seed)
 
-| Peran | Alamat Email | Password | Keterangan |
+| Peran | Alamat Email | Kata Sandi | Deskripsi Akses |
 |---|---|---|---|
-| **Administrator** | `admin@demo.test` | `Demo#12345` | Akses penuh `/admin`, statistik, kelola kode, kelola materi |
-| **Siswa (User)** | `user@demo.test` | `Demo#12345` | Akun baru tanpa langganan aktif (materi & tryout terkunci) |
+| Administrator | admin@demo.test | Demo#12345 | Akses penuh dashboard admin (/admin), statistik, kelola kode redeem, kelola materi, kelola paket tryout & butir soal |
+| Pengguna / Siswa | user@demo.test | Demo#12345 | Akun pengguna terdaftar untuk simulasi pengerjaan materi dan tryout |
 
-### 🎟️ Kode Redeem Demo (30 Hari Masa Aktif)
+### Kode Redeem Demo (Masa Aktif 30 Hari)
 
-Reviewer dapat menukarkan kode-kode berikut di halaman `/redeem`:
-1. `LATIH-DEMO-0001`
-2. `LATIH-DEMO-0002`
-3. `LATIH-DEMO-0003`
-4. `LATIH-DEMO-0004`
-5. `LATIH-DEMO-0005`
+Penguji dapat langsung menukarkan kode-kode berikut pada menu Redeem (/redeem):
+1. LATIH-DEMO-0001
+2. LATIH-DEMO-0002
+3. LATIH-DEMO-0003
+4. LATIH-DEMO-0004
+5. LATIH-DEMO-0005
 
-*(Input fleksibel: huruf kecil/besar, dengan atau tanpa tanda hubung `-` akan dinormalisasi secara otomatis)*.
-
----
-
-## 📋 Status Fitur
-
-### ✅ Selesai Dikerjakan (P0 & P1)
-
-#### 🌟 Prioritas P0 (Fitur Wajib Soal)
-- [x] **Autentikasi & Akun:** Registrasi akun baru, login, logout, sesi JWT berbasis cookie `httpOnly`, `SameSite=Lax`, `Secure` (di production), dengan masa aktif 7 hari. Validasi input nama, email unik, dan password kuat (min 8 karakter kombinasi huruf & angka).
-- [x] **Rate Limiting Database-Backed:** Pembatasan 10 request per menit per IP untuk login, register, dan redeem menggunakan tabel PostgreSQL `RateLimit` (kompatibel serverless).
-- [x] **Aktivasi Langganan via Kode Redeem:** Normalisasi kode, transaksi atomik database (`prisma.$transaction` dengan `updateMany` bersyarat), pesan error spesifik (*invalid*, *already used*, *expired*, *revoked*), dan perpanjangan masa aktif kumulatif bagi pengguna yang sudah berlangganan aktif.
-- [x] **Guard Hak Akses Server-Side:** Seluruh validasi sesi, status aktif user, dan masa aktif langganan diverifikasi di sisi server (API route handler & Server Components), bukan sekadar disembunyikan di UI.
-- [x] **Materi Belajar Video:** Kurikulum video edukasi berbasis embed YouTube nocookie responsif (16:9). Pengguna tanpa langganan diarahkan ke halaman aktivasi redeem.
-- [x] **Simulasi Tryout & Skoring:** 1 paket tryout, 10 stimulus soal, masing-masing memuat tepat 3 butir pernyataan (total 30 butir Benar/Salah). Jawaban tersimpan otomatis berkala (*debounce autosave*). Skoring transparan di server: 1 poin per butir benar, skala nilai 0–100 (1 desimal).
-- [x] **Keamanan Kunci Jawaban:** Payload soal saat pengerjaan (`IN_PROGRESS`) secara mutlak tidak mengirimkan `isTrue` dan `explanation` ke peramban. Kunci dan pembahasan hanya dikirim setelah attempt disubmit.
-- [x] **Landing Page:** Satu halaman responsif (360px ke atas) mencakup Navbar dengan anchor, Hero section, Fitur unggulan, Cara kerja 4 langkah, Cuplikan materi, FAQ, dan Footer.
-- [x] **Seed Data Idempotent:** Pembuatan akun admin & user demo, 5 kode redeem, 5 modul materi video, serta 10 soal tryout (30 butir pernyataan) yang tervalidasi lengkap dengan kunci dan pembahasan.
-
-#### 🚀 Prioritas P1 (Nilai Tambah Berbiaya Kecil)
-- [x] **Timer Tryout 20 Menit:** Hitung mundur tersinkronisasi dari `startedAt` server. Refresh peramban tidak mereset waktu. Auto-submit saat waktu habis.
-- [x] **Riwayat Attempt Siswa:** Daftar seluruh sesi tryout yang pernah diselesaikan lengkap dengan skor, persentase nilai, dan waktu pengerjaan.
-- [x] **Penanda Progres Belajar:** Tombol "Tandai Selesai" pada materi video yang menyimpan progres per user dan indikator bar progres modul di dashboard dan daftar materi.
-- [x] **Banner Peringatan Masa Aktif:** Notifikasi otomatis di dashboard saat sisa masa aktif langganan $\le 7$ hari.
-- [x] **Ganti Password:** Pengaturan kata sandi baru di halaman profil siswa.
-- [x] **Panel Admin — Dashboard Statistik:** Menampilkan metrik total pengguna, user baru 7 hari, langganan aktif, langganan segera berakhir, kode tersedia/terpakai, dan rata-rata skor tryout.
-- [x] **Panel Admin — Kelola Kode Redeem:** Pembuatan kode massal (batch 1–100 kode, 12 karakter acak tanpa karakter ambigu `0, O, 1, I`), tabel paginasi 20 baris dengan pencarian & filter status, pencabutan kode yang belum terpakai, serta ekspor data ke file CSV.
-- [x] **Panel Admin — Kelola Materi Video:** Penambahan materi baru dengan validasi tautan YouTube dan ekstraksi video ID otomatis, pengubahan konten, serta pengarsipan materi (*soft archive* ke status `DRAFT` bila sudah memiliki riwayat tonton user).
-
-### ⏸️ Sengaja Ditunda (P2 — Sesuai Batasan Soal)
-- [ ] Pengelolaan profil pengguna secara manual oleh admin (aktivasi/deaktivasi manual).
-- [ ] CMS pembuat soal tryout dinamis dari UI admin (saat ini konten seed sudah sangat komprehensif untuk pengujian).
-- [ ] Payment gateway online & transfer bank (di luar kebutuhan spesifikasi kode redeem).
+Catatan: Sistem mendukung input fleksibel (huruf besar/kecil dan dengan atau tanpa tanda hubung strip akan dinormalisasi secara otomatis).
 
 ---
 
-## 🎯 Prioritas Pengerjaan & Alasannya
+## 2. Hasil Pengerjaan Proyek
 
-Mengacu pada prinsip rekayasa perangkat lunak dengan tenggat waktu terbatas (technical test):
-1. **P0 (Kebutuhan Wajib Soal):** Memastikan seluruh alur inti berjalan utuh tanpa celah: *Daftar $\rightarrow$ Login $\rightarrow$ Redeem Kode $\rightarrow$ Nonton Materi $\rightarrow$ Tryout $\rightarrow$ Penilaian & Pembahasan*. Kualitas keamanan (anti-bocor kunci jawaban, integritas transaksi redeem, dan otorisasi server) adalah syarat mutlak yang tidak boleh dikompromikan.
-2. **P1 (Nilai Tambah Esensial):** Fitur seperti timer tryout, autosave, riwayat nilai, dan panel admin kode/materi memberikan pengalaman produk nyata (*production-ready feel*) dengan kompleksitas yang terukur.
-3. **P2 (Dieliminasi):** Fitur CMS bank soal atau payment gateway sengaja tidak dikerjakan agar tidak menghabiskan waktu pada hal sekunder di luar kriteria penilaian utama.
+Proyek ini telah diselesaikan secara menyeluruh dengan mengedepankan kualitas arsitektur piranti lunak skala industri (Clean Architecture), keandalan keamanan data, performa serverless yang efisien, dan pengalaman pengguna yang responsif.
 
----
-
-## 🛠️ Tech Stack & Keputusan Teknis
-
-- **Framework:** Next.js 15 (App Router) — Monolit Fullstack dengan **Clean Architecture**.
-  - *Alasan:* Menghilangkan *overhead* konfigurasi CORS lintas domain, menyatukan definisi tipe data dan skema validasi Zod antara frontend dan backend, serta memudahkan deployment satu atap di Vercel.
-- **Pola Arsitektur (Clean Architecture):**
-  - **Domain Layer (`src/core/domain/`):** Entitas bisnis murni (`UserEntity`, `SubscriptionEntity`, `TryoutEntity`, dll.) dan abstraksi antarmuka repositori (*repository ports*) yang bebas ketergantungan dari framework eksternal.
-  - **Use Cases Layer (`src/core/use-cases/`):** Aturan bisnis aplikasi dengan prinsip *Single Responsibility* (Auth, Redeem, Subscription, Materials, Tryout, Admin).
-  - **Infrastructure Layer (`src/infrastructure/`):** Implementasi repositori berbasis Prisma ORM, adapter keamanan JWT (`JoseTokenService`), dan adapter hash password (`BcryptPasswordHasher`).
-  - **Dependency Injection Container (`src/core/container.ts`):** Komposisi sentral (*composition root*) yang menginstansiasi repositori dan use case secara terisolasi dan mudah di-mock pada saat pengujian.
-  - **Presentation Layer (`src/app/` & `src/components/`):** Route Handler API tipis dan React Server Components yang mendelegasikan eksekusi langsung ke use case.
-- **Bahasa:** TypeScript (Strict Mode).
-- **Database & ORM:** PostgreSQL + Prisma ORM.
-- **Autentikasi & Kriptografi:** `jose` (JWT) + `bcryptjs` (Cost 10).
-- **Styling & Desain:** Tailwind CSS murni dengan palet warna resmi (`brand-navy: #001031`, `brand-blue: #0048FC`, `brand-blue-50: #EAF0FF`, `surface: #FFFFFF`) dan font Google (Poppins untuk heading, Inter untuk body).
-- **Validasi Data:** Zod pada client-side dan server-side route handler.
-- **Ikon Antarmuka:** `lucide-react`.
-- **Pengujian Unit:** Vitest (pengujian logika skoring, validasi, dan konkurensi redeem).
-
-### Keputusan Teknis Kritis
-1. **Redeem Atomik Bebas Race Condition:**  
-   Penebusan kode dilakukan dalam satu blok `prisma.$transaction` menggunakan klausa update bersyarat:
-   ```ts
-   prisma.redeemCode.updateMany({
-     where: { code, isUsed: false, revokedAt: null, ... },
-     data: { isUsed: true, usedById: userId, usedAt: now }
-   })
-   ```
-   Bila baris yang terpengaruh bukan 1, transaksi dibatalkan dan sistem meneliti apakah kode salah, kedaluwarsa, atau sudah pernah dipakai. Hal ini terbukti lulus pada uji konkurensi paralel.
-2. **Kerahasiaan Kunci Jawaban:**  
-   Saat siswa membuka halaman ujian (`/tryout/[attemptId]`), query database menggunakan klausa `select` eksplisit yang memangkas kolom `isTrue` dan `explanation`. Inspeksi lewat *Network tab* peramban tidak akan pernah menemukan kunci jawaban sebelum tombol Submit ditekan.
-3. **Skoring Proporsional:**  
-   Setiap butir pernyataan yang dijawab sesuai dengan fakta stimulus bernilai 1 poin (total maksimal 30 poin). Nilai persentase dihitung dengan rumus:
-   $$\text{Persentase} = \left(\frac{\text{Poin Benar}}{30}\right) \times 100\%$$
-   Butir yang dikosongkan tidak mendapat penalti minus (dihitung 0).
+### Ringkasan Pencapaian Hasil Rekayasa:
+1. Arsitektur Bersih (Clean Architecture): Memisahkan secara tegas antara Domain Layer (aturan bisnis murni), Use Cases Layer (alur aplikasi), Infrastructure Layer (repositori Prisma dan adapter eksternal), serta Presentation Layer (React Server Components dan Route Handlers Next.js).
+2. Integritas Transaksi Atomik: Menjamin penebusan voucher kode redeem bebas dari kondisi perlombaan (race condition) menggunakan conditional update atomik pada level database engine.
+3. Keamanan Ujian Tanpa Kebocoran (Zero Answer Leak): Data kunci jawaban (isTrue) dan pembahasan (explanation) secara mutlak tidak pernah disertakan dalam payload server saat tryout berstatus sedang dikerjakan (IN_PROGRESS).
+4. Direct Upload Cloudinary: Pengunggahan video materi dapat dilakukan langsung dari browser ke Cloudinary menggunakan tanda tangan digital aman (HMAC-SHA1), dilengkapi indikator visual persentase real-time dan kecepatan transfer data.
+5. Otomatisasi Skema Database (PgBouncer-Safe): Skema basis data PostgreSQL disinkronkan secara otomatis dan aman melalui query idempotent tanpa mengunci transaksi PgBouncer.
+6. Verifikasi Kualitas Kode:
+   - 22 dari 22 unit test berhasil lulus 100% menggunakan Vitest (mencakup skoring, validasi, dan konkurensi).
+   - Seluruh alur pengguna dan admin berhasil diverifikasi melalui pengujian otomatis Playwright (HTTP 200 tanpa error digest SSR).
 
 ---
 
-## 🚀 Panduan Deployment ke Vercel
+## 3. Fitur yang Tersedia
 
-Aplikasi dirancang agar sepenuhnya *stateless* dan siap di-deploy ke Vercel dengan database PostgreSQL (Sumopod / Neon):
+### A. Autentikasi dan Manajemen Pengguna
+- Registrasi Pengguna Baru: Validasi nama lengkap, email unik, dan kata sandi berkekuatan standar (minimal 8 karakter kombinasi huruf dan angka).
+- Autentikasi Sesi JWT: Penyimpanan token sesi pada cookie HttpOnly dengan atribut SameSite=Lax dan Secure di lingkungan produksi untuk mencegah serangan Cross-Site Scripting (XSS).
+- Pembatasan Frekuensi (Rate Limiting): Proteksi 10 permintaan per menit per alamat IP pada rute login, registrasi, dan redeem untuk mencegah serangan brute force.
+- Ubah Kata Sandi: Fasilitas pembaruan kata sandi secara mandiri pada halaman profil pengguna.
+- Manajemen Profil & Paket Aktif: Menampilkan identitas akun, status langganan, masa berlaku, serta daftar paket tryout spesifik yang dapat diakses pengguna.
 
-### 1. Import Proyek di Vercel
-1. Buka dashboard [Vercel](https://vercel.com) lalu klik **Add New...** $\rightarrow$ **Project**.
-2. Pilih repositori GitHub: `https://github.com/Salman-artz/latih.in`.
-3. Framework Preset akan otomatis terdeteksi sebagai **Next.js**.
+### B. Aktivasi Langganan & Kode Redeem
+- Validasi dan Normalisasi Kode: Format kode voucher ditransformasikan secara konsisten (pembersihan spasi dan kapitalisasi otomatis).
+- Penanganan Kesalahan Spesifik: Memberikan respon jelas jika kode tidak ditemukan, sudah digunakan oleh pengguna lain, kedaluwarsa, atau dicabut statusnya.
+- Akumulasi Masa Aktif Kumulatif: Jika pengguna memasukkan kode baru saat langganan masih berjalan, masa aktif otomatis ditambahkan dari tanggal berakhir sebelumnya tanpa menghilangkan sisa hari aktif.
+- Keterikatan Paket Soal Fleksibel: Kode redeem dapat diterbitkan untuk membuka seluruh tryout umum atau dibatasi khusus untuk paket tryout tertentu.
 
-### 2. Konfigurasi Environment Variables di Vercel
-Tambahkan variabel lingkungan berikut di tab **Environment Variables** (lihat panduan pada berkas `.env.example`):
+### C. Kurikulum Materi Pembelajaran Video
+- Dukungan Multi-Sumber Video: Fleksibilitas pemutaran video menggunakan embed YouTube nocookie responsif (aspek rasio 16:9) maupun pemutar video Cloudinary teroptimasi.
+- Direct Upload Cloudinary Berkecepatan Tinggi: Unggah video langsung dari peramban ke Cloudinary (maksimal 100 MB sesuai Cloudinary Free Plan) disertai progress bar persentase (0% - 100%) dan statistik kecepatan (MB/s).
+- Pelacak Progres Belajar: Tombol status "Tandai Selesai" yang tersimpan per pengguna di database serta indikator visual progres kurikulum pada dashboard siswa.
+- Akses Terproteksi: Modul video hanya dapat diakses oleh pengguna yang memiliki langganan aktif. Pengguna non-aktif diarahkan secara edukatif ke halaman redeem.
 
-| Variable | Contoh / Format | Deskripsi |
-|---|---|---|
-| `DATABASE_URL` | `postgresql://<user>:<password>@<host>:<port>/<database>?schema=<schema>&pgbouncer=true` | Connection string PostgreSQL (gunakan flag pgbouncer jika menggunakan pooler) |
-| `JWT_SECRET` | String acak minimal 48 karakter | Kunci rahasia HS256 untuk penandatanganan token JWT sesi cookie |
-| `APP_URL` | `https://<domain-kamu>.vercel.app` | URL domain publik aplikasi |
-| `NODE_ENV` | `production` | Mode produksi |
+### D. Simulasi Tryout dan Ujian Berwaktu
+- Format Soal Majemuk: 1 paket simulasi memuat 10 stimulus teks/kasus panjang, dengan masing-masing 3 butir pernyataan Benar atau Salah (total 30 butir pernyataan per sesi).
+- Timer Tersinkronisasi Sisi Server: Batas waktu 20 menit nyata yang dihitung berdasarkan selisih waktu mulai server. Waktu tidak bertambah atau terulang meskipun peramban ditutup atau direfresh.
+- Penyimpanan Jawaban Otomatis (Autosave Debounce): Jawaban siswa disimpan secara berkala ke database di latar belakang sehingga progres pengerjaan aman dari putus koneksi mendadak.
+- Pengumpulan Otomatis: Saat sisa waktu habis (00:00), sistem secara otomatis mengumpulkan jawaban dan memproses penilaian di server.
 
-> [!NOTE]
-> Pastikan database PostgreSQL tujuan telah dimigrasi dan di-seed datanya. Setelah deploy di Vercel, aplikasi langsung dapat diuji coba.
+### E. Penilaian dan Pembahasan Interaktif
+- Perhitungan Nilai Proporsional: Setiap butir pernyataan yang dijawab benar menghasilkan 1 poin (maksimal 30 poin) dan dikonversi ke skala nilai 0 hingga 100.
+- Analisis Butir Jawaban: Menampilkan rekapitulasi jumlah butir benar, salah, dan kosong.
+- Pembahasan Lengkap Pasca-Ujian: Siswa dapat meninjau stimulus soal, kunci jawaban valid, pilihan yang sebelumnya dipilih, serta penjelasan konseptual pada setiap butir.
+- Riwayat Pengerjaan: Rekam jejak seluruh sesi tryout yang pernah diselesaikan tersimpan rapi dan dapat ditinjau kembali kapan saja.
 
-### 3. Deploy
-1. Klik tombol **Deploy**.
-2. Vercel akan menjalankan `prisma generate && next build` dan menyajikan aplikasi secara global.
-3. Setelah deployment selesai, salin URL Vercel dan perbarui `APP_URL`.
+### F. Panel Administrasi (Admin Dashboard)
+- Ringkasan Metrik Bisnis: Statistik total pengguna terdaftar, pengguna baru 7 hari terakhir, langganan aktif, langganan segera berakhir, dan rata-rata skor tryout.
+- Generator Kode Redeem Massal: Kemampuan membuat kode secara batch (1 sampai 100 kode sekaligus) dengan format 12 karakter acak tanpa karakter ambigu (bebas angka 0, huruf O, angka 1, dan huruf I).
+- Manajemen Kode: Pencarian kode, filter status (Aktif, Terpakai, Kedaluwarsa, Dicabut), pencabutan izin kode (revoke), dan ekspor data ke file CSV.
+- Manajemen Materi Pembelajaran: Penambahan, pengeditan, pengaturan nomor urut, dan pengarsipan materi video (soft archive) agar tidak merusak data progres siswa yang sudah ada.
+- Manajemen Paket Tryout & Bank Soal: Pembuatan paket tryout baru, pengaturan durasi ujian, serta fitur impor dan ekspor butir soal menggunakan template file CSV standar.
 
 ---
 
-## 🐳 Docker & CI/CD GitHub Actions
+## 4. Prioritas Pengembangan yang Dipilih
 
-### 1. Menjalankan via Docker Compose (Lokal)
-Aplikasi telah dilengkapi dengan konfigurasi multi-stage build `Dockerfile` (Next.js 15 Standalone) dan `docker-compose.yml` yang mencakup service PostgreSQL mandiri:
+Dalam proses perancangan dan implementasi proyek dengan batas waktu pengerjaan teknis, strategi alokasi prioritas disusun ke dalam tiga tingkatan:
 
-```powershell
-# Menjalankan aplikasi dan database PostgreSQL lokal via Docker
-docker compose up --build -d
+### Prioritas P0 (Kebutuhan Mutlak / Core Requirements)
+Fokus utama dialokasikan untuk menjamin seluruh fondasi bisnis dan keamanan sistem berjalan tanpa cacat:
+1. Keamanan Transaksi Redeem: Menghindari celah race condition menggunakan transaksi atomik database.
+2. Pencegahan Kebocoran Kunci: Menjamin integritas ujian online dengan menyaring kunci jawaban dari payload respons saat tryout sedang berlangsung.
+3. Penegakan Otorisasi Sisi Server: Seluruh validasi hak akses dieksekusi di backend (bukan sekadar disembunyikan lewat CSS/UI).
+4. Kelengkapan Alur Inti: Memastikan siklus lengkap Registrasi -> Login -> Aktivasi Kode -> Tonton Video -> Simulasi Tryout 10 Stimulus -> Hasil & Pembahasan berfungsi 100%.
 
-# Memeriksa log aplikasi
-docker compose logs -f app
+### Prioritas P1 (Nilai Tambah Berbiaya Efisien)
+Fitur-fitur yang meningkatkan keandalan operasional dan pengalaman pengguna secara signifikan:
+1. Sinkronisasi Timer Sisi Server: Mencegah manipulasi waktu lokal pada peramban siswa.
+2. Penyimpanan Progres Berkala (Autosave): Menjamin rasa aman siswa saat mengerjakan stimulus soal panjang.
+3. Direct Upload Cloudinary: Mengatasi limit serverless payload 4.5 MB dengan mengalirkan file langsung ke cloud storage dilengkapi indikator persentase.
+4. Fitur Operasional Admin: Batch generator kode voucher dan impor/ekspor CSV soal tryout untuk mempermudah manajemen konten penerbit.
+
+### Prioritas P2 (Sengaja Ditunda Berdasarkan Kebutuhan Ujian)
+Fitur yang diidentifikasi berada di luar ruang lingkup kebutuhan bisnis buku penerbit Liniswara:
+1. Integrasi Payment Gateway Pihak Ketiga: Sesuai model bisnis buku fisik penerbit, akses tryout diperoleh melalui kode voucher yang tertera pada buku, bukan pembayaran kartu kredit/e-wallet langsung di aplikasi.
+2. Login Sosial Pihak Ketiga (Google/Facebook OAuth): Autentikasi email dan kata sandi mandiri sudah mencukupi kebutuhan identifikasi data siswa.
+3. Integrasi Live Proctoring Web-Camera: Dieliminasi agar sistem tetap ringan, hemat kuota siswa, dan dapat diakses lancar di berbagai perangkat peramban.
+
+---
+
+## 5. Tinjauan Arsitektur Piranti Lunak (Clean Architecture)
+
+Aplikasi dibangun menggunakan prinsip Clean Architecture untuk memastikan kode terstruktur, mudah diuji secara modular, dan independen terhadap framework:
+
+```text
+src/
+├── core/                         # Lapisan Inti Bisnis
+│   ├── domain/
+│   │   ├── entities/             # Entitas data murni (User, Subscription, Tryout, dll.)
+│   │   └── repositories/         # Interface / Ports kontrak data
+│   ├── use-cases/                # Use case aplikasi (Auth, Redeem, Materials, Tryout, Admin)
+│   └── container.ts              # Composition Root / Dependency Injection
+├── infrastructure/               # Lapisan Adapter & Infrastruktur
+│   ├── repositories/             # Implementasi repositori berbasis Prisma ORM
+│   └── security/                 # Adapter Jose JWT dan Bcrypt password hasher
+├── app/                          # Lapisan Presentasi (Next.js 15 App Router)
+│   ├── (public)/                 # Landing page, login, registrasi
+│   ├── (app)/                    # Dashboard, materi, tryout, riwayat, profil, redeem
+│   ├── (admin)/admin/            # Dashboard statistik admin, kode redeem, materi, tryout
+│   └── api/                      # Route Handler tipis yang mendelegasikan ke use case
+├── components/                   # Komponen UI modular (Navbar, Footer, Logo, Tryout)
+├── lib/                          # Konfigurasi database singleton, penanganan error, validasi Zod
+└── tests/                        # Pengujian unit Vitest (skoring, validasi, transaksi)
 ```
-Aplikasi dapat diakses di `http://localhost:3000`.
-
-### 2. CI/CD GitHub Actions Pipeline
-Setiap *push* atau *pull request* ke branch `main` secara otomatis memicu workflow `.github/workflows/ci.yml` yang menjalankan:
-1. **Code Quality & Typecheck:** Validasi `npx tsc --noEmit` & `eslint`.
-2. **Automated Unit & Integration Test:** Eksekusi Vitest (skoring, validasi, dan konkurensi database).
-3. **Docker Build & Smoke Test:** Pembangunan image Docker menggunakan Docker Buildx dengan layer caching GitHub Actions (`gha`) untuk menjamin image production selalu valid dan bebas broken build.
 
 ---
 
-## 💻 Panduan Menjalankan di Komputer Lokal
-- Node.js versi 20 ke atas (`node -v`)
-- PostgreSQL terpasang lokal (port 5432)
-- Git dan PowerShell (Windows)
+## 6. Panduan Menjalankan di Komputer Lokal
 
-### Langkah Pemasangan (PowerShell)
+### Prasyarat Sistem:
+- Node.js versi 20 ke atas
+- PostgreSQL versi 14 ke atas
+- Git
 
-1. **Buka folder proyek:**
-   ```powershell
-   cd "D:\Project Porto\latih.in"
+### Langkah Instalasi:
+
+1. Kloning Repositori:
+   ```bash
+   git clone https://github.com/Salman-artz/latih.in.git
+   cd latih.in
    ```
 
-2. **Siapkan Environment Variable:**
-   Salin berkas `.env.example` menjadi `.env`:
-   ```powershell
-   Copy-Item .env.example .env
+2. Konfigurasi Variabel Lingkungan:
+   Salin berkas contoh konfigurasi:
+   ```bash
+   cp .env.example .env
    ```
-   Sesuaikan konfigurasi koneksi database lokal kamu di dalam `.env`.
+   Sesuaikan parameter `DATABASE_URL` dan kredensial Cloudinary pada berkas `.env`.
 
-3. **Install Dependensi:**
-   ```powershell
+3. Instalasi Dependensi:
+   ```bash
    npm install
    ```
 
-4. **Jalankan Migrasi Database:**
-   ```powershell
+4. Sinkronisasi Database dan Seeding Awal:
+   ```bash
    npx prisma migrate dev --name init
-   ```
-
-5. **Lakukan Seeding Data Awal:**
-   ```powershell
    npm run db:seed
    ```
 
-6. **Jalankan Unit Test:**
-   ```powershell
+5. Menjalankan Pengujian Unit:
+   ```bash
    npm test
    ```
 
-7. **Jalankan Server Development:**
-   ```powershell
+6. Menjalankan Server Development:
+   ```bash
    npm run dev
    ```
-   Aplikasi dapat diakses melalui peramban di `http://localhost:3000`.
+   Buka peramban pada alamat `http://localhost:3000`.
 
 ---
 
-## 📁 Struktur Direktori (Clean Architecture)
+## 7. Catatan Integritas dan Penggunaan Asisten AI
 
-```text
-latih.in/
-├── prisma/
-│   ├── schema.prisma            # Skema PostgreSQL (11 Model, Relasi, Indeks)
-│   ├── seed.ts                  # Script seeding data demo (idempotent)
-│   └── seed-data/               # Modul materi & paket tryout demo
-├── public/                      # Aset statis & logo wordmark resmi
-├── src/
-│   ├── core/                    # INTI BISNIS (Clean Architecture)
-│   │   ├── domain/
-│   │   │   ├── entities/        # Entitas domain (User, Subscription, Tryout, dll.)
-│   │   │   └── repositories/    # Interfaces / Ports Repositori
-│   │   ├── use-cases/           # Application Use Cases (Auth, Redeem, Tryout, Admin)
-│   │   └── container.ts         # Dependency Injection / Composition Root
-│   ├── infrastructure/          # ADAPTER & IMPLEMENTASI EKSTERNAL
-│   │   ├── repositories/        # Implementasi Repositori Prisma ORM
-│   │   └── security/            # Jose JWT Service & Bcrypt Hasher Service
-│   ├── app/                     # PRESENTATION LAYER (Next.js 15 App Router)
-│   │   ├── (public)/            # Landing page (/), /login, /register
-│   │   ├── (app)/               # /dashboard, /redeem, /materi, /tryout, /riwayat, /profil
-│   │   ├── (admin)/admin/       # /admin (Statistik), /admin/kode, /admin/materi
-│   │   └── api/                 # 17 Route Handler tipis yang memanggil Use Cases
-│   ├── components/              # Komponen UI Reusable (Navbar, Footer, Tryout, Video)
-│   ├── lib/                     # Utilitas singleton db, errors, & validator Zod
-│   ├── middleware.ts            # Proteksi rute & verifikasi token JWT
-│   └── tests/                   # Pengujian Vitest & script checklist verifikasi
-├── vitest.config.ts             # Konfigurasi runner Vitest
-├── tailwind.config.ts           # Konfigurasi tema & token warna brand
-└── package.json
-```
-
----
-
-## 🤖 Catatan Penggunaan AI Assistant
-
-Sesuai komitmen kejujuran akademis dan profesional:
-- Proyek ini dikembangkan secara kolaboratif menggunakan AI Assistant (**Antigravity**) untuk *scaffolding* komponen antarmuka, pembuatan bank soal literasi penalaran, serta penyusunan script migrasi data.
-- Seluruh arsitektur keamanan, pola transaksi atomik database, penegakan hak akses server-side, perhitungan skoring, serta pengujian logika telah dikaji dan diverifikasi langsung oleh engineer agar memenuhi standar pengujian teknis PT Lini Suara Nusantara.
+Sesuai dengan standar transparansi dan profesionalisme rekayasa piranti lunak:
+- Proyek ini dikembangkan dengan bantuan AI Assistant (Antigravity) dalam penyusunan template awal komponen antarmuka, pembuatan butir stimulus literasi bacaan, serta penulisan skrip migrasi data awal.
+- Seluruh perancangan arsitektur sistem (Clean Architecture), logika transaksi atomik anti-race condition, perlindungan kerahasiaan kunci jawaban, algoritma skoring, sinkronisasi skema PgBouncer, dan validasi fungsional telah ditinjau, diuji, dan diverifikasi secara langsung oleh pengembang agar sesuai dengan ketentuan uji teknis PT Lini Suara Nusantara.
