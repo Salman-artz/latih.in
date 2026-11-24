@@ -8,8 +8,7 @@
 
 ## 1. Tautan Publik dan Kredensial Pengujian
 
-- URL Produksi Utama: [https://latihin.salmanartzdev.my.id](https://latihin.salmanartzdev.my.id)
-- URL Alternatif Vercel: [https://latih-in.vercel.app](https://latih-in.vercel.app)
+- URL Produksi: [https://latihin.salmanartzdev.my.id](https://latihin.salmanartzdev.my.id)
 - Repositori GitHub: [https://github.com/Salman-artz/latih.in](https://github.com/Salman-artz/latih.in)
 
 ### Akun Pengujian Demo (Tersedia via Database Seed)
