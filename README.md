@@ -42,7 +42,7 @@ Proyek ini telah diselesaikan secara menyeluruh dengan mengedepankan kualitas ar
 4. Direct Upload Cloudinary: Pengunggahan video materi dapat dilakukan langsung dari browser ke Cloudinary menggunakan tanda tangan digital aman (HMAC-SHA1), dilengkapi indikator visual persentase real-time dan kecepatan transfer data (maksimal 100 MB sesuai Cloudinary Free Plan).
 5. Antarmuka Bebas Dialog Browser Bawaan: Seluruh interaksi konfirmasi (hapus, revoke, mulai ujian, submit waktu) menggunakan komponen Modal Dialog modern kustom dengan backdrop blur dan dukungan keyboard (Escape), meniadakan popup bawaan peramban yang memunculkan label "... says".
 6. Manajemen Bank Soal Berbasis Spreadsheet (Excel & CSV): Mendukung unduh template Excel (.xlsx) dengan panduan pengisian bertab khusus, impor soal multi-format (.xlsx, .xls, .csv), dan ekspor soal terstruktur lengkap dengan metadata paket ujian.
-7. Otomatisasi Skema Database (PgBouncer-Safe): Skema basis data PostgreSQL disinkronkan secara otomatis dan aman melalui query idempotent tanpa mengunci transaksi PgBouncer.
+7. Otomatisasi Skema Database: Skema basis data PostgreSQL (Sumopod DB) disinkronkan secara otomatis dan aman melalui query idempotent serta konfigurasi isolasi schema yang presisi.
 8. Verifikasi Kualitas Kode:
    - 22 dari 22 unit test berhasil lulus 100% menggunakan Vitest (mencakup skoring, validasi, transaksi konkurensi, dan utilitas spreadsheet).
    - Seluruh alur pengguna dan admin telah diverifikasi melalui pengujian otomatis Playwright (HTTP 200 tanpa error digest SSR).
@@ -206,7 +206,7 @@ src/
 Aplikasi dibangun menggunakan kombinasi teknologi modern yang menjamin skalabilitas, kecepatan eksekusi, serta keamanan data:
 
 - Lapisan Framework & Runtime: Next.js 15 (App Router, Server Components, Route Handlers), React 19, TypeScript 5, Node.js 20+.
-- Lapisan Database & ORM: PostgreSQL (Neon Serverless Database dengan PgBouncer Connection Pooling), Prisma ORM v6.
+- Lapisan Database & ORM: PostgreSQL (Sumopod DB), Prisma ORM v6.
 - Lapisan Styling & Desain Antarmuka: Tailwind CSS, Lucide React (ikonografi modern), sistem komponen antarmuka mandiri (termasuk Modal Dialog kustom).
 - Autentikasi & Keamanan: Jose (enkripsi dan verifikasi JWT), Bcrypt.js (hashing kata sandi aman), Cookie HttpOnly SameSite=Lax (proteksi XSS), mekanisme pembatas frekuensi (Rate Limiting).
 - Manajemen Media Video: Cloudinary API (Direct Signed Upload HMAC-SHA1 dari peramban hingga 100 MB), YouTube IFrame Embed (nocookie).
@@ -220,4 +220,4 @@ Aplikasi dibangun menggunakan kombinasi teknologi modern yang menjamin skalabili
 
 Sesuai dengan standar transparansi dan profesionalisme rekayasa piranti lunak:
 - Proyek ini dikembangkan dengan bantuan AI Assistant (Antigravity) dalam penyusunan template awal komponen antarmuka, pembuatan butir stimulus literasi bacaan, serta penulisan skrip migrasi data awal.
-- Seluruh perancangan arsitektur sistem (Clean Architecture), logika transaksi atomik anti-race condition, perlindungan kerahasiaan kunci jawaban, algoritma skoring, sinkronisasi skema PgBouncer, pengolahan spreadsheet Excel/CSV, dan validasi fungsional telah ditinjau, diuji, dan diverifikasi secara langsung oleh pengembang agar sesuai dengan ketentuan uji teknis PT Lini Suara Nusantara.
+- Seluruh perancangan arsitektur sistem (Clean Architecture), logika transaksi atomik anti-race condition, perlindungan kerahasiaan kunci jawaban, algoritma skoring, sinkronisasi skema basis data PostgreSQL (Sumopod DB), pengolahan spreadsheet Excel/CSV, dan validasi fungsional telah ditinjau, diuji, dan diverifikasi secara langsung oleh pengembang agar sesuai dengan ketentuan uji teknis PT Lini Suara Nusantara.
