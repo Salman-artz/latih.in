@@ -201,7 +201,22 @@ src/
 
 ---
 
-## 7. Catatan Integritas dan Penggunaan Asisten AI
+## 7. Tumpukan Teknologi (Tech Stack)
+
+Aplikasi dibangun menggunakan kombinasi teknologi modern yang menjamin skalabilitas, kecepatan eksekusi, serta keamanan data:
+
+- Lapisan Framework & Runtime: Next.js 15 (App Router, Server Components, Route Handlers), React 19, TypeScript 5, Node.js 20+.
+- Lapisan Database & ORM: PostgreSQL (Neon Serverless Database dengan PgBouncer Connection Pooling), Prisma ORM v6.
+- Lapisan Styling & Desain Antarmuka: Tailwind CSS, Lucide React (ikonografi modern), sistem komponen antarmuka mandiri (termasuk Modal Dialog kustom).
+- Autentikasi & Keamanan: Jose (enkripsi dan verifikasi JWT), Bcrypt.js (hashing kata sandi aman), Cookie HttpOnly SameSite=Lax (proteksi XSS), mekanisme pembatas frekuensi (Rate Limiting).
+- Manajemen Media Video: Cloudinary API (Direct Signed Upload HMAC-SHA1 dari peramban hingga 100 MB), YouTube IFrame Embed (nocookie).
+- Pengolahan Dokumen & Spreadsheet: XLSX (SheetJS) untuk pembuatan template, pembacaan impor, dan ekspor soal terstruktur dalam format Excel (.xlsx, .xls) serta CSV ber-BOM UTF-8.
+- Pengujian Perangkat Lunak: Vitest (pengujian unit logika bisnis, algoritma skoring, validasi, dan transaksi), Playwright (pengujian alur navigasi dan HTTP status).
+- Infrastruktur & Penerapan: Vercel Serverless Platform, Domain Kustom dengan sertifikat enkripsi SSL/TLS otomatis.
+
+---
+
+## 8. Catatan Integritas dan Penggunaan Asisten AI
 
 Sesuai dengan standar transparansi dan profesionalisme rekayasa piranti lunak:
 - Proyek ini dikembangkan dengan bantuan AI Assistant (Antigravity) dalam penyusunan template awal komponen antarmuka, pembuatan butir stimulus literasi bacaan, serta penulisan skrip migrasi data awal.
