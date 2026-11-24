@@ -37,5 +37,14 @@ export function handleApiError(error: unknown) {
   }
 
   console.error("Unhandled API Error:", error);
-  return errorResponse("Terjadi kesalahan internal pada server", 500, "INTERNAL_SERVER_ERROR");
+  return NextResponse.json(
+    {
+      error: {
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Terjadi kesalahan internal pada server",
+        details: error instanceof Error ? `${error.name}: ${error.message}` : String(error),
+      },
+    },
+    { status: 500 }
+  );
 }

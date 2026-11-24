@@ -2,7 +2,7 @@ import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { Role } from "@prisma/client";
-import { prisma } from "./db";
+import { prisma, ensureDbSchema } from "./db";
 
 export const COOKIE_NAME = "latih_session";
 const JWT_EXPIRES_IN = "7d";
@@ -74,6 +74,9 @@ export const getSession = cache(async () => {
 
     const sessionPayload = await verifyToken(token);
     if (!sessionPayload) return null;
+
+    // Pastikan skema database dan kolom tambahan selalu sinkron secara otomatis
+    await ensureDbSchema();
 
     // Muat user dari database dan pastikan akun aktif
     const user = await prisma.user.findUnique({
