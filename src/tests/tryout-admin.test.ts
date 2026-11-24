@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import {
   getQuestionTemplateCsv,
   exportTryoutQuestionsCsv,
+  exportTryoutQuestionsXlsx,
   importTryoutQuestionsFromCsv,
   createAdminTryout,
 } from "@/services/admin-tryout";
@@ -70,5 +71,10 @@ describe("Admin Tryout & Question CSV Utilities", () => {
     const exported = await exportTryoutQuestionsCsv(testTryoutId);
     expect(exported).toContain("Stimulus bacaan soal impor satu...");
     expect(exported).toContain("Stimulus bacaan soal impor dua...");
+
+    const { buffer, filename } = await exportTryoutQuestionsXlsx(testTryoutId);
+    expect(buffer).toBeDefined();
+    expect(buffer.length).toBeGreaterThan(0);
+    expect(filename).toContain(".xlsx");
   });
 });

@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { Role } from "@prisma/client";
-import { exportTryoutQuestionsCsv } from "@/services/admin-tryout";
+import {
+  exportTryoutQuestionsXlsx,
+  exportTryoutQuestionsCsv,
+} from "@/services/admin-tryout";
 import { errorResponse, handleApiError } from "@/lib/errors";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -18,13 +21,28 @@ export async function GET(
     }
 
     const { id: tryoutId } = await params;
-    const csvContent = await exportTryoutQuestionsCsv(tryoutId);
+    const { searchParams } = new URL(request.url);
+    const format = searchParams.get("format") || "xlsx";
 
-    return new NextResponse(csvContent, {
+    if (format === "csv") {
+      const csvContent = await exportTryoutQuestionsCsv(tryoutId);
+      return new NextResponse(csvContent, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/csv; charset=utf-8",
+          "Content-Disposition": `attachment; filename="soal-tryout-${tryoutId}.csv"`,
+        },
+      });
+    }
+
+    // Default: Excel (.xlsx) dengan styling rapi dan sheet informasi
+    const { buffer, filename } = await exportTryoutQuestionsXlsx(tryoutId);
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
-        "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="soal-tryout-${tryoutId}.csv"`,
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": `attachment; filename="${filename}"`,
       },
     });
   } catch (error) {

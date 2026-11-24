@@ -15,6 +15,7 @@ import {
   Clock,
   Download,
   Upload,
+  FileSpreadsheet,
 } from "lucide-react";
 import { ModalDialog, ModalDialogState } from "@/components/ui/ModalDialog";
 
@@ -391,12 +392,12 @@ export default function AdminTryoutQuestionsPage({
             </label>
 
             <a
-              href={`/api/admin/tryouts/${tryoutId}/questions/export`}
+              href={`/api/admin/tryouts/${tryoutId}/questions/export?format=xlsx`}
               download
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 text-xs font-semibold hover:bg-gray-50 transition shadow-sm"
-              title="Ekspor seluruh butir soal paket ini ke file CSV"
+              title="Ekspor seluruh butir soal paket ini ke file Excel (.xlsx) rapi"
             >
-              <Download className="w-3.5 h-3.5" /> Ekspor Soal
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" /> Ekspor Excel (.xlsx)
             </a>
 
             <button

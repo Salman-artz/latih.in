@@ -441,7 +441,94 @@ export async function exportTryoutQuestionsCsv(tryoutId: string): Promise<string
     ];
   });
 
-  return toCsvString(CSV_QUESTION_HEADERS, rows);
+  return "\uFEFF" + toCsvString(CSV_QUESTION_HEADERS, rows);
+}
+
+export async function exportTryoutQuestionsXlsx(tryoutId: string): Promise<{ buffer: Buffer; filename: string }> {
+  const tryout = await prisma.tryout.findUnique({
+    where: { id: tryoutId },
+    include: {
+      questions: {
+        orderBy: { order: "asc" },
+        include: {
+          statements: {
+            orderBy: { order: "asc" },
+          },
+        },
+      },
+    },
+  });
+
+  if (!tryout) {
+    throw new AppError("Paket tryout tidak ditemukan", 404, "NOT_FOUND");
+  }
+
+  // Sheet 1: Informasi Paket
+  const infoRows = [
+    ["INFORMASI PAKET TRYOUT (latih.in)"],
+    [""],
+    ["ID Tryout", tryout.id],
+    ["Judul Tryout", tryout.title],
+    ["Durasi Pengerjaan", `${tryout.durationMinutes} Menit`],
+    ["Status Publikasi", tryout.status === "PUBLISHED" ? "Diterbitkan (Aktif)" : "Draf"],
+    ["Jumlah Butir Soal", tryout.questions.length],
+    ["Waktu Ekspor", new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })],
+    [""],
+    ["Petunjuk:", "Seluruh butir soal, pernyataan, dan pembahasan terdapat pada sheet 'Daftar Soal' di sebelah."],
+    ["Format File:", "File ini kompatibel dan dapat langsung digunakan kembali untuk fitur Impor Soal di dashboard admin."],
+  ];
+
+  const wsInfo = XLSX.utils.aoa_to_sheet(infoRows);
+  wsInfo["!cols"] = [{ wch: 24 }, { wch: 65 }];
+
+  // Sheet 2: Daftar Soal
+  const dataRows = tryout.questions.map((q) => {
+    const s1 = q.statements[0];
+    const s2 = q.statements[1];
+    const s3 = q.statements[2];
+
+    return [
+      q.order,
+      q.stem,
+      s1?.text || "",
+      s1 ? (s1.isTrue ? "BENAR" : "SALAH") : "",
+      s1?.explanation || "",
+      s2?.text || "",
+      s2 ? (s2.isTrue ? "BENAR" : "SALAH") : "",
+      s2?.explanation || "",
+      s3?.text || "",
+      s3 ? (s3.isTrue ? "BENAR" : "SALAH") : "",
+      s3?.explanation || "",
+    ];
+  });
+
+  const wsSoal = XLSX.utils.aoa_to_sheet([CSV_QUESTION_HEADERS, ...dataRows]);
+  wsSoal["!cols"] = [
+    { wch: 12 }, // Nomor Soal
+    { wch: 60 }, // Teks Stimulus Soal
+    { wch: 35 }, // Pernyataan 1
+    { wch: 22 }, // Kunci 1 (BENAR/SALAH)
+    { wch: 40 }, // Pembahasan 1
+    { wch: 35 }, // Pernyataan 2
+    { wch: 22 }, // Kunci 2 (BENAR/SALAH)
+    { wch: 40 }, // Pembahasan 2
+    { wch: 35 }, // Pernyataan 3
+    { wch: 22 }, // Kunci 3 (BENAR/SALAH)
+    { wch: 40 }, // Pembahasan 3
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, wsInfo, "Informasi Tryout");
+  XLSX.utils.book_append_sheet(wb, wsSoal, "Daftar Soal");
+
+  const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer;
+  const safeTitle = tryout.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const filename = `soal-${safeTitle || tryout.id}.xlsx`;
+
+  return { buffer, filename };
 }
 
 export async function importTryoutQuestionsFromCsv(tryoutId: string, csvInput: string | Buffer) {
