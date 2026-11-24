@@ -35,7 +35,10 @@ export class PrismaRedeemCodeRepository implements IRedeemCodeRepository {
       where.revokedAt = null;
       where.OR = [{ expiresAt: null }, { expiresAt: { gt: params.now } }];
     } else if (params.status === "USED") {
-      where.isUsed = true;
+      where.OR = [
+        { isUsed: true },
+        { usedCount: { gte: prisma.redeemCode.fields ? undefined : 1 } },
+      ];
     } else if (params.status === "REVOKED") {
       where.revokedAt = { not: null };
     } else if (params.status === "EXPIRED") {
@@ -52,7 +55,8 @@ export class PrismaRedeemCodeRepository implements IRedeemCodeRepository {
         skip: (params.page - 1) * params.limit,
         take: params.limit,
         include: {
-          subscription: {
+          subscriptions: {
+            take: 5,
             include: {
               user: {
                 select: { name: true, email: true },
@@ -66,22 +70,30 @@ export class PrismaRedeemCodeRepository implements IRedeemCodeRepository {
     const formatted = codes.map((c) => {
       let statusStr = "AVAILABLE";
       if (c.revokedAt) statusStr = "REVOKED";
-      else if (c.isUsed) statusStr = "USED";
+      else if (c.isUsed || c.usedCount >= c.maxUses) statusStr = "USED";
       else if (c.expiresAt && c.expiresAt <= params.now) statusStr = "EXPIRED";
 
+      const firstUser = c.subscriptions?.[0]?.user;
       return {
         ...c,
         status: statusStr,
-        usedBy: c.subscription?.user ? { name: c.subscription.user.name, email: c.subscription.user.email } : null,
+        usedBy: firstUser ? { name: firstUser.name, email: firstUser.email } : null,
       };
     });
 
     return { codes: formatted, total };
   }
 
-  async createMany(codes: { code: string; durationDays: number; label?: string | null; expiresAt?: Date | null; createdById: string }[]): Promise<void> {
+  async createMany(codes: { code: string; durationDays: number; maxUses?: number; label?: string | null; expiresAt?: Date | null; createdById: string }[]): Promise<void> {
     await prisma.redeemCode.createMany({
-      data: codes,
+      data: codes.map((c) => ({
+        code: c.code,
+        durationDays: c.durationDays,
+        maxUses: c.maxUses ?? 1,
+        label: c.label,
+        expiresAt: c.expiresAt,
+        createdById: c.createdById,
+      })),
     });
   }
 

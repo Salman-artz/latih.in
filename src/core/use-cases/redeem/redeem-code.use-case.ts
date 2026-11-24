@@ -8,7 +8,7 @@ export class RedeemCodeUseCase {
     const now = new Date();
 
     return await prisma.$transaction(async (tx) => {
-      // Administrator dilarang me-redeem kode atau berlangganan
+      // 1. Administrator dilarang me-redeem kode atau berlangganan
       const user = await tx.user.findUnique({
         where: { id: userId },
         select: { role: true },
@@ -21,37 +21,60 @@ export class RedeemCodeUseCase {
         );
       }
 
+      // 2. Ambil data kode redeem
+      const existing = await tx.redeemCode.findUnique({ where: { code } });
+      if (!existing) {
+        throw new AppError("Kode redeem tidak valid", 400, "CODE_INVALID");
+      }
+      if (existing.revokedAt) {
+        throw new AppError("Kode redeem sudah dicabut", 400, "CODE_REVOKED");
+      }
+      if (existing.expiresAt && existing.expiresAt <= now) {
+        throw new AppError("Kode redeem sudah kedaluwarsa", 400, "CODE_EXPIRED");
+      }
+      if (existing.isUsed || existing.usedCount >= existing.maxUses) {
+        throw new AppError("Kuota penukaran kode ini sudah habis", 400, "CODE_ALREADY_USED");
+      }
+
+      // 3. Pastikan user ini belum pernah menukarkan kode ini
+      const alreadyRedeemed = await tx.subscription.findFirst({
+        where: {
+          userId,
+          codeId: existing.id,
+        },
+      });
+      if (alreadyRedeemed) {
+        throw new AppError("Kamu sudah pernah menukarkan kode redeem ini sebelumnya", 400, "CODE_ALREADY_REDEEMED");
+      }
+
+      // 4. Update kuota secara atomik (concurrency safe)
+      const willBeFull = existing.usedCount + 1 >= existing.maxUses;
       const updateResult = await tx.redeemCode.updateMany({
         where: {
-          code,
+          id: existing.id,
+          usedCount: { lt: existing.maxUses },
           isUsed: false,
           revokedAt: null,
-          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
         },
         data: {
-          isUsed: true,
+          usedCount: { increment: 1 },
+          isUsed: willBeFull,
           usedById: userId,
           usedAt: now,
         },
       });
 
       if (updateResult.count !== 1) {
-        const existing = await tx.redeemCode.findUnique({ where: { code } });
-        if (!existing) throw new AppError("Kode redeem tidak valid", 400, "CODE_INVALID");
-        if (existing.isUsed) throw new AppError("Kode redeem sudah digunakan", 400, "CODE_ALREADY_USED");
-        if (existing.revokedAt) throw new AppError("Kode redeem sudah dicabut", 400, "CODE_REVOKED");
-        if (existing.expiresAt && existing.expiresAt <= now) throw new AppError("Kode redeem sudah kedaluwarsa", 400, "CODE_EXPIRED");
-        throw new AppError("Kode redeem tidak valid", 400, "CODE_INVALID");
+        throw new AppError("Kuota penukaran kode ini baru saja habis oleh pengguna lain", 400, "CODE_ALREADY_USED");
       }
 
-      const codeRecord = await tx.redeemCode.findUniqueOrThrow({ where: { code } });
-
+      // 5. Perpanjang atau aktifkan langganan user
       const currentActiveSub = await tx.subscription.findFirst({
         where: { userId, endsAt: { gt: now } },
         orderBy: { endsAt: "desc" },
       });
 
-      const durationMillis = codeRecord.durationDays * 24 * 60 * 60 * 1000;
+      const durationMillis = existing.durationDays * 24 * 60 * 60 * 1000;
       const startsAt = now;
       let endsAt: Date;
 
@@ -64,7 +87,7 @@ export class RedeemCodeUseCase {
       const subscription = await tx.subscription.create({
         data: {
           userId,
-          codeId: codeRecord.id,
+          codeId: existing.id,
           source: "REDEEM",
           startsAt,
           endsAt,
@@ -76,7 +99,7 @@ export class RedeemCodeUseCase {
           id: subscription.id,
           startsAt: subscription.startsAt,
           endsAt: subscription.endsAt,
-          durationDays: codeRecord.durationDays,
+          durationDays: existing.durationDays,
         },
       };
     });

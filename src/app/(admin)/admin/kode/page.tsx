@@ -18,6 +18,8 @@ interface RedeemCodeItem {
   id: string;
   code: string;
   durationDays: number;
+  maxUses: number;
+  usedCount: number;
   label: string | null;
   status: "AVAILABLE" | "USED" | "REVOKED" | "EXPIRED";
   expiresAt: string | null;
@@ -39,6 +41,7 @@ export default function AdminRedeemCodesPage() {
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [batchCount, setBatchCount] = useState(5);
   const [batchDuration, setBatchDuration] = useState(30);
+  const [batchMaxUses, setBatchMaxUses] = useState(1);
   const [batchLabel, setBatchLabel] = useState("");
   const [batchExpires, setBatchExpires] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -95,6 +98,12 @@ export default function AdminRedeemCodesPage() {
       return;
     }
 
+    const maxUsesNum = Number(batchMaxUses);
+    if (isNaN(maxUsesNum) || maxUsesNum < 1 || maxUsesNum > 1000) {
+      alert("Jatah kuota pengguna harus antara 1 sampai 1000 pengguna");
+      return;
+    }
+
     if (batchLabel && batchLabel.trim().length > 100) {
       alert("Label batch maksimal 100 karakter");
       return;
@@ -108,8 +117,9 @@ export default function AdminRedeemCodesPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          count: Number(batchCount),
-          durationDays: Number(batchDuration),
+          count: countNum,
+          durationDays: durationNum,
+          maxUses: maxUsesNum,
           label: batchLabel || undefined,
           expiresAt: batchExpires ? new Date(batchExpires).toISOString() : undefined,
         }),
@@ -263,6 +273,7 @@ export default function AdminRedeemCodesPage() {
                 <tr>
                   <th className="py-3 px-4">Kode Redeem</th>
                   <th className="py-3 px-4">Durasi</th>
+                  <th className="py-3 px-4">Kuota Pengguna</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4">Label Batch</th>
                   <th className="py-3 px-4">Pemakai</th>
@@ -280,14 +291,26 @@ export default function AdminRedeemCodesPage() {
                       {item.durationDays} Hari
                     </td>
                     <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-brand-navy">
+                          {item.usedCount}
+                        </span>
+                        <span className="text-gray-400">/</span>
+                        <span className="text-gray-600 font-medium">
+                          {item.maxUses}
+                        </span>
+                        <span className="text-[11px] text-gray-400">siswa</span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
                       {item.status === "AVAILABLE" && (
                         <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-300">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Tersedia
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Tersedia ({item.maxUses - item.usedCount} sisa)
                         </span>
                       )}
                       {item.status === "USED" && (
                         <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-blue-50 text-brand-blue border border-brand-blue/30">
-                          <Clock className="w-3 h-3 text-brand-blue" /> Terpakai
+                          <Clock className="w-3 h-3 text-brand-blue" /> {item.maxUses > 1 ? "Kuota Penuh" : "Terpakai"}
                         </span>
                       )}
                       {item.status === "REVOKED" && (
@@ -305,7 +328,11 @@ export default function AdminRedeemCodesPage() {
                       {item.label || "-"}
                     </td>
                     <td className="py-3.5 px-4 text-gray-600 text-xs">
-                      {item.usedBy ? (
+                      {item.usedCount > 1 ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-700">
+                          {item.usedCount} Siswa terdaftar
+                        </span>
+                      ) : item.usedBy ? (
                         <div>
                           <span className="font-semibold text-brand-navy block">{item.usedBy.name}</span>
                           <span className="text-gray-400">{item.usedBy.email}</span>
@@ -427,6 +454,24 @@ export default function AdminRedeemCodesPage() {
                     onChange={(e) => setBatchDuration(Number(e.target.value))}
                     className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Jatah Kuota Pengguna per Kode (1 - 1000 Siswa)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={1000}
+                    required
+                    value={batchMaxUses}
+                    onChange={(e) => setBatchMaxUses(Number(e.target.value))}
+                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  />
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Berapa banyak siswa yang dapat menukarkan kode ini (misal: 1 untuk privat/eksklusif, atau 10/100 siswa untuk kelas/buku promo).
+                  </p>
                 </div>
 
                 <div>

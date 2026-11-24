@@ -25,6 +25,7 @@ export async function generateRedeemCodesBatch(params: {
   adminId: string;
   count: number;
   durationDays: number;
+  maxUses?: number;
   label?: string;
   expiresAt?: Date | null;
 }) {
@@ -66,7 +67,7 @@ export async function getAdminRedeemCodes({
     where.expiresAt = { lte: now };
   }
 
-  const [total, codes] = await Promise.all([
+    const [total, codes] = await Promise.all([
     prisma.redeemCode.count({ where }),
     prisma.redeemCode.findMany({
       where,
@@ -74,7 +75,8 @@ export async function getAdminRedeemCodes({
       skip: (page - 1) * limit,
       take: limit,
       include: {
-        subscription: {
+        subscriptions: {
+          take: 5,
           include: {
             user: {
               select: {
@@ -93,21 +95,25 @@ export async function getAdminRedeemCodes({
     codes: codes.map((c) => {
       let codeStatus = "AVAILABLE";
       if (c.revokedAt) codeStatus = "REVOKED";
-      else if (c.isUsed) codeStatus = "USED";
+      else if (c.isUsed || c.usedCount >= c.maxUses) codeStatus = "USED";
       else if (c.expiresAt && c.expiresAt <= now) codeStatus = "EXPIRED";
+
+      const firstUser = c.subscriptions?.[0]?.user;
 
       return {
         id: c.id,
         code: c.code,
         durationDays: c.durationDays,
+        maxUses: c.maxUses,
+        usedCount: c.usedCount,
         label: c.label,
         status: codeStatus,
         expiresAt: c.expiresAt,
         usedAt: c.usedAt,
-        usedBy: c.subscription?.user
+        usedBy: firstUser
           ? {
-              name: c.subscription.user.name,
-              email: c.subscription.user.email,
+              name: firstUser.name,
+              email: firstUser.email,
             }
           : null,
         createdAt: c.createdAt,
@@ -179,7 +185,7 @@ export async function exportRedeemCodesCSV(status = "ALL", search = "") {
     where,
     orderBy: { createdAt: "desc" },
     include: {
-      subscription: {
+      subscriptions: {
         include: {
           user: {
             select: { name: true, email: true },
@@ -198,20 +204,38 @@ export async function exportRedeemCodesCSV(status = "ALL", search = "") {
     return `"${escaped}"`;
   };
 
-  const headers = ["Kode", "Durasi (Hari)", "Status", "Label Batch", "Kedaluwarsa", "Dibuat Pada", "Pemakai"];
+  const headers = [
+    "Kode",
+    "Durasi (Hari)",
+    "Kuota Maksimal",
+    "Terpakai",
+    "Sisa Kuota",
+    "Status",
+    "Label Batch",
+    "Kedaluwarsa",
+    "Dibuat Pada",
+    "Pemakai",
+  ];
   const rows = codes.map((c) => {
     let codeStatus = "Tersedia";
     if (c.revokedAt) codeStatus = "Dicabut";
-    else if (c.isUsed) codeStatus = "Terpakai";
+    else if (c.isUsed || c.usedCount >= c.maxUses) codeStatus = "Terpakai (Penuh)";
     else if (c.expiresAt && c.expiresAt <= now) codeStatus = "Kedaluwarsa";
 
-    const userStr = c.subscription?.user ? `${c.subscription.user.name} (${c.subscription.user.email})` : "-";
+    const userStr =
+      c.subscriptions && c.subscriptions.length > 0
+        ? c.subscriptions.map((s) => `${s.user.name} (${s.user.email})`).join("; ")
+        : "-";
+    const remainingQuota = Math.max(0, c.maxUses - c.usedCount);
     const expiresStr = c.expiresAt ? c.expiresAt.toISOString() : "-";
     const createdStr = c.createdAt.toISOString();
 
     return [
       sanitizeCsvValue(c.code),
       c.durationDays,
+      c.maxUses,
+      c.usedCount,
+      remainingQuota,
       sanitizeCsvValue(codeStatus),
       sanitizeCsvValue(c.label || "-"),
       sanitizeCsvValue(expiresStr),

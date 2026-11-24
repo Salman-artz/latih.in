@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
       adminId: session.userId,
       count: validated.count,
       durationDays: validated.durationDays,
+      maxUses: validated.maxUses,
       label: validated.label,
       expiresAt: validated.expiresAt ? new Date(validated.expiresAt) : null,
     });

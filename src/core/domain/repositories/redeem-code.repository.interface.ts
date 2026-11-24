@@ -15,7 +15,7 @@ export interface IRedeemCodeRepository {
     })[];
     total: number;
   }>;
-  createMany(codes: { code: string; durationDays: number; label?: string | null; expiresAt?: Date | null; createdById: string }[]): Promise<void>;
+  createMany(codes: { code: string; durationDays: number; maxUses?: number; label?: string | null; expiresAt?: Date | null; createdById: string }[]): Promise<void>;
   revoke(id: string, adminId: string): Promise<RedeemCodeEntity>;
   countAll(): Promise<number>;
   countUsed(): Promise<number>;

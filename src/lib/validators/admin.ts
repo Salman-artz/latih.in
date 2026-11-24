@@ -28,6 +28,7 @@ export function extractYoutubeId(input: string): string | null {
 export const generateCodesSchema = z.object({
   count: z.number().int().min(1, "Minimal 1 kode").max(100, "Maksimal 100 kode per batch").default(1),
   durationDays: z.number().int().min(1, "Durasi minimal 1 hari").max(730, "Durasi maksimal 730 hari").default(30),
+  maxUses: z.number().int().min(1, "Minimal kuota 1 pengguna").max(1000, "Maksimal kuota 1000 pengguna").default(1),
   label: z.string().max(100).optional(),
   expiresAt: z.string().datetime().optional().nullable(),
 });

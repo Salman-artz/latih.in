@@ -64,13 +64,14 @@ describe("Logika Transaksi Redeem & Konkurensi", () => {
     expect(diffDays).toBe(30);
   });
 
-  it("redeem kedua dengan kode yang sama ditolak (CODE_ALREADY_USED)", async () => {
+  it("redeem kedua oleh user yang sama ditolak (CODE_ALREADY_REDEEMED)", async () => {
     if (!hasDatabase) return;
     const codeStr = `TESTUSED${Date.now()}`;
     await prisma.redeemCode.create({
       data: {
         code: codeStr,
         durationDays: 15,
+        maxUses: 5,
         isUsed: false,
       },
     });
@@ -78,8 +79,62 @@ describe("Logika Transaksi Redeem & Konkurensi", () => {
     // Redeem pertama sukses
     await redeemCode(testUserId, codeStr);
 
-    // Redeem kedua harus gagal
-    await expect(redeemCode(testUserId, codeStr)).rejects.toThrow("Kode redeem sudah digunakan");
+    // Redeem kedua oleh user yang sama harus ditolak
+    await expect(redeemCode(testUserId, codeStr)).rejects.toThrow(
+      "Kamu sudah pernah menukarkan kode redeem ini sebelumnya"
+    );
+  });
+
+  it("multi-quota: kode dengan kuota 2 dapat digunakan oleh 2 user berbeda, lalu ditolak untuk user ke-3", async () => {
+    if (!hasDatabase) return;
+    const multiCode = `TESTMULTI${Date.now()}`;
+    await prisma.redeemCode.create({
+      data: {
+        code: multiCode,
+        durationDays: 10,
+        maxUses: 2,
+        isUsed: false,
+      },
+    });
+
+    // Buat user ke-2 & user ke-3
+    const user2 = await prisma.user.upsert({
+      where: { email: "test-user2@demo.test" },
+      update: {},
+      create: {
+        email: "test-user2@demo.test",
+        name: "Test User 2",
+        passwordHash: "dummy",
+      },
+    });
+
+    const user3 = await prisma.user.upsert({
+      where: { email: "test-user3@demo.test" },
+      update: {},
+      create: {
+        email: "test-user3@demo.test",
+        name: "Test User 3",
+        passwordHash: "dummy",
+      },
+    });
+
+    // User 1 redeem (1/2) -> Sukses
+    const res1 = await redeemCode(testUserId, multiCode);
+    expect(res1.subscription).toBeDefined();
+
+    // User 2 redeem (2/2) -> Sukses
+    const res2 = await redeemCode(user2.id, multiCode);
+    expect(res2.subscription).toBeDefined();
+
+    // Verifikasi status kode di DB sekarang isUsed = true & usedCount = 2
+    const dbCode = await prisma.redeemCode.findUnique({ where: { code: multiCode } });
+    expect(dbCode?.usedCount).toBe(2);
+    expect(dbCode?.isUsed).toBe(true);
+
+    // User 3 redeem -> Gagal karena kuota habis
+    await expect(redeemCode(user3.id, multiCode)).rejects.toThrow(
+      "Kuota penukaran kode ini sudah habis"
+    );
   });
 
   it("konkurensi: dua panggilan paralel dengan kode yang sama menghasilkan tepat satu sukses", async () => {

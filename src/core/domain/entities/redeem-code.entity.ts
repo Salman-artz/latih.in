@@ -4,6 +4,8 @@ export interface RedeemCodeEntity {
   id: string;
   code: string;
   durationDays: number;
+  maxUses: number;
+  usedCount: number;
   expiresAt?: Date | null;
   label?: string | null;
   isUsed: boolean;

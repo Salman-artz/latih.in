@@ -41,19 +41,21 @@ model User {
 }
 
 model RedeemCode {
-  id           String        @id @default(cuid())
-  code         String        @unique
-  durationDays Int           @default(30)
-  expiresAt    DateTime?
-  label        String?
-  isUsed       Boolean       @default(false)
-  usedById     String?
-  usedAt       DateTime?
-  revokedAt    DateTime?
-  revokedById  String?
-  createdById  String?
-  createdAt    DateTime      @default(now())
-  subscription Subscription?
+  id            String         @id @default(cuid())
+  code          String         @unique
+  durationDays  Int            @default(30)
+  maxUses       Int            @default(1)
+  usedCount     Int            @default(0)
+  expiresAt     DateTime?
+  label         String?
+  isUsed        Boolean        @default(false)
+  usedById      String?
+  usedAt        DateTime?
+  revokedAt     DateTime?
+  revokedById   String?
+  createdById   String?
+  createdAt     DateTime       @default(now())
+  subscriptions Subscription[]
 
   @@index([isUsed, revokedAt])
 }
@@ -61,7 +63,7 @@ model RedeemCode {
 model Subscription {
   id          String             @id @default(cuid())
   userId      String
-  codeId      String?            @unique
+  codeId      String?
   source      SubscriptionSource @default(REDEEM)
   startsAt    DateTime
   endsAt      DateTime

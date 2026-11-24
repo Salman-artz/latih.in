@@ -62,6 +62,7 @@ export class GenerateRedeemCodesUseCase {
     adminId: string;
     count: number;
     durationDays: number;
+    maxUses?: number;
     label?: string;
     expiresAt?: Date | null;
   }) {
@@ -88,6 +89,7 @@ export class GenerateRedeemCodesUseCase {
       generatedCodes.map((code) => ({
         code,
         durationDays: params.durationDays,
+        maxUses: params.maxUses || 1,
         label: params.label || null,
         expiresAt: params.expiresAt || null,
         createdById: params.adminId,
