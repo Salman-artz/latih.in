@@ -15,8 +15,8 @@
 
 | Peran | Alamat Email | Kata Sandi | Deskripsi Akses |
 |---|---|---|---|
-| Administrator | admin@demo.test | Demo#12345 | Akses penuh dashboard admin (/admin), statistik, kelola kode redeem, kelola materi, kelola paket tryout & butir soal |
-| Pengguna / Siswa | user@demo.test | Demo#12345 | Akun pengguna terdaftar untuk simulasi pengerjaan materi dan tryout |
+| Administrator | admin@demo.test | Demo#12345 | Akses penuh dashboard admin (/admin), statistik, kelola kode redeem, kelola materi video, kelola paket tryout & butir soal |
+| Pengguna / Siswa | user@demo.test | Demo#12345 | Akun pengguna terdaftar untuk simulasi pembelajaran materi dan pengerjaan tryout |
 
 ### Kode Redeem Demo (Masa Aktif 30 Hari)
 
@@ -33,17 +33,19 @@ Catatan: Sistem mendukung input fleksibel (huruf besar/kecil dan dengan atau tan
 
 ## 2. Hasil Pengerjaan Proyek
 
-Proyek ini telah diselesaikan secara menyeluruh dengan mengedepankan kualitas arsitektur piranti lunak skala industri (Clean Architecture), keandalan keamanan data, performa serverless yang efisien, dan pengalaman pengguna yang responsif.
+Proyek ini telah diselesaikan secara menyeluruh dengan mengedepankan kualitas arsitektur piranti lunak skala industri (Clean Architecture), keandalan keamanan data, performa serverless yang efisien, dan pengalaman pengguna yang profesional.
 
 ### Ringkasan Pencapaian Hasil Rekayasa:
 1. Arsitektur Bersih (Clean Architecture): Memisahkan secara tegas antara Domain Layer (aturan bisnis murni), Use Cases Layer (alur aplikasi), Infrastructure Layer (repositori Prisma dan adapter eksternal), serta Presentation Layer (React Server Components dan Route Handlers Next.js).
 2. Integritas Transaksi Atomik: Menjamin penebusan voucher kode redeem bebas dari kondisi perlombaan (race condition) menggunakan conditional update atomik pada level database engine.
-3. Keamanan Ujian Tanpa Kebocoran (Zero Answer Leak): Data kunci jawaban (isTrue) dan pembahasan (explanation) secara mutlak tidak pernah disertakan dalam payload server saat tryout berstatus sedang dikerjakan (IN_PROGRESS).
-4. Direct Upload Cloudinary: Pengunggahan video materi dapat dilakukan langsung dari browser ke Cloudinary menggunakan tanda tangan digital aman (HMAC-SHA1), dilengkapi indikator visual persentase real-time dan kecepatan transfer data.
-5. Otomatisasi Skema Database (PgBouncer-Safe): Skema basis data PostgreSQL disinkronkan secara otomatis dan aman melalui query idempotent tanpa mengunci transaksi PgBouncer.
-6. Verifikasi Kualitas Kode:
-   - 22 dari 22 unit test berhasil lulus 100% menggunakan Vitest (mencakup skoring, validasi, dan konkurensi).
-   - Seluruh alur pengguna dan admin berhasil diverifikasi melalui pengujian otomatis Playwright (HTTP 200 tanpa error digest SSR).
+3. Keamanan Ujian Tanpa Kebocoran (Zero Answer Leak): Data kunci jawaban (isTrue) dan pembahasan (explanation) secara mutlak tidak pernah disertakan dalam payload respons server saat tryout berstatus sedang dikerjakan (IN_PROGRESS).
+4. Direct Upload Cloudinary: Pengunggahan video materi dapat dilakukan langsung dari browser ke Cloudinary menggunakan tanda tangan digital aman (HMAC-SHA1), dilengkapi indikator visual persentase real-time dan kecepatan transfer data (maksimal 100 MB sesuai Cloudinary Free Plan).
+5. Antarmuka Bebas Dialog Browser Bawaan: Seluruh interaksi konfirmasi (hapus, revoke, mulai ujian, submit waktu) menggunakan komponen Modal Dialog modern kustom dengan backdrop blur dan dukungan keyboard (Escape), meniadakan popup bawaan peramban yang memunculkan label "... says".
+6. Manajemen Bank Soal Berbasis Spreadsheet (Excel & CSV): Mendukung unduh template Excel (.xlsx) dengan panduan pengisian bertab khusus, impor soal multi-format (.xlsx, .xls, .csv), dan ekspor soal terstruktur lengkap dengan metadata paket ujian.
+7. Otomatisasi Skema Database (PgBouncer-Safe): Skema basis data PostgreSQL disinkronkan secara otomatis dan aman melalui query idempotent tanpa mengunci transaksi PgBouncer.
+8. Verifikasi Kualitas Kode:
+   - 22 dari 22 unit test berhasil lulus 100% menggunakan Vitest (mencakup skoring, validasi, transaksi konkurensi, dan utilitas spreadsheet).
+   - Seluruh alur pengguna dan admin telah diverifikasi melalui pengujian otomatis Playwright (HTTP 200 tanpa error digest SSR).
 
 ---
 
@@ -83,9 +85,18 @@ Proyek ini telah diselesaikan secara menyeluruh dengan mengedepankan kualitas ar
 ### F. Panel Administrasi (Admin Dashboard)
 - Ringkasan Metrik Bisnis: Statistik total pengguna terdaftar, pengguna baru 7 hari terakhir, langganan aktif, langganan segera berakhir, dan rata-rata skor tryout.
 - Generator Kode Redeem Massal: Kemampuan membuat kode secara batch (1 sampai 100 kode sekaligus) dengan format 12 karakter acak tanpa karakter ambigu (bebas angka 0, huruf O, angka 1, dan huruf I).
-- Manajemen Kode: Pencarian kode, filter status (Aktif, Terpakai, Kedaluwarsa, Dicabut), pencabutan izin kode (revoke), dan ekspor data ke file CSV.
+- Manajemen Kode: Pencarian kode, filter status (Aktif, Terpakai, Kedaluwarsa, Dicabut), pencabutan izin kode (revoke), dan ekspor data ke file CSV ber-BOM UTF-8.
 - Manajemen Materi Pembelajaran: Penambahan, pengeditan, pengaturan nomor urut, dan pengarsipan materi video (soft archive) agar tidak merusak data progres siswa yang sudah ada.
-- Manajemen Paket Tryout & Bank Soal: Pembuatan paket tryout baru, pengaturan durasi ujian, serta fitur impor dan ekspor butir soal menggunakan template file CSV standar.
+- Manajemen Paket Tryout & Bank Soal:
+  - Pembuatan paket tryout baru dan pengaturan durasi ujian.
+  - Unduh Template Excel (.xlsx): File spreadsheet rapi berisi sheet petunjuk pengisian dan sheet template soal 11 kolom dengan auto-width proporsional.
+  - Impor Soal Multi-Format: Mendukung file .xlsx, .xls, maupun .csv secara fleksibel.
+  - Ekspor Soal Excel (.xlsx): Menghasilkan file workbook berstruktur dengan sheet informasi metadata dan sheet daftar butir soal yang siap diedit kembali (round-trip ready).
+
+### G. Pengalaman Pengguna (UI/UX)
+- Landing Page Satu Halaman: Navigasi ringkas, showcase alur belajar 3 langkah, katalog materi, simulasi tryout, testimoni, dan FAQ.
+- Dialog Interaktif Modern: Menggantikan seluruh popup bawaan peramban dengan komponen modal UI modern berbasis Tailwind CSS, dilengkapi ikon visual, deskripsi jelas, dan tombol aksi terarah.
+- Responsif di Seluruh Perangkat: Tata letak ramah seluler, tablet, maupun layar desktop.
 
 ---
 
@@ -104,8 +115,10 @@ Fokus utama dialokasikan untuk menjamin seluruh fondasi bisnis dan keamanan sist
 Fitur-fitur yang meningkatkan keandalan operasional dan pengalaman pengguna secara signifikan:
 1. Sinkronisasi Timer Sisi Server: Mencegah manipulasi waktu lokal pada peramban siswa.
 2. Penyimpanan Progres Berkala (Autosave): Menjamin rasa aman siswa saat mengerjakan stimulus soal panjang.
-3. Direct Upload Cloudinary: Mengatasi limit serverless payload 4.5 MB dengan mengalirkan file langsung ke cloud storage dilengkapi indikator persentase.
-4. Fitur Operasional Admin: Batch generator kode voucher dan impor/ekspor CSV soal tryout untuk mempermudah manajemen konten penerbit.
+3. Direct Upload Cloudinary: Mengatasi limit serverless payload 4.5 MB dengan mengalirkan file langsung ke cloud storage dilengkapi indikator persentase dan batas wajar 100 MB.
+4. Otomatisasi Bank Soal Excel: Template, impor, dan ekspor .xlsx multi-sheet untuk mempermudah tim penyusun soal penerbit buku tanpa repot mengatur format CSV mentah.
+5. Modal Dialog Modern: Menggantikan alert/confirm bawaan peramban agar antarmuka terlihat profesional dan konsisten.
+6. Fitur Operasional Admin: Batch generator kode voucher dan manajemen kurikulum video.
 
 ### Prioritas P2 (Sengaja Ditunda Berdasarkan Kebutuhan Ujian)
 Fitur yang diidentifikasi berada di luar ruang lingkup kebutuhan bisnis buku penerbit Liniswara:
@@ -135,9 +148,9 @@ src/
 │   ├── (app)/                    # Dashboard, materi, tryout, riwayat, profil, redeem
 │   ├── (admin)/admin/            # Dashboard statistik admin, kode redeem, materi, tryout
 │   └── api/                      # Route Handler tipis yang mendelegasikan ke use case
-├── components/                   # Komponen UI modular (Navbar, Footer, Logo, Tryout)
+├── components/                   # Komponen UI modular (Navbar, Footer, Logo, Tryout, ModalDialog)
 ├── lib/                          # Konfigurasi database singleton, penanganan error, validasi Zod
-└── tests/                        # Pengujian unit Vitest (skoring, validasi, transaksi)
+└── tests/                        # Pengujian unit Vitest (skoring, validasi, transaksi, spreadsheet)
 ```
 
 ---
@@ -192,4 +205,4 @@ src/
 
 Sesuai dengan standar transparansi dan profesionalisme rekayasa piranti lunak:
 - Proyek ini dikembangkan dengan bantuan AI Assistant (Antigravity) dalam penyusunan template awal komponen antarmuka, pembuatan butir stimulus literasi bacaan, serta penulisan skrip migrasi data awal.
-- Seluruh perancangan arsitektur sistem (Clean Architecture), logika transaksi atomik anti-race condition, perlindungan kerahasiaan kunci jawaban, algoritma skoring, sinkronisasi skema PgBouncer, dan validasi fungsional telah ditinjau, diuji, dan diverifikasi secara langsung oleh pengembang agar sesuai dengan ketentuan uji teknis PT Lini Suara Nusantara.
+- Seluruh perancangan arsitektur sistem (Clean Architecture), logika transaksi atomik anti-race condition, perlindungan kerahasiaan kunci jawaban, algoritma skoring, sinkronisasi skema PgBouncer, pengolahan spreadsheet Excel/CSV, dan validasi fungsional telah ditinjau, diuji, dan diverifikasi secara langsung oleh pengembang agar sesuai dengan ketentuan uji teknis PT Lini Suara Nusantara.
