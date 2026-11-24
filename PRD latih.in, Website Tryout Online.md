@@ -14,7 +14,7 @@ Penerbit buku pendidikan membutuhkan platform tryout yang menggabungkan konten b
 
 Masalah yang diselesaikan:
 
-- Siswa belum punya satu tempat untuk belajar lewat video dan langsung mengukur kemampuan lewat tryout.
+- Pengguna belum punya satu tempat untuk belajar lewat video dan langsung mengukur kemampuan lewat tryout.
 - Penerbit butuh cara sederhana untuk mengendalikan akses konten berbayar tanpa integrasi pembayaran.
 - Format soal Benar/Salah majemuk (3 pernyataan per soal) membutuhkan skoring yang jelas dan transparan.
 
@@ -51,7 +51,7 @@ Masalah yang diselesaikan:
 
 | Persona | Deskripsi | Kebutuhan utama |
 | --- | --- | --- |
-| **Siswa (User)** | Pelajar yang menyiapkan ujian, memakai HP maupun laptop | Daftar cepat, redeem kode, belajar lewat video, ikut tryout, melihat skor dan pembahasan |
+| **Pengguna (User)** | Pelajar yang menyiapkan ujian, memakai HP maupun laptop | Daftar cepat, redeem kode, belajar lewat video, ikut tryout, melihat skor dan pembahasan |
 | **Admin** (opsional, P1) | Staf penerbit | Membuat kode redeem dan melihat status pemakaiannya |
 | **Reviewer HRD/Teknis** | Penilai technical test | Mencoba cepat lewat akun demo, membaca README, melihat kualitas kode |
 
@@ -59,21 +59,21 @@ Masalah yang diselesaikan:
 
 | ID | Sebagai | Saya ingin | Agar | Prioritas |
 | --- | --- | --- | --- | --- |
-| US-01 | Siswa | mendaftar dengan email dan password | punya akun pribadi | P0 |
-| US-02 | Siswa | login dan logout | akses saya aman | P0 |
-| US-03 | Siswa | memasukkan kode redeem | langganan saya aktif | P0 |
-| US-04 | Siswa | melihat sisa masa langganan | tahu kapan perlu memperpanjang | P0 |
-| US-05 | Siswa | melihat daftar materi video | memilih topik yang ingin dipelajari | P0 |
-| US-06 | Siswa | menonton video di dalam halaman | belajar tanpa meninggalkan situs | P0 |
-| US-07 | Siswa | mengerjakan tryout 10 soal | menguji pemahaman saya | P0 |
-| US-08 | Siswa | menjawab Benar/Salah untuk tiap pernyataan | mengikuti format soal yang ditetapkan | P0 |
-| US-09 | Siswa | melihat skor dan pembahasan setelah submit | tahu letak kesalahan saya | P0 |
+| US-01 | Pengguna | mendaftar dengan email dan password | punya akun pribadi | P0 |
+| US-02 | Pengguna | login dan logout | akses saya aman | P0 |
+| US-03 | Pengguna | memasukkan kode redeem | langganan saya aktif | P0 |
+| US-04 | Pengguna | melihat sisa masa langganan | tahu kapan perlu memperpanjang | P0 |
+| US-05 | Pengguna | melihat daftar materi video | memilih topik yang ingin dipelajari | P0 |
+| US-06 | Pengguna | menonton video di dalam halaman | belajar tanpa meninggalkan situs | P0 |
+| US-07 | Pengguna | mengerjakan tryout 10 soal | menguji pemahaman saya | P0 |
+| US-08 | Pengguna | menjawab Benar/Salah untuk tiap pernyataan | mengikuti format soal yang ditetapkan | P0 |
+| US-09 | Pengguna | melihat skor dan pembahasan setelah submit | tahu letak kesalahan saya | P0 |
 | US-10 | Calon pengguna | melihat landing page yang menjelaskan produk | memahami manfaat dan cara mulai | P0 |
-| US-11 | Siswa | timer hitung mundur di tryout | berlatih dengan batas waktu nyata | P1 |
-| US-12 | Siswa | riwayat attempt tryout | memantau perkembangan skor | P1 |
-| US-13 | Siswa | menandai video yang sudah ditonton | melacak progres belajar | P1 |
-| US-14 | Admin | membuat kode redeem baru | membagikannya ke siswa | P1 |
-| US-15 | Siswa | mengulang tryout | berlatih berkali-kali | P2 |
+| US-11 | Pengguna | timer hitung mundur di tryout | berlatih dengan batas waktu nyata | P1 |
+| US-12 | Pengguna | riwayat attempt tryout | memantau perkembangan skor | P1 |
+| US-13 | Pengguna | menandai video yang sudah ditonton | melacak progres belajar | P1 |
+| US-14 | Admin | membuat kode redeem baru | membagikannya ke pengguna | P1 |
+| US-15 | Pengguna | mengulang tryout | berlatih berkali-kali | P2 |
 
 ### 4.3 Alur Utama (Happy Path)
 

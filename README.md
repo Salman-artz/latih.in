@@ -16,7 +16,7 @@
 | Peran | Alamat Email | Kata Sandi | Deskripsi Akses |
 |---|---|---|---|
 | Administrator | admin@demo.test | Demo#12345 | Akses penuh dashboard admin (/admin), statistik, kelola kode redeem, kelola materi video, kelola paket tryout & butir soal |
-| Pengguna / Siswa | user@demo.test | Demo#12345 | Akun pengguna terdaftar untuk simulasi pembelajaran materi dan pengerjaan tryout |
+| Pengguna | user@demo.test | Demo#12345 | Akun pengguna terdaftar untuk simulasi pembelajaran materi dan pengerjaan tryout |
 
 ### Kode Redeem Demo (Masa Aktif 30 Hari)
 
@@ -67,26 +67,26 @@ Proyek ini telah diselesaikan secara menyeluruh dengan mengedepankan kualitas ar
 ### C. Kurikulum Materi Pembelajaran Video
 - Dukungan Multi-Sumber Video: Fleksibilitas pemutaran video menggunakan embed YouTube nocookie responsif (aspek rasio 16:9) maupun pemutar video Cloudinary teroptimasi.
 - Direct Upload Cloudinary Berkecepatan Tinggi: Unggah video langsung dari peramban ke Cloudinary (maksimal 100 MB sesuai Cloudinary Free Plan) disertai progress bar persentase (0% - 100%) dan statistik kecepatan (MB/s).
-- Pelacak Progres Belajar: Tombol status "Tandai Selesai" yang tersimpan per pengguna di database serta indikator visual progres kurikulum pada dashboard siswa.
+- Pelacak Progres Belajar: Tombol status "Tandai Selesai" yang tersimpan per pengguna di database serta indikator visual progres kurikulum pada dashboard pengguna.
 - Akses Terproteksi: Modul video hanya dapat diakses oleh pengguna yang memiliki langganan aktif. Pengguna non-aktif diarahkan secara edukatif ke halaman redeem.
 
 ### D. Simulasi Tryout dan Ujian Berwaktu
 - Format Soal Majemuk: 1 paket simulasi memuat 10 stimulus teks/kasus panjang, dengan masing-masing 3 butir pernyataan Benar atau Salah (total 30 butir pernyataan per sesi).
 - Timer Tersinkronisasi Sisi Server: Batas waktu 20 menit nyata yang dihitung berdasarkan selisih waktu mulai server. Waktu tidak bertambah atau terulang meskipun peramban ditutup atau direfresh.
-- Penyimpanan Jawaban Otomatis (Autosave Debounce): Jawaban siswa disimpan secara berkala ke database di latar belakang sehingga progres pengerjaan aman dari putus koneksi mendadak.
+- Penyimpanan Jawaban Otomatis (Autosave Debounce): Jawaban pengguna disimpan secara berkala ke database di latar belakang sehingga progres pengerjaan aman dari putus koneksi mendadak.
 - Pengumpulan Otomatis: Saat sisa waktu habis (00:00), sistem secara otomatis mengumpulkan jawaban dan memproses penilaian di server.
 
 ### E. Penilaian dan Pembahasan Interaktif
 - Perhitungan Nilai Proporsional: Setiap butir pernyataan yang dijawab benar menghasilkan 1 poin (maksimal 30 poin) dan dikonversi ke skala nilai 0 hingga 100.
 - Analisis Butir Jawaban: Menampilkan rekapitulasi jumlah butir benar, salah, dan kosong.
-- Pembahasan Lengkap Pasca-Ujian: Siswa dapat meninjau stimulus soal, kunci jawaban valid, pilihan yang sebelumnya dipilih, serta penjelasan konseptual pada setiap butir.
+- Pembahasan Lengkap Pasca-Ujian: Pengguna dapat meninjau stimulus soal, kunci jawaban valid, pilihan yang sebelumnya dipilih, serta penjelasan konseptual pada setiap butir.
 - Riwayat Pengerjaan: Rekam jejak seluruh sesi tryout yang pernah diselesaikan tersimpan rapi dan dapat ditinjau kembali kapan saja.
 
 ### F. Panel Administrasi (Admin Dashboard)
 - Ringkasan Metrik Bisnis: Statistik total pengguna terdaftar, pengguna baru 7 hari terakhir, langganan aktif, langganan segera berakhir, dan rata-rata skor tryout.
 - Generator Kode Redeem Massal: Kemampuan membuat kode secara batch (1 sampai 100 kode sekaligus) dengan format 12 karakter acak tanpa karakter ambigu (bebas angka 0, huruf O, angka 1, dan huruf I).
 - Manajemen Kode: Pencarian kode, filter status (Aktif, Terpakai, Kedaluwarsa, Dicabut), pencabutan izin kode (revoke), dan ekspor data ke file CSV ber-BOM UTF-8.
-- Manajemen Materi Pembelajaran: Penambahan, pengeditan, pengaturan nomor urut, dan pengarsipan materi video (soft archive) agar tidak merusak data progres siswa yang sudah ada.
+- Manajemen Materi Pembelajaran: Penambahan, pengeditan, pengaturan nomor urut, dan pengarsipan materi video (soft archive) agar tidak merusak data progres pengguna yang sudah ada.
 - Manajemen Paket Tryout & Bank Soal:
   - Pembuatan paket tryout baru dan pengaturan durasi ujian.
   - Unduh Template Excel (.xlsx): File spreadsheet rapi berisi sheet petunjuk pengisian dan sheet template soal 11 kolom dengan auto-width proporsional.
@@ -113,8 +113,8 @@ Fokus utama dialokasikan untuk menjamin seluruh fondasi bisnis dan keamanan sist
 
 ### Prioritas P1 (Nilai Tambah Berbiaya Efisien)
 Fitur-fitur yang meningkatkan keandalan operasional dan pengalaman pengguna secara signifikan:
-1. Sinkronisasi Timer Sisi Server: Mencegah manipulasi waktu lokal pada peramban siswa.
-2. Penyimpanan Progres Berkala (Autosave): Menjamin rasa aman siswa saat mengerjakan stimulus soal panjang.
+1. Sinkronisasi Timer Sisi Server: Mencegah manipulasi waktu lokal pada peramban pengguna.
+2. Penyimpanan Progres Berkala (Autosave): Menjamin rasa aman pengguna saat mengerjakan stimulus soal panjang.
 3. Direct Upload Cloudinary: Mengatasi limit serverless payload 4.5 MB dengan mengalirkan file langsung ke cloud storage dilengkapi indikator persentase dan batas wajar 100 MB.
 4. Otomatisasi Bank Soal Excel: Template, impor, dan ekspor .xlsx multi-sheet untuk mempermudah tim penyusun soal penerbit buku tanpa repot mengatur format CSV mentah.
 5. Modal Dialog Modern: Menggantikan alert/confirm bawaan peramban agar antarmuka terlihat profesional dan konsisten.
@@ -123,8 +123,8 @@ Fitur-fitur yang meningkatkan keandalan operasional dan pengalaman pengguna seca
 ### Prioritas P2 (Sengaja Ditunda Berdasarkan Kebutuhan Ujian)
 Fitur yang diidentifikasi berada di luar ruang lingkup kebutuhan bisnis buku penerbit Liniswara:
 1. Integrasi Payment Gateway Pihak Ketiga: Sesuai model bisnis buku fisik penerbit, akses tryout diperoleh melalui kode voucher yang tertera pada buku, bukan pembayaran kartu kredit/e-wallet langsung di aplikasi.
-2. Login Sosial Pihak Ketiga (Google/Facebook OAuth): Autentikasi email dan kata sandi mandiri sudah mencukupi kebutuhan identifikasi data siswa.
-3. Integrasi Live Proctoring Web-Camera: Dieliminasi agar sistem tetap ringan, hemat kuota siswa, dan dapat diakses lancar di berbagai perangkat peramban.
+2. Login Sosial Pihak Ketiga (Google/Facebook OAuth): Autentikasi email dan kata sandi mandiri sudah mencukupi kebutuhan identifikasi data pengguna.
+3. Integrasi Live Proctoring Web-Camera: Dieliminasi agar sistem tetap ringan, hemat kuota pengguna, dan dapat diakses lancar di berbagai perangkat peramban.
 
 ---
 

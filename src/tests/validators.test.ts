@@ -64,9 +64,9 @@ describe("Validasi & Helper Logika", () => {
 
     it("memvalidasi schema registrasi lengkap", () => {
       const valid = registerSchema.safeParse({
-        name: "Siswa Unggul",
-        email: "siswa@sekolah.sch.id",
-        password: "SiswaBaru#2026",
+        name: "Pengguna Unggul",
+        email: "pengguna@sekolah.sch.id",
+        password: "PenggunaBaru#2026",
       });
       expect(valid.success).toBe(true);
 

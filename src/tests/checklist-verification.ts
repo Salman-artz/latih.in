@@ -13,13 +13,13 @@ async function runChecklist() {
   console.log("=================================================");
 
   const timestamp = Date.now();
-  const testEmail = `siswa-check-${timestamp}@test.com`;
+  const testEmail = `pengguna-check-${timestamp}@test.com`;
 
   // Item 1: Registrasi email baru berhasil
   const passwordHash = await bcrypt.hash("Password123", 10);
   const newUser = await prisma.user.create({
     data: {
-      name: "Siswa Checklist",
+      name: "Pengguna Checklist",
       email: testEmail,
       passwordHash,
       role: Role.USER,
@@ -32,7 +32,7 @@ async function runChecklist() {
   try {
     await prisma.user.create({
       data: {
-        name: "Siswa Duplikat",
+        name: "Pengguna Duplikat",
         email: testEmail,
         passwordHash,
       },
@@ -154,7 +154,7 @@ async function runChecklist() {
   // Item 13: Hasil attempt user lain ditolak 404
   const otherUser = await prisma.user.create({
     data: {
-      name: "Siswa Lain",
+      name: "Pengguna Lain",
       email: `other-${timestamp}@test.com`,
       passwordHash,
     },
