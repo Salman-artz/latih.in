@@ -41,6 +41,8 @@ export default function AdminMaterialsPage() {
   const [formYoutube, setFormYoutube] = useState("");
   const [formVideoUrl, setFormVideoUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStats, setUploadStats] = useState("");
   const [uploadSuccessMsg, setUploadSuccessMsg] = useState("");
   const [formOrder, setFormOrder] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -107,30 +109,78 @@ export default function AdminMaterialsPage() {
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
+    setUploadStats("Menyiapkan koneksi langsung ke Cloudinary...");
     setFormError("");
     setUploadSuccessMsg("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("/api/admin/upload-video", {
-        method: "POST",
-        body: formData,
-      });
+      // 1. Dapatkan signature untuk direct upload ke Cloudinary
+      const signRes = await fetch("/api/admin/cloudinary-sign");
+      const signData = await signRes.json();
 
-      const data = await res.json();
-      if (!res.ok) {
-        setFormError(data.error?.message || "Gagal mengunggah video ke Cloudinary");
-        setIsUploading(false);
-        return;
+      if (!signRes.ok) {
+        throw new Error(signData.error?.message || "Gagal mendapatkan izin tanda tangan Cloudinary");
       }
 
-      setFormVideoUrl(data.url);
-      setUploadSuccessMsg("Video berhasil diunggah ke Cloudinary!");
-    } catch {
-      setFormError("Gagal mengunggah video karena kendala koneksi");
-    } finally {
+      const { cloudName, apiKey, timestamp, folder, signature } = signData;
+
+      // 2. Direct upload langsung ke endpoint Cloudinary
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", apiKey);
+      formData.append("timestamp", timestamp.toString());
+      formData.append("signature", signature);
+      formData.append("folder", folder);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`);
+
+      const startTime = Date.now();
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.min(99, Math.round((event.loaded / event.total) * 100));
+          const loadedMB = (event.loaded / (1024 * 1024)).toFixed(1);
+          const totalMB = (event.total / (1024 * 1024)).toFixed(1);
+          const elapsedSec = (Date.now() - startTime) / 1000;
+          const speedMBps = elapsedSec > 0 ? (event.loaded / (1024 * 1024) / elapsedSec).toFixed(2) : "0";
+          setUploadProgress(percent);
+          setUploadStats(`${loadedMB} MB / ${totalMB} MB (${percent}%) • Kecepatan: ${speedMBps} MB/s`);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            setUploadProgress(100);
+            setUploadStats("Selesai diproses di Cloudinary");
+            setFormVideoUrl(data.secure_url);
+            setUploadSuccessMsg("Video berhasil diunggah langsung ke Cloudinary!");
+          } catch {
+            setFormError("Gagal membaca respon dari Cloudinary");
+          }
+        } else {
+          try {
+            const errData = JSON.parse(xhr.responseText);
+            setFormError(errData.error?.message || `Gagal mengunggah ke Cloudinary (HTTP ${xhr.status})`);
+          } catch {
+            setFormError(`Gagal mengunggah ke Cloudinary (HTTP ${xhr.status})`);
+          }
+        }
+        setIsUploading(false);
+      };
+
+      xhr.onerror = () => {
+        setFormError("Koneksi ke Cloudinary terputus. Pastikan jaringan internet stabil.");
+        setIsUploading(false);
+      };
+
+      xhr.send(formData);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal mengunggah video ke Cloudinary";
+      setFormError(msg);
       setIsUploading(false);
     }
   }
@@ -497,12 +547,24 @@ export default function AdminMaterialsPage() {
                         className="cursor-pointer flex flex-col items-center justify-center gap-1.5"
                       >
                         {isUploading ? (
-                          <>
-                            <Loader2 className="w-6 h-6 animate-spin text-brand-blue" />
-                            <span className="text-xs font-semibold text-brand-blue">
-                              Sedang mengunggah video ke Cloudinary...
-                            </span>
-                          </>
+                          <div className="w-full space-y-2 py-1">
+                            <div className="flex items-center justify-between text-xs font-semibold text-brand-navy">
+                              <span className="flex items-center gap-1.5 text-brand-blue">
+                                <Loader2 className="w-4 h-4 animate-spin text-brand-blue" />
+                                Direct Upload ke Cloudinary...
+                              </span>
+                              <span className="font-mono text-brand-blue font-bold">{uploadProgress}%</span>
+                            </div>
+                            <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                              <div
+                                className="bg-brand-blue h-2 rounded-full transition-all duration-150"
+                                style={{ width: `${uploadProgress}%` }}
+                              />
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-mono text-center">
+                              {uploadStats}
+                            </div>
+                          </div>
                         ) : (
                           <>
                             <UploadCloud className="w-6 h-6 text-gray-400" />
@@ -510,7 +572,7 @@ export default function AdminMaterialsPage() {
                               Klik untuk pilih file video (.mp4, .webm)
                             </span>
                             <span className="text-[11px] text-gray-400">
-                              Maksimal 300MB
+                              Maksimal 300MB • Direct Upload Cepat dengan Progress Bar
                             </span>
                           </>
                         )}
