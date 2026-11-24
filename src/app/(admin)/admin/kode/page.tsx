@@ -12,6 +12,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  Edit2,
 } from "lucide-react";
 
 interface RedeemCodeItem {
@@ -46,6 +47,17 @@ export default function AdminRedeemCodesPage() {
   const [batchExpires, setBatchExpires] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateResult, setGenerateResult] = useState<string[] | null>(null);
+
+  // Form Edit State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<RedeemCodeItem | null>(null);
+  const [editCode, setEditCode] = useState("");
+  const [editDuration, setEditDuration] = useState(30);
+  const [editMaxUses, setEditMaxUses] = useState(1);
+  const [editLabel, setEditLabel] = useState("");
+  const [editExpires, setEditExpires] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [editError, setEditError] = useState("");
 
   // Action State
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -138,6 +150,59 @@ export default function AdminRedeemCodesPage() {
     } catch {
       alert("Terjadi kesalahan koneksi");
       setIsGenerating(false);
+    }
+  }
+
+  async function handleEditSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingItem) return;
+    setEditError("");
+
+    const durationNum = Number(editDuration);
+    if (isNaN(durationNum) || durationNum < 1 || durationNum > 730) {
+      setEditError("Durasi masa aktif harus antara 1 sampai 730 hari");
+      return;
+    }
+
+    const maxUsesNum = Number(editMaxUses);
+    if (isNaN(maxUsesNum) || maxUsesNum < 1 || maxUsesNum > 10000) {
+      setEditError("Jatah kuota pengguna harus antara 1 sampai 10.000 pengguna");
+      return;
+    }
+
+    if (maxUsesNum < editingItem.usedCount) {
+      setEditError(`Kuota tidak boleh lebih kecil dari jumlah pengguna yang sudah terdaftar (${editingItem.usedCount} pengguna)`);
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const res = await fetch(`/api/admin/redeem-codes/${editingItem.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: editCode.trim().toUpperCase(),
+          durationDays: durationNum,
+          maxUses: maxUsesNum,
+          label: editLabel.trim() || null,
+          expiresAt: editExpires ? new Date(editExpires).toISOString() : null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setEditError(data.error?.message || "Gagal memperbarui kode");
+        setIsUpdating(false);
+        return;
+      }
+
+      setShowEditModal(false);
+      setEditingItem(null);
+      loadCodes();
+    } catch {
+      setEditError("Terjadi kesalahan jaringan");
+    } finally {
+      setIsUpdating(false);
     }
   }
 
@@ -299,7 +364,7 @@ export default function AdminRedeemCodesPage() {
                         <span className="text-gray-600 font-medium">
                           {item.maxUses}
                         </span>
-                        <span className="text-[11px] text-gray-400">siswa</span>
+                        <span className="text-[11px] text-gray-400">pengguna</span>
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
@@ -330,7 +395,7 @@ export default function AdminRedeemCodesPage() {
                     <td className="py-3.5 px-4 text-gray-600 text-xs">
                       {item.usedCount > 1 ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-700">
-                          {item.usedCount} Siswa terdaftar
+                          {item.usedCount} Pengguna terdaftar
                         </span>
                       ) : item.usedBy ? (
                         <div>
@@ -347,15 +412,38 @@ export default function AdminRedeemCodesPage() {
                         : "Permanen"}
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      {item.status === "AVAILABLE" && (
-                        <button
-                          onClick={() => handleRevoke(item.id)}
-                          disabled={actionLoadingId === item.id}
-                          className="text-xs font-semibold text-red-600 hover:text-red-800 disabled:opacity-40 transition"
-                        >
-                          {actionLoadingId === item.id ? "Memproses..." : "Cabut"}
-                        </button>
-                      )}
+                      <div className="flex items-center justify-end gap-2.5">
+                        {item.status !== "REVOKED" && (
+                          <button
+                            onClick={() => {
+                              setEditingItem(item);
+                              setEditCode(item.code);
+                              setEditDuration(item.durationDays);
+                              setEditMaxUses(item.maxUses);
+                              setEditLabel(item.label || "");
+                              setEditExpires(
+                                item.expiresAt
+                                  ? new Date(item.expiresAt).toISOString().slice(0, 16)
+                                  : ""
+                              );
+                              setEditError("");
+                              setShowEditModal(true);
+                            }}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-brand-blue hover:text-blue-800 transition"
+                          >
+                            <Edit2 className="w-3 h-3" /> Edit
+                          </button>
+                        )}
+                        {item.status === "AVAILABLE" && (
+                          <button
+                            onClick={() => handleRevoke(item.id)}
+                            disabled={actionLoadingId === item.id}
+                            className="text-xs font-semibold text-red-600 hover:text-red-800 disabled:opacity-40 transition"
+                          >
+                            {actionLoadingId === item.id ? "Memproses..." : "Cabut"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -458,7 +546,7 @@ export default function AdminRedeemCodesPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Jatah Kuota Pengguna per Kode (1 - 1000 Siswa)
+                    Jatah Kuota Pengguna per Kode (1 - 1000 Pengguna)
                   </label>
                   <input
                     type="number"
@@ -470,7 +558,7 @@ export default function AdminRedeemCodesPage() {
                     className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
                   <p className="text-[11px] text-gray-400 mt-1">
-                    Berapa banyak siswa yang dapat menukarkan kode ini (misal: 1 untuk privat/eksklusif, atau 10/100 siswa untuk kelas/buku promo).
+                    Berapa banyak pengguna yang dapat menukarkan kode ini (misal: 1 untuk privat/eksklusif, atau 10/100 pengguna untuk kelas/buku promo).
                   </p>
                 </div>
 
@@ -524,6 +612,135 @@ export default function AdminRedeemCodesPage() {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL EDIT KODE REDEEM */}
+      {showEditModal && editingItem && (
+        <div className="fixed inset-0 z-50 bg-brand-navy/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-gray-100 space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+              <div>
+                <h3 className="text-lg font-bold text-brand-navy">Edit Kode Redeem</h3>
+                <p className="text-xs text-gray-500">Sesuaikan kode voucher, durasi, dan kuota pengguna.</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingItem(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {editError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-md">
+                {editError}
+              </div>
+            )}
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  String Kode Redeem
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editCode}
+                  onChange={(e) => setEditCode(e.target.value.toUpperCase())}
+                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Durasi Masa Aktif (Hari)
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={730}
+                  required
+                  value={editDuration}
+                  onChange={(e) => setEditDuration(Number(e.target.value))}
+                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Jatah Kuota Pengguna
+                </label>
+                <input
+                  type="number"
+                  min={editingItem.usedCount || 1}
+                  max={10000}
+                  required
+                  value={editMaxUses}
+                  onChange={(e) => setEditMaxUses(Number(e.target.value))}
+                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                />
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Sudah terpakai oleh <strong>{editingItem.usedCount} pengguna</strong>. Kuota minimal adalah {editingItem.usedCount}.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Label Batch / Keterangan
+                </label>
+                <input
+                  type="text"
+                  maxLength={100}
+                  value={editLabel}
+                  onChange={(e) => setEditLabel(e.target.value)}
+                  placeholder="Contoh: Promo Buku 2026"
+                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Batas Expired (Opsional, kosongkan jika permanen)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={editExpires}
+                  onChange={(e) => setEditExpires(e.target.value)}
+                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingItem(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="inline-flex items-center gap-1.5 px-5 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-md text-xs sm:text-sm font-semibold shadow disabled:opacity-50"
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan Perubahan"
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

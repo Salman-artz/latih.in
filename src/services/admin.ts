@@ -156,6 +156,82 @@ export async function revokeRedeemCode(codeId: string, adminId: string) {
   return updated;
 }
 
+export async function updateRedeemCode(
+  codeId: string,
+  data: {
+    code?: string;
+    durationDays?: number;
+    maxUses?: number;
+    label?: string | null;
+    expiresAt?: Date | null;
+  }
+) {
+  const existing = await prisma.redeemCode.findUnique({
+    where: { id: codeId },
+  });
+
+  if (!existing) {
+    throw new AppError("Kode redeem tidak ditemukan", 404, "NOT_FOUND");
+  }
+
+  if (existing.revokedAt) {
+    throw new AppError("Kode yang sudah dicabut tidak dapat diubah", 400, "ALREADY_REVOKED");
+  }
+
+  const updateData: Prisma.RedeemCodeUpdateInput = {};
+
+  if (data.code && data.code !== existing.code) {
+    const codeConflict = await prisma.redeemCode.findFirst({
+      where: {
+        code: data.code,
+        id: { not: codeId },
+      },
+    });
+    if (codeConflict) {
+      throw new AppError("Kode redeem sudah dipakai oleh voucher lain", 400, "CODE_ALREADY_EXISTS");
+    }
+    updateData.code = data.code;
+  }
+
+  if (data.durationDays !== undefined) {
+    updateData.durationDays = data.durationDays;
+  }
+
+  if (data.label !== undefined) {
+    updateData.label = data.label;
+  }
+
+  if (data.expiresAt !== undefined) {
+    updateData.expiresAt = data.expiresAt;
+  }
+
+  if (data.maxUses !== undefined) {
+    if (data.maxUses < existing.usedCount) {
+      throw new AppError(
+        `Kuota tidak boleh lebih kecil dari jumlah pengguna yang sudah menukarkan kode (${existing.usedCount} pengguna)`,
+        400,
+        "INVALID_MAX_USES"
+      );
+    }
+    updateData.maxUses = data.maxUses;
+
+    const now = new Date();
+    const effectiveExpiresAt = data.expiresAt !== undefined ? data.expiresAt : existing.expiresAt;
+    const isExpired = effectiveExpiresAt && effectiveExpiresAt <= now;
+
+    if (data.maxUses > existing.usedCount && !isExpired) {
+      updateData.isUsed = false;
+    } else if (data.maxUses <= existing.usedCount) {
+      updateData.isUsed = true;
+    }
+  }
+
+  return await prisma.redeemCode.update({
+    where: { id: codeId },
+    data: updateData,
+  });
+}
+
 export async function exportRedeemCodesCSV(status = "ALL", search = "") {
   const now = new Date();
   const where: Prisma.RedeemCodeWhereInput = {};

@@ -49,7 +49,7 @@ export default async function DashboardPage() {
       <div className="bg-white p-5 sm:p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-brand-navy">
-            {isAdmin ? "Dashboard Administrator" : "Dashboard Siswa"}
+            {isAdmin ? "Dashboard Administrator" : "Dashboard Pengguna"}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             Selamat datang, <span className="font-semibold text-slate-800">{session.user.name}</span>.{" "}
@@ -75,7 +75,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Banner Langganan Segera Berakhir (Khusus Siswa, <= 7 hari) */}
+      {/* Banner Langganan Segera Berakhir (Khusus Pengguna, <= 7 hari) */}
       {!isAdmin && subStatus.subscription && (
         <SubscriptionBanner daysLeft={subStatus.subscription.daysLeft} />
       )}
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
               {isAdmin
-                ? "Sebagai Administrator, tugas Anda adalah mengatur kode voucher, mengelola materi pembelajaran, dan memantau siswa. Administrator tidak dapat berlangganan atau me-redeem voucher karena seluruh fitur operasional dikelola via Panel Admin."
+                ? "Sebagai Administrator, tugas Anda adalah mengatur kode voucher, mengelola materi pembelajaran, dan memantau pengguna. Administrator tidak dapat berlangganan atau me-redeem voucher karena seluruh fitur operasional dikelola via Panel Admin."
                 : subStatus.isActive
                 ? `Masa aktif langganan kamu berlaku hingga ${new Date(
                     subStatus.subscription!.endsAt
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
                 Generate batch kode voucher 1-100 kode, filter status, cabut voucher, dan ekspor data ke format CSV.
               </p>
               <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 text-[11px] text-slate-700">
-                Tersedia: <span className="font-bold text-brand-blue">{adminAvailableCodes} kode</span> siap dibagikan ke siswa.
+                Tersedia: <span className="font-bold text-brand-blue">{adminAvailableCodes} kode</span> siap dibagikan ke pengguna.
               </div>
             </div>
             <Link
@@ -199,7 +199,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       ) : (
-        /* Action Cards untuk Siswa */
+        /* Action Cards untuk Pengguna */
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
           {/* Modul Materi */}
           <div className="bg-white p-5 sm:p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">

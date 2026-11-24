@@ -120,7 +120,7 @@ function LoginForm() {
       <div className="mt-5 pt-4 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
         <p className="font-bold text-slate-700">Akun Demo Pengujian:</p>
         <p>Admin: <span className="font-mono text-slate-900 font-semibold">admin@demo.test</span> / <span className="font-mono text-slate-900 font-semibold">Demo#12345</span></p>
-        <p>Siswa: <span className="font-mono text-slate-900 font-semibold">user@demo.test</span> / <span className="font-mono text-slate-900 font-semibold">Demo#12345</span></p>
+        <p>Pengguna: <span className="font-mono text-slate-900 font-semibold">user@demo.test</span> / <span className="font-mono text-slate-900 font-semibold">Demo#12345</span></p>
       </div>
     </div>
   );

@@ -72,7 +72,7 @@ export default async function AdminLayout({
                 className="px-3 py-1.5 rounded-lg text-brand-blue hover:bg-brand-blue-50 transition flex items-center gap-1"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Mode Siswa</span>
+                <span className="hidden sm:inline">Mode Pengguna</span>
               </Link>
             </nav>
           </div>

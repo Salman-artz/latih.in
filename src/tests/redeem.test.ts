@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { prisma } from "@/lib/db";
 import { redeemCode } from "@/services/redeem";
+import { updateRedeemCode } from "@/services/admin";
 
 describe("Logika Transaksi Redeem & Konkurensi", () => {
   let testUserId: string;
@@ -186,5 +187,51 @@ describe("Logika Transaksi Redeem & Konkurensi", () => {
     await expect(redeemCode(adminUser.id, adminCode)).rejects.toThrow(
       "Administrator tidak dapat melakukan redeem kode atau berlangganan"
     );
+  });
+
+  it("fitur edit: update kode, durasi, dan kuota berhasil dilakukan", async () => {
+    if (!hasDatabase) return;
+    const initialCode = `TESTEDIT${Date.now()}`;
+    const created = await prisma.redeemCode.create({
+      data: {
+        code: initialCode,
+        durationDays: 10,
+        maxUses: 1,
+        isUsed: false,
+      },
+    });
+
+    const newCode = `EDITED${Date.now()}`;
+    const updated = await updateRedeemCode(created.id, {
+      code: newCode,
+      durationDays: 60,
+      maxUses: 50,
+      label: "Promo Khusus",
+    });
+
+    expect(updated.code).toBe(newCode);
+    expect(updated.durationDays).toBe(60);
+    expect(updated.maxUses).toBe(50);
+    expect(updated.label).toBe("Promo Khusus");
+  });
+
+  it("fitur edit: menurunkan kuota di bawah usedCount ditolak (INVALID_MAX_USES)", async () => {
+    if (!hasDatabase) return;
+    const usedCode = `TESTUSEDEDIT${Date.now()}`;
+    const created = await prisma.redeemCode.create({
+      data: {
+        code: usedCode,
+        durationDays: 30,
+        maxUses: 5,
+        usedCount: 3,
+        isUsed: false,
+      },
+    });
+
+    await expect(
+      updateRedeemCode(created.id, {
+        maxUses: 2,
+      })
+    ).rejects.toThrow("Kuota tidak boleh lebih kecil dari jumlah pengguna yang sudah menukarkan kode (3 pengguna)");
   });
 });

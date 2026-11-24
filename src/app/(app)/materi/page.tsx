@@ -10,7 +10,7 @@ export default async function MateriListPage() {
 
   const sub = await getUserSubscription(session.userId);
 
-  // Jika belum berlangganan: Tampilkan state terkunci dengan pesan edukatif & tombol redeem (khusus Siswa)
+  // Jika belum berlangganan: Tampilkan state terkunci dengan pesan edukatif & tombol redeem (khusus Pengguna)
   if (!sub.isActive && session.user.role !== "ADMIN") {
     return (
       <div className="max-w-xl mx-auto py-12 text-center space-y-6">

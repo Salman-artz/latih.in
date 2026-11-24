@@ -15,7 +15,7 @@ export class RedeemCodeUseCase {
       });
       if (user?.role === "ADMIN") {
         throw new AppError(
-          "Administrator tidak dapat melakukan redeem kode atau berlangganan. Fitur ini khusus untuk akun Siswa.",
+          "Administrator tidak dapat melakukan redeem kode atau berlangganan. Fitur ini khusus untuk akun Pengguna.",
           403,
           "ADMIN_CANNOT_REDEEM"
         );

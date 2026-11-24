@@ -33,6 +33,20 @@ export const generateCodesSchema = z.object({
   expiresAt: z.string().datetime().optional().nullable(),
 });
 
+export const updateRedeemCodeSchema = z.object({
+  code: z
+    .string()
+    .min(3, "Kode minimal 3 karakter")
+    .max(50, "Kode maksimal 50 karakter")
+    .regex(/^[A-Za-z0-9_-]+$/, "Kode hanya boleh huruf, angka, tanda hubung (-), dan garis bawah (_)")
+    .transform((val) => val.toUpperCase().trim())
+    .optional(),
+  durationDays: z.number().int().min(1, "Durasi minimal 1 hari").max(730, "Durasi maksimal 730 hari").optional(),
+  maxUses: z.number().int().min(1, "Minimal kuota 1 pengguna").max(10000, "Maksimal kuota 10.000 pengguna").optional(),
+  label: z.string().max(100, "Label maksimal 100 karakter").optional().nullable(),
+  expiresAt: z.string().datetime().optional().nullable(),
+});
+
 export const materialSchema = z.object({
   title: z.string().min(3, "Judul minimal 3 karakter").max(200, "Judul maksimal 200 karakter").trim(),
   description: z.string().min(5, "Deskripsi minimal 5 karakter").trim(),

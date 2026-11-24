@@ -43,7 +43,7 @@ export default async function HomePage() {
                     href="/dashboard"
                     className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-brand-blue text-white font-semibold text-sm hover:bg-blue-700 transition"
                   >
-                    Buka Dashboard Siswa <ArrowRight className="w-4 h-4" />
+                    Buka Dashboard Pengguna <ArrowRight className="w-4 h-4" />
                   </Link>
                 ) : (
                   <>

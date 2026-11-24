@@ -24,7 +24,7 @@ export default async function RedeemPage() {
               Administrator Tidak Dapat Menukarkan Kode
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-              Fitur redeem kode voucher dan aktivasi paket langganan secara eksklusif diperuntukkan bagi akun <strong>Siswa</strong>. Sebagai Administrator, tugas Anda adalah mengatur, membuat (*generate*), dan membagikan kode voucher kepada siswa melalui Panel Admin.
+              Fitur redeem kode voucher dan aktivasi paket langganan secara eksklusif diperuntukkan bagi akun <strong>Pengguna</strong>. Sebagai Administrator, tugas Anda adalah mengatur, membuat (*generate*), dan membagikan kode voucher kepada pengguna melalui Panel Admin.
             </p>
           </div>
 
@@ -32,7 +32,7 @@ export default async function RedeemPage() {
             <p className="font-semibold text-slate-800">Petunjuk Pengujian Akun:</p>
             <ul className="list-disc list-inside space-y-1 text-slate-600">
               <li>Untuk mengelola kode voucher: Buka menu <strong>Kelola Kode</strong> di Panel Admin.</li>
-              <li>Untuk menguji alur penukaran kode & simulasi siswa: Masuk menggunakan akun Siswa demo (<code className="bg-slate-200 px-1 py-0.5 rounded text-brand-navy">user@demo.test</code> / <code className="bg-slate-200 px-1 py-0.5 rounded text-brand-navy">Demo#12345</code>).</li>
+              <li>Untuk menguji alur penukaran kode & simulasi pengguna: Masuk menggunakan akun Pengguna demo (<code className="bg-slate-200 px-1 py-0.5 rounded text-brand-navy">user@demo.test</code> / <code className="bg-slate-200 px-1 py-0.5 rounded text-brand-navy">Demo#12345</code>).</li>
             </ul>
           </div>
 
@@ -55,7 +55,7 @@ export default async function RedeemPage() {
     );
   }
 
-  // Jika Siswa: Tampilkan formulir penukaran kode
+  // Jika Pengguna: Tampilkan formulir penukaran kode
   return (
     <div className="max-w-xl mx-auto py-4 space-y-6">
       <div className="text-center space-y-2">
