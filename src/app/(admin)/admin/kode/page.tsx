@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   KeyRound,
   Download,
@@ -22,6 +22,8 @@ interface RedeemCodeItem {
   maxUses: number;
   usedCount: number;
   label: string | null;
+  tryoutId: string | null;
+  tryoutTitle: string | null;
   status: "AVAILABLE" | "USED" | "REVOKED" | "EXPIRED";
   expiresAt: string | null;
   usedAt: string | null;
@@ -31,6 +33,7 @@ interface RedeemCodeItem {
 
 export default function AdminRedeemCodesPage() {
   const [codes, setCodes] = useState<RedeemCodeItem[]>([]);
+  const [tryouts, setTryouts] = useState<{ id: string; title: string }[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -44,6 +47,7 @@ export default function AdminRedeemCodesPage() {
   const [batchDuration, setBatchDuration] = useState(30);
   const [batchMaxUses, setBatchMaxUses] = useState(1);
   const [batchLabel, setBatchLabel] = useState("");
+  const [batchTryoutId, setBatchTryoutId] = useState("");
   const [batchExpires, setBatchExpires] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateResult, setGenerateResult] = useState<string[] | null>(null);
@@ -55,6 +59,7 @@ export default function AdminRedeemCodesPage() {
   const [editDuration, setEditDuration] = useState(30);
   const [editMaxUses, setEditMaxUses] = useState(1);
   const [editLabel, setEditLabel] = useState("");
+  const [editTryoutId, setEditTryoutId] = useState("");
   const [editExpires, setEditExpires] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [editError, setEditError] = useState("");
@@ -62,7 +67,7 @@ export default function AdminRedeemCodesPage() {
   // Action State
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
-  async function loadCodes() {
+  const loadCodes = useCallback(async () => {
     setIsLoading(true);
     try {
       const query = new URLSearchParams({
@@ -83,11 +88,26 @@ export default function AdminRedeemCodesPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [page, statusFilter, search]);
 
   useEffect(() => {
     loadCodes();
-  }, [page, statusFilter]);
+  }, [loadCodes]);
+
+  useEffect(() => {
+    async function loadTryouts() {
+      try {
+        const res = await fetch("/api/admin/tryouts");
+        const data = await res.json();
+        if (res.ok && data.tryouts) {
+          setTryouts(data.tryouts);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    loadTryouts();
+  }, []);
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -133,6 +153,7 @@ export default function AdminRedeemCodesPage() {
           durationDays: durationNum,
           maxUses: maxUsesNum,
           label: batchLabel || undefined,
+          tryoutId: batchTryoutId || undefined,
           expiresAt: batchExpires ? new Date(batchExpires).toISOString() : undefined,
         }),
       });
@@ -185,6 +206,7 @@ export default function AdminRedeemCodesPage() {
           durationDays: durationNum,
           maxUses: maxUsesNum,
           label: editLabel.trim() || null,
+          tryoutId: editTryoutId || null,
           expiresAt: editExpires ? new Date(editExpires).toISOString() : null,
         }),
       });
@@ -350,7 +372,16 @@ export default function AdminRedeemCodesPage() {
                 {codes.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/50 transition">
                     <td className="py-3.5 px-4 font-mono font-bold text-brand-navy">
-                      {item.code}
+                      <div>{item.code}</div>
+                      <div className="font-sans font-normal text-[11px] mt-0.5">
+                        {item.tryoutTitle ? (
+                          <span className="inline-block text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
+                            {item.tryoutTitle}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">Semua Paket Tryout</span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3.5 px-4 text-gray-600">
                       {item.durationDays} Hari
@@ -421,6 +452,7 @@ export default function AdminRedeemCodesPage() {
                               setEditDuration(item.durationDays);
                               setEditMaxUses(item.maxUses);
                               setEditLabel(item.label || "");
+                              setEditTryoutId(item.tryoutId || "");
                               setEditExpires(
                                 item.expiresAt
                                   ? new Date(item.expiresAt).toISOString().slice(0, 16)
@@ -578,6 +610,27 @@ export default function AdminRedeemCodesPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Pilihan Paket Tryout
+                  </label>
+                  <select
+                    value={batchTryoutId}
+                    onChange={(e) => setBatchTryoutId(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  >
+                    <option value="">Semua Paket Tryout (Akses Penuh)</option>
+                    {tryouts.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.title}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Pilih tryout tertentu jika voucher ini khusus untuk paket tryout tersebut, atau biarkan &quot;Semua Paket Tryout&quot; untuk akses penuh.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
                     Batas Akhir Penukaran / Expired (Opsional)
                   </label>
                   <input
@@ -701,6 +754,27 @@ export default function AdminRedeemCodesPage() {
                   placeholder="Contoh: Promo Buku 2026"
                   className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Pilihan Paket Tryout
+                </label>
+                <select
+                  value={editTryoutId}
+                  onChange={(e) => setEditTryoutId(e.target.value)}
+                  className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                >
+                  <option value="">Semua Paket Tryout (Akses Penuh)</option>
+                  {tryouts.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.title}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Pilih paket tryout yang berhak diakses pengguna yang menukarkan kode ini.
+                </p>
               </div>
 
               <div>

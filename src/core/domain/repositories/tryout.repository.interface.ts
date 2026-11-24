@@ -6,7 +6,7 @@ import {
 } from "../entities/tryout.entity";
 
 export interface ITryoutRepository {
-  findPublishedTryout(): Promise<TryoutEntity | null>;
+  findPublishedTryout(tryoutId?: string): Promise<TryoutEntity | null>;
   findActiveAttempt(userId: string, tryoutId: string): Promise<AttemptEntity | null>;
   findAttemptById(attemptId: string): Promise<AttemptEntity | null>;
   createAttempt(data: { userId: string; tryoutId: string; isTest?: boolean }): Promise<AttemptEntity>;

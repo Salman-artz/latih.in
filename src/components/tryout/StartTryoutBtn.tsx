@@ -5,10 +5,16 @@ import { useRouter } from "next/navigation";
 import { PlayCircle, ArrowRight, Loader2 } from "lucide-react";
 
 interface StartTryoutBtnProps {
-  activeAttemptId: string | null;
+  tryoutId?: string;
+  activeAttemptId?: string | null;
+  label?: string;
 }
 
-export function StartTryoutBtn({ activeAttemptId }: StartTryoutBtnProps) {
+export function StartTryoutBtn({
+  tryoutId,
+  activeAttemptId,
+  label,
+}: StartTryoutBtnProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -17,6 +23,8 @@ export function StartTryoutBtn({ activeAttemptId }: StartTryoutBtnProps) {
     try {
       const res = await fetch("/api/tryout/start", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tryoutId }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -35,11 +43,15 @@ export function StartTryoutBtn({ activeAttemptId }: StartTryoutBtnProps) {
     <button
       onClick={handleStart}
       disabled={isLoading}
-      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md bg-brand-blue hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm transition disabled:opacity-50 shadow-sm"
+      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md bg-brand-blue hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm transition disabled:opacity-50 shadow-sm"
     >
       {isLoading ? (
         <>
           <Loader2 className="w-4 h-4 animate-spin" /> Menyiapkan Lembar Soal...
+        </>
+      ) : label ? (
+        <>
+          <PlayCircle className="w-4 h-4" /> {label}
         </>
       ) : activeAttemptId ? (
         <>
@@ -47,7 +59,7 @@ export function StartTryoutBtn({ activeAttemptId }: StartTryoutBtnProps) {
         </>
       ) : (
         <>
-          <PlayCircle className="w-5 h-5" /> Mulai Simulasi Sekarang
+          <PlayCircle className="w-4 h-4" /> Mulai Simulasi Sekarang
         </>
       )}
     </button>

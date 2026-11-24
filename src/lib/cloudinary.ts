@@ -1,4 +1,7 @@
-import { v2 as cloudinary } from "cloudinary";
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
+import fs from "fs";
+import os from "os";
+import path from "path";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,30 +14,29 @@ export async function uploadVideoToCloudinary(
   buffer: Buffer,
   folder = "latih-in/materials"
 ): Promise<{ url: string; publicId: string; duration?: number }> {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: "video",
-        folder,
-        chunk_size: 6000000, // 6MB chunk
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-        } else if (result) {
-          resolve({
-            url: result.secure_url,
-            publicId: result.public_id,
-            duration: result.duration,
-          });
-        } else {
-          reject(new Error("Gagal mengunggah video ke Cloudinary"));
-        }
-      }
-    );
+  // Simpan buffer ke temporary file di disk untuk chunked upload_large (efisien untuk file besar s/d 300MB)
+  const tempFilePath = path.join(
+    os.tmpdir(),
+    `upload-${Date.now()}-${Math.random().toString(36).substring(2)}.mp4`
+  );
+  await fs.promises.writeFile(tempFilePath, buffer);
 
-    uploadStream.end(buffer);
-  });
+  try {
+    const result = (await cloudinary.uploader.upload_large(tempFilePath, {
+      resource_type: "video",
+      folder,
+      chunk_size: 20000000, // 20MB per chunk
+    })) as UploadApiResponse;
+
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+      duration: result.duration,
+    };
+  } finally {
+    // Selalu hapus file sementara dari disk setelah selesai
+    await fs.promises.unlink(tempFilePath).catch(() => {});
+  }
 }
 
 export { cloudinary };

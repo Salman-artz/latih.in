@@ -70,7 +70,11 @@ export class RedeemCodeUseCase {
 
       // 5. Perpanjang atau aktifkan langganan user
       const currentActiveSub = await tx.subscription.findFirst({
-        where: { userId, endsAt: { gt: now } },
+        where: {
+          userId,
+          tryoutId: existing.tryoutId || null,
+          endsAt: { gt: now },
+        },
         orderBy: { endsAt: "desc" },
       });
 
@@ -88,6 +92,7 @@ export class RedeemCodeUseCase {
         data: {
           userId,
           codeId: existing.id,
+          tryoutId: existing.tryoutId,
           source: "REDEEM",
           startsAt,
           endsAt,

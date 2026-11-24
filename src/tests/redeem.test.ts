@@ -234,4 +234,45 @@ describe("Logika Transaksi Redeem & Konkurensi", () => {
       })
     ).rejects.toThrow("Kuota tidak boleh lebih kecil dari jumlah pengguna yang sudah menukarkan kode (3 pengguna)");
   });
+
+  it("redeem kode spesifik paket tryout: menghasilkan langganan khusus tryout dan muncul di daftar paket pengguna", async () => {
+    if (!hasDatabase) return;
+
+    // 1. Buat tryout uji
+    const testTryout = await prisma.tryout.create({
+      data: {
+        title: `Tryout Khusus Uji ${Date.now()}`,
+        durationMinutes: 30,
+        status: "PUBLISHED",
+      },
+    });
+
+    // 2. Buat kode redeem terkait tryout tersebut
+    const tryoutCodeStr = `TRYOUTPAKET${Date.now()}`;
+    await prisma.redeemCode.create({
+      data: {
+        code: tryoutCodeStr,
+        durationDays: 45,
+        tryoutId: testTryout.id,
+        label: "Paket Khusus Tryout Uji",
+      },
+    });
+
+    // 3. Redeem oleh user uji
+    const res = await redeemCode(testUserId, tryoutCodeStr);
+    expect(res.subscription).toBeDefined();
+
+    // 4. Periksa data di database
+    const subDb = await prisma.subscription.findUnique({
+      where: { id: res.subscription.id },
+      include: { tryout: true },
+    });
+    expect(subDb?.tryoutId).toBe(testTryout.id);
+    expect(subDb?.tryout?.title).toBe(testTryout.title);
+
+    // 5. Bersihkan data tryout
+    await prisma.subscription.deleteMany({ where: { tryoutId: testTryout.id } });
+    await prisma.redeemCode.deleteMany({ where: { tryoutId: testTryout.id } });
+    await prisma.tryout.delete({ where: { id: testTryout.id } });
+  });
 });

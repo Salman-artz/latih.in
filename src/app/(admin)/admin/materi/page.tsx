@@ -101,6 +101,11 @@ export default function AdminMaterialsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 300 * 1024 * 1024) {
+      setFormError("Ukuran file video melebihi batas maksimal 300MB");
+      return;
+    }
+
     setIsUploading(true);
     setFormError("");
     setUploadSuccessMsg("");
@@ -505,7 +510,7 @@ export default function AdminMaterialsPage() {
                               Klik untuk pilih file video (.mp4, .webm)
                             </span>
                             <span className="text-[11px] text-gray-400">
-                              Maksimal 100MB
+                              Maksimal 300MB
                             </span>
                           </>
                         )}

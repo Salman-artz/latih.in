@@ -27,6 +27,7 @@ export async function generateRedeemCodesBatch(params: {
   durationDays: number;
   maxUses?: number;
   label?: string;
+  tryoutId?: string | null;
   expiresAt?: Date | null;
 }) {
   return await generateRedeemCodesUseCase.execute(params);
@@ -75,6 +76,12 @@ export async function getAdminRedeemCodes({
       skip: (page - 1) * limit,
       take: limit,
       include: {
+        tryout: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
         subscriptions: {
           take: 5,
           include: {
@@ -107,6 +114,8 @@ export async function getAdminRedeemCodes({
         maxUses: c.maxUses,
         usedCount: c.usedCount,
         label: c.label,
+        tryoutId: c.tryoutId,
+        tryoutTitle: c.tryout?.title || null,
         status: codeStatus,
         expiresAt: c.expiresAt,
         usedAt: c.usedAt,
@@ -163,6 +172,7 @@ export async function updateRedeemCode(
     durationDays?: number;
     maxUses?: number;
     label?: string | null;
+    tryoutId?: string | null;
     expiresAt?: Date | null;
   }
 ) {
@@ -199,6 +209,10 @@ export async function updateRedeemCode(
 
   if (data.label !== undefined) {
     updateData.label = data.label;
+  }
+
+  if (data.tryoutId !== undefined) {
+    updateData.tryout = data.tryoutId ? { connect: { id: data.tryoutId } } : { disconnect: true };
   }
 
   if (data.expiresAt !== undefined) {
@@ -261,6 +275,9 @@ export async function exportRedeemCodesCSV(status = "ALL", search = "") {
     where,
     orderBy: { createdAt: "desc" },
     include: {
+      tryout: {
+        select: { title: true },
+      },
       subscriptions: {
         include: {
           user: {
@@ -282,6 +299,7 @@ export async function exportRedeemCodesCSV(status = "ALL", search = "") {
 
   const headers = [
     "Kode",
+    "Paket Tryout",
     "Durasi (Hari)",
     "Kuota Maksimal",
     "Terpakai",
@@ -305,9 +323,11 @@ export async function exportRedeemCodesCSV(status = "ALL", search = "") {
     const remainingQuota = Math.max(0, c.maxUses - c.usedCount);
     const expiresStr = c.expiresAt ? c.expiresAt.toISOString() : "-";
     const createdStr = c.createdAt.toISOString();
+    const tryoutTitleStr = c.tryout?.title || "Semua Tryout (Akses Penuh)";
 
     return [
       sanitizeCsvValue(c.code),
+      sanitizeCsvValue(tryoutTitleStr),
       c.durationDays,
       c.maxUses,
       c.usedCount,

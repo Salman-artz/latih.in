@@ -3,7 +3,16 @@ import { getUserSubscription } from "@/services/subscription";
 import { prisma } from "@/lib/db";
 import { StartTryoutBtn } from "@/components/tryout/StartTryoutBtn";
 import Link from "next/link";
-import { Lock, Clock, Award, KeyRound, CheckCircle2 } from "lucide-react";
+import {
+  Lock,
+  Clock,
+  Award,
+  KeyRound,
+  CheckCircle2,
+  FileQuestion,
+  BookOpen,
+  ArrowRight,
+} from "lucide-react";
 
 export default async function TryoutIndexPage() {
   const session = await getSession();
@@ -42,79 +51,179 @@ export default async function TryoutIndexPage() {
     );
   }
 
-  // Cek apakah ada attempt IN_PROGRESS yang sedang berjalan
-  const activeAttempt = await prisma.attempt.findFirst({
-    where: {
-      userId: session.userId,
-      status: "IN_PROGRESS",
+  // Ambil seluruh paket tryout terbit
+  const publishedTryouts = await prisma.tryout.findMany({
+    where: { status: "PUBLISHED" },
+    orderBy: { createdAt: "asc" },
+    include: {
+      _count: {
+        select: { questions: true },
+      },
+      attempts: {
+        where: { userId: session.userId },
+        orderBy: { startedAt: "desc" },
+        take: 1,
+        select: {
+          id: true,
+          status: true,
+          score: true,
+          submittedAt: true,
+        },
+      },
     },
-    orderBy: { startedAt: "desc" },
   });
 
   return (
-    <div className="max-w-3xl mx-auto py-4 space-y-6">
+    <div className="max-w-4xl mx-auto py-4 space-y-8">
       {/* Title */}
       <div className="text-center space-y-2">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy">
-          Simulasi Tryout Literasi & Penalaran
+          Paket Simulasi Tryout Mandiri
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto">
-          Uji kesiapan ujian kamu melalui latihan berwaktu dengan format stimulus dan butir Benar/Salah.
+          Pilih paket latihan yang ingin kamu kerjakan. Satu akun dapat mengakses seluruh paket tryout yang tersedia tanpa batasan.
         </p>
       </div>
 
-      {/* Info Card Paket */}
-      <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-6">
-        <h2 className="text-base font-bold text-brand-navy pb-3 border-b border-slate-100">
-          Petunjuk & Aturan Pengerjaan
+      {/* Petunjuk & Aturan Singkat */}
+      <div className="bg-white p-5 sm:p-6 rounded-lg border border-slate-200 shadow-sm space-y-4">
+        <h2 className="text-sm font-bold text-brand-navy uppercase tracking-wider flex items-center gap-2">
+          <Award className="w-4 h-4 text-brand-blue" /> Petunjuk Pengerjaan Tryout
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-md bg-slate-50 border border-slate-200 space-y-1">
-            <div className="text-[11px] text-slate-500 flex items-center gap-1 font-semibold uppercase tracking-wider">
-              <Clock className="w-3.5 h-3.5 text-brand-blue" /> Durasi Waktu
-            </div>
-            <div className="text-lg font-bold text-brand-navy">20 Menit</div>
-            <div className="text-[11px] text-slate-500">Auto-submit saat waktu habis</div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div className="p-3 bg-slate-50 rounded border border-slate-200 space-y-0.5">
+            <span className="font-semibold text-brand-navy block">Format Soal</span>
+            <span className="text-slate-500">Stimulus bacaan + 3 butir pernyataan Benar/Salah.</span>
           </div>
-
-          <div className="p-4 rounded-md bg-slate-50 border border-slate-200 space-y-1">
-            <div className="text-[11px] text-slate-500 flex items-center gap-1 font-semibold uppercase tracking-wider">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Jumlah Soal
-            </div>
-            <div className="text-lg font-bold text-brand-navy">10 Soal (30 Butir)</div>
-            <div className="text-[11px] text-slate-500">3 Pernyataan per soal</div>
+          <div className="p-3 bg-slate-50 rounded border border-slate-200 space-y-0.5">
+            <span className="font-semibold text-brand-navy block">Hitung Mundur</span>
+            <span className="text-slate-500">Timer berjalan otomatis dengan batas waktu masing-masing paket.</span>
           </div>
-
-          <div className="p-4 rounded-md bg-slate-50 border border-slate-200 space-y-1">
-            <div className="text-[11px] text-slate-500 flex items-center gap-1 font-semibold uppercase tracking-wider">
-              <Award className="w-3.5 h-3.5 text-brand-blue" /> Skoring Maksimal
-            </div>
-            <div className="text-lg font-bold text-brand-navy">30 Poin (100%)</div>
-            <div className="text-[11px] text-slate-500">1 Poin per pernyataan benar</div>
+          <div className="p-3 bg-slate-50 rounded border border-slate-200 space-y-0.5">
+            <span className="font-semibold text-brand-navy block">Evaluasi & Pembahasan</span>
+            <span className="text-slate-500">Kunci jawaban dan pembahasan komprehensif setelah submit.</span>
           </div>
         </div>
+      </div>
 
-        <ul className="text-xs sm:text-sm text-slate-600 space-y-2 list-disc pl-5 leading-relaxed">
-          <li>Setiap soal menyajikan stimulus bacaan dan <strong>3 butir pernyataan</strong> yang wajib ditentukan apakah <strong>Benar</strong> atau <strong>Salah</strong>.</li>
-          <li>Jawaban tersimpan otomatis secara berkala. Kamu bebas berpindah nomor soal sebelum mengumpulkan.</li>
-          <li>Pernyataan yang dikosongkan tidak mendapat pengurangan poin (dihitung 0).</li>
-          <li>Kunci jawaban dan pembahasan komprehensif akan ditampilkan segera setelah tryout disubmit.</li>
-        </ul>
-
-        {/* Start Button Client Component */}
-        <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs text-slate-500">
-            {activeAttempt ? (
-              <span className="text-amber-800 font-semibold">
-                ⚠️ Kamu memiliki sesi yang sedang berjalan. Lanjutkan dari sesi tersebut.
-              </span>
-            ) : (
-              <span>Pastikan koneksi internet stabil sebelum menekan tombol mulai.</span>
-            )}
-          </div>
-          <StartTryoutBtn activeAttemptId={activeAttempt?.id || null} />
+      {/* Daftar Paket Tryout */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-base sm:text-lg font-bold text-brand-navy flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-brand-blue" /> Daftar Paket Tersedia ({publishedTryouts.length})
+          </h2>
+          <Link
+            href="/riwayat"
+            className="text-xs font-semibold text-brand-blue hover:text-blue-800 transition flex items-center gap-1"
+          >
+            Lihat Riwayat Skor <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
+
+        {publishedTryouts.length === 0 ? (
+          <div className="bg-white p-12 rounded-lg border border-slate-200 text-center space-y-2">
+            <BookOpen className="w-8 h-8 text-slate-300 mx-auto" />
+            <p className="font-semibold text-brand-navy">Belum ada paket tryout aktif</p>
+            <p className="text-xs text-slate-500">
+              Paket latihan sedang disiapkan oleh administrator. Silakan periksa kembali berkala.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {publishedTryouts.map((item, idx) => {
+              const latestAttempt = item.attempts[0];
+              const isInProgress = latestAttempt?.status === "IN_PROGRESS";
+              const isCompleted = latestAttempt?.status === "SUBMITTED";
+              const hasAccess =
+                session.user.role === "ADMIN" ||
+                (sub.packages || []).some(
+                  (p) => p.isActive && (!p.tryoutId || p.tryoutId === item.id)
+                );
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white p-5 sm:p-6 rounded-lg border border-slate-200 shadow-sm hover:border-slate-300 transition flex flex-col md:flex-row justify-between md:items-center gap-4"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded bg-brand-blue-50 text-brand-blue flex items-center justify-center font-bold text-xs font-mono">
+                        #{idx + 1}
+                      </span>
+                      <h3 className="font-bold text-brand-navy text-base sm:text-lg">
+                        {item.title}
+                      </h3>
+                      {!hasAccess && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                          <Lock className="w-3 h-3 text-slate-400" /> Terkunci
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        {item.durationMinutes} Menit
+                      </span>
+                      <span>•</span>
+                      <span className="inline-flex items-center gap-1">
+                        <FileQuestion className="w-3.5 h-3.5 text-slate-400" />
+                        {item._count.questions} Butir Soal
+                      </span>
+                      <span>•</span>
+                      {isInProgress ? (
+                        <span className="inline-flex items-center gap-1 text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                          Sedang Dikerjakan
+                        </span>
+                      ) : isCompleted ? (
+                        <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          Selesai • Skor Terakhir: {latestAttempt.score} Poin
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">Belum pernah dikerjakan</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2.5 self-start md:self-center">
+                    {isCompleted && (
+                      <Link
+                        href={`/tryout/${latestAttempt.id}/hasil`}
+                        className="px-3.5 py-2 rounded-md border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                      >
+                        Lihat Pembahasan
+                      </Link>
+                    )}
+
+                    {hasAccess ? (
+                      <StartTryoutBtn
+                        tryoutId={item.id}
+                        activeAttemptId={isInProgress ? latestAttempt.id : null}
+                        label={
+                          isInProgress
+                            ? "Lanjutkan Pengerjaan"
+                            : isCompleted
+                            ? "Ulangi Latihan"
+                            : "Mulai Tryout"
+                        }
+                      />
+                    ) : (
+                      <Link
+                        href="/redeem"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold hover:bg-amber-100 transition"
+                      >
+                        <Lock className="w-3.5 h-3.5" /> Tukar Kode Paket
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

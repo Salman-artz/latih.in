@@ -8,6 +8,7 @@ export interface RedeemCodeEntity {
   usedCount: number;
   expiresAt?: Date | null;
   label?: string | null;
+  tryoutId?: string | null;
   isUsed: boolean;
   usedById?: string | null;
   usedAt?: Date | null;

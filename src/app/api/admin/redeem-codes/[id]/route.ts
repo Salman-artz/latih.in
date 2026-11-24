@@ -27,6 +27,7 @@ export async function PATCH(
       durationDays: validated.durationDays,
       maxUses: validated.maxUses,
       label: validated.label,
+      tryoutId: validated.tryoutId !== undefined ? (validated.tryoutId || null) : undefined,
       expiresAt:
         validated.expiresAt !== undefined
           ? validated.expiresAt

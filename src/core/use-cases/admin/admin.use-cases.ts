@@ -64,6 +64,7 @@ export class GenerateRedeemCodesUseCase {
     durationDays: number;
     maxUses?: number;
     label?: string;
+    tryoutId?: string | null;
     expiresAt?: Date | null;
   }) {
     const generatedCodes: string[] = [];
@@ -91,6 +92,7 @@ export class GenerateRedeemCodesUseCase {
         durationDays: params.durationDays,
         maxUses: params.maxUses || 1,
         label: params.label || null,
+        tryoutId: params.tryoutId || null,
         expiresAt: params.expiresAt || null,
         createdById: params.adminId,
       }))

@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
       durationDays: validated.durationDays,
       maxUses: validated.maxUses,
       label: validated.label,
+      tryoutId: validated.tryoutId || null,
       expiresAt: validated.expiresAt ? new Date(validated.expiresAt) : null,
     });
 

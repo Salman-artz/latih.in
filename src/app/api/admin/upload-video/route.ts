@@ -4,6 +4,9 @@ import { Role } from "@prisma/client";
 import { uploadVideoToCloudinary } from "@/lib/cloudinary";
 import { errorResponse, handleApiError } from "@/lib/errors";
 
+export const maxDuration = 300;
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession();
@@ -27,10 +30,10 @@ export async function POST(request: NextRequest) {
       return errorResponse("Hanya file video (.mp4, .webm, .mov) yang diperbolehkan", 400, "INVALID_FILE_TYPE");
     }
 
-    // Batas ukuran 100MB
-    const maxSize = 100 * 1024 * 1024;
+    // Batas ukuran 300MB
+    const maxSize = 300 * 1024 * 1024;
     if (file.size > maxSize) {
-      return errorResponse("Ukuran file video maksimal 100MB", 400, "FILE_TOO_LARGE");
+      return errorResponse("Ukuran file video maksimal 300MB", 400, "FILE_TOO_LARGE");
     }
 
     const arrayBuffer = await file.arrayBuffer();

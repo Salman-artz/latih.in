@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import {
@@ -18,6 +19,50 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const session = await getSession();
+
+  const dbMaterials = await prisma.material.findMany({
+    where: { status: "PUBLISHED" },
+    orderBy: { order: "asc" },
+    take: 3,
+  });
+
+  const displayMaterials =
+    dbMaterials.length > 0
+      ? dbMaterials.map((m, idx) => ({
+          id: m.id,
+          orderText: `Modul 0${idx + 1}`,
+          title: m.title,
+          description: m.description,
+          thumbnailUrl:
+            m.videoType === "CLOUDINARY" && m.videoUrl
+              ? m.videoUrl.replace(/\.[^/.]+$/, ".jpg")
+              : m.youtubeId
+              ? `https://img.youtube.com/vi/${m.youtubeId}/hqdefault.jpg`
+              : "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80",
+        }))
+      : [
+          {
+            id: "m1",
+            orderText: "Modul 01",
+            title: "Teknik Membaca Kritis dan Menemukan Ide Pokok",
+            description: "Strategi membaca cepat dan terarah untuk menemukan gagasan utama dalam stimulus teks panjang.",
+            thumbnailUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80",
+          },
+          {
+            id: "m2",
+            orderText: "Modul 02",
+            title: "Analisis Logika dan Silogisme dalam Penalaran Umum",
+            description: "Pahami dasar-dasar logika proposisional, modus ponens, modus tollens, dan penarikan simpulan valid.",
+            thumbnailUrl: "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=600&auto=format&fit=crop&q=80",
+          },
+          {
+            id: "m3",
+            orderText: "Modul 03",
+            title: "Membedakan Fakta, Opini, dan Asumsi Penulis",
+            description: "Kupas tuntas perbedaan bukti berbasis fakta objektif dibandingkan opini subyektif pada teks ujian.",
+            thumbnailUrl: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80",
+          },
+        ];
 
   return (
     <>
@@ -234,86 +279,57 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Module 1 */}
-              <div className="rounded-lg border border-slate-200 bg-white overflow-hidden hover:border-brand-blue/50 transition">
-                <div className="aspect-video bg-slate-900 relative flex items-center justify-center">
-                  <img
-                    src="https://img.youtube.com/vi/Wn6p_y7m15M/mqdefault.jpg"
-                    alt="Thumbnail Materi 1"
-                    className="w-full h-full object-cover opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-brand-navy/30 flex items-center justify-center">
-                    <div className="w-10 h-10 rounded-md bg-white/90 text-brand-navy flex items-center justify-center">
-                      <PlayCircle className="w-6 h-6" />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-5 space-y-2">
-                  <div className="inline-block text-[11px] font-bold px-2 py-0.5 rounded bg-brand-blue-50 text-brand-blue border border-brand-blue/20">
-                    Modul 01
-                  </div>
-                  <h3 className="font-bold text-brand-navy text-sm sm:text-base line-clamp-1">
-                    Teknik Membaca Kritis dan Menemukan Ide Pokok
-                  </h3>
-                  <p className="text-xs text-slate-500 line-clamp-2">
-                    Strategi membaca cepat dan terarah untuk menemukan gagasan utama dalam stimulus teks panjang.
-                  </p>
-                </div>
-              </div>
+              {displayMaterials.map((mod) => (
+                <Link
+                  key={mod.id}
+                  href="/login"
+                  className="rounded-lg border border-slate-200 bg-white overflow-hidden hover:border-brand-blue/60 hover:shadow-lg transition block group cursor-pointer"
+                >
+                  <div className="aspect-video bg-gradient-to-br from-brand-navy via-slate-800 to-slate-900 relative flex items-center justify-center overflow-hidden">
+                    {mod.thumbnailUrl ? (
+                      <img
+                        src={mod.thumbnailUrl}
+                        alt={mod.title}
+                        className="w-full h-full object-cover opacity-75 group-hover:opacity-90 group-hover:scale-105 transition duration-300"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                        <div className="w-8 h-8 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue mb-2">
+                          <PlayCircle className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <span className="text-[11px] font-medium text-slate-300 line-clamp-1">{mod.title}</span>
+                      </div>
+                    )}
 
-              {/* Module 2 */}
-              <div className="rounded-lg border border-slate-200 bg-white overflow-hidden hover:border-brand-blue/50 transition">
-                <div className="aspect-video bg-slate-900 relative flex items-center justify-center">
-                  <img
-                    src="https://img.youtube.com/vi/8nhZ_9u9b7U/mqdefault.jpg"
-                    alt="Thumbnail Materi 2"
-                    className="w-full h-full object-cover opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-brand-navy/30 flex items-center justify-center">
-                    <div className="w-10 h-10 rounded-md bg-white/90 text-brand-navy flex items-center justify-center">
-                      <PlayCircle className="w-6 h-6" />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-5 space-y-2">
-                  <div className="inline-block text-[11px] font-bold px-2 py-0.5 rounded bg-brand-blue-50 text-brand-blue border border-brand-blue/20">
-                    Modul 02
-                  </div>
-                  <h3 className="font-bold text-brand-navy text-sm sm:text-base line-clamp-1">
-                    Analisis Logika dan Silogisme dalam Penalaran Umum
-                  </h3>
-                  <p className="text-xs text-slate-500 line-clamp-2">
-                    Pahami dasar-dasar logika proposisional, modus ponens, modus tollens, dan penarikan simpulan valid.
-                  </p>
-                </div>
-              </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/80 via-brand-navy/20 to-transparent" />
 
-              {/* Module 3 */}
-              <div className="rounded-lg border border-slate-200 bg-white overflow-hidden hover:border-brand-blue/50 transition">
-                <div className="aspect-video bg-slate-900 relative flex items-center justify-center">
-                  <img
-                    src="https://img.youtube.com/vi/GS_z1n8zI1g/mqdefault.jpg"
-                    alt="Thumbnail Materi 3"
-                    className="w-full h-full object-cover opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-brand-navy/30 flex items-center justify-center">
-                    <div className="w-10 h-10 rounded-md bg-white/90 text-brand-navy flex items-center justify-center">
+                    <div className="relative z-10 w-12 h-12 rounded-full bg-white/95 text-brand-navy flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-brand-blue group-hover:text-white transition">
                       <PlayCircle className="w-6 h-6" />
                     </div>
+
+                    <div className="absolute bottom-2.5 left-3 z-10 flex items-center gap-1.5 text-white text-[11px] font-semibold">
+                      <PlayCircle className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Klik untuk Tonton Video</span>
+                    </div>
+
+                    <div className="absolute top-2.5 right-2.5 z-10 px-2 py-0.5 rounded bg-brand-navy/85 text-blue-200 border border-blue-400/30 text-[10px] font-semibold">
+                      Masuk untuk Akses
+                    </div>
                   </div>
-                </div>
-                <div className="p-5 space-y-2">
-                  <div className="inline-block text-[11px] font-bold px-2 py-0.5 rounded bg-brand-blue-50 text-brand-blue border border-brand-blue/20">
-                    Modul 03
+
+                  <div className="p-5 space-y-2">
+                    <div className="inline-block text-[11px] font-bold px-2 py-0.5 rounded bg-brand-blue-50 text-brand-blue border border-brand-blue/20">
+                      {mod.orderText}
+                    </div>
+                    <h3 className="font-bold text-brand-navy text-sm sm:text-base line-clamp-1 group-hover:text-brand-blue transition">
+                      {mod.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 line-clamp-2">
+                      {mod.description}
+                    </p>
                   </div>
-                  <h3 className="font-bold text-brand-navy text-sm sm:text-base line-clamp-1">
-                    Membedakan Fakta, Opini, dan Asumsi Penulis
-                  </h3>
-                  <p className="text-xs text-slate-500 line-clamp-2">
-                    Kupas tuntas perbedaan bukti berbasis fakta objektif dibandingkan opini subyektif pada teks ujian.
-                  </p>
-                </div>
-              </div>
+                </Link>
+              ))}
             </div>
           </div>
         </section>

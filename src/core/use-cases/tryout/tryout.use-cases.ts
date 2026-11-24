@@ -8,18 +8,18 @@ export class StartOrResumeTryoutUseCase {
     private subRepo: ISubscriptionRepository
   ) {}
 
-  async execute(userId: string, userRole = "USER") {
-    const isTest = userRole === "ADMIN";
-    if (!isTest) {
-      const sub = await this.subRepo.findActiveByUserId(userId, new Date());
-      if (!sub) {
-        throw new AppError("Langganan aktif diperlukan untuk memulai tryout", 403, "SUBSCRIPTION_REQUIRED");
-      }
-    }
-
-    const tryout = await this.tryoutRepo.findPublishedTryout();
+  async execute(userId: string, userRole = "USER", tryoutId?: string) {
+    const tryout = await this.tryoutRepo.findPublishedTryout(tryoutId);
     if (!tryout) {
       throw new AppError("Paket tryout belum tersedia", 404, "TRYOUT_NOT_FOUND");
+    }
+
+    const isTest = userRole === "ADMIN";
+    if (!isTest) {
+      const sub = await this.subRepo.findActiveByUserId(userId, new Date(), tryout.id);
+      if (!sub) {
+        throw new AppError("Langganan aktif untuk paket tryout ini diperlukan", 403, "SUBSCRIPTION_REQUIRED");
+      }
     }
 
     const activeAttempt = await this.tryoutRepo.findActiveAttempt(userId, tryout.id);

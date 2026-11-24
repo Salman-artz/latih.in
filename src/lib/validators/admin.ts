@@ -30,6 +30,7 @@ export const generateCodesSchema = z.object({
   durationDays: z.number().int().min(1, "Durasi minimal 1 hari").max(730, "Durasi maksimal 730 hari").default(30),
   maxUses: z.number().int().min(1, "Minimal kuota 1 pengguna").max(1000, "Maksimal kuota 1000 pengguna").default(1),
   label: z.string().max(100).optional(),
+  tryoutId: z.string().optional().nullable(),
   expiresAt: z.string().datetime().optional().nullable(),
 });
 
@@ -44,6 +45,7 @@ export const updateRedeemCodeSchema = z.object({
   durationDays: z.number().int().min(1, "Durasi minimal 1 hari").max(730, "Durasi maksimal 730 hari").optional(),
   maxUses: z.number().int().min(1, "Minimal kuota 1 pengguna").max(10000, "Maksimal kuota 10.000 pengguna").optional(),
   label: z.string().max(100, "Label maksimal 100 karakter").optional().nullable(),
+  tryoutId: z.string().optional().nullable(),
   expiresAt: z.string().datetime().optional().nullable(),
 });
 

@@ -55,6 +55,9 @@ export class PrismaRedeemCodeRepository implements IRedeemCodeRepository {
         skip: (params.page - 1) * params.limit,
         take: params.limit,
         include: {
+          tryout: {
+            select: { id: true, title: true },
+          },
           subscriptions: {
             take: 5,
             include: {
@@ -76,6 +79,7 @@ export class PrismaRedeemCodeRepository implements IRedeemCodeRepository {
       const firstUser = c.subscriptions?.[0]?.user;
       return {
         ...c,
+        tryoutTitle: c.tryout?.title || null,
         status: statusStr,
         usedBy: firstUser ? { name: firstUser.name, email: firstUser.email } : null,
       };
@@ -84,13 +88,14 @@ export class PrismaRedeemCodeRepository implements IRedeemCodeRepository {
     return { codes: formatted, total };
   }
 
-  async createMany(codes: { code: string; durationDays: number; maxUses?: number; label?: string | null; expiresAt?: Date | null; createdById: string }[]): Promise<void> {
+  async createMany(codes: { code: string; durationDays: number; maxUses?: number; label?: string | null; tryoutId?: string | null; expiresAt?: Date | null; createdById: string }[]): Promise<void> {
     await prisma.redeemCode.createMany({
       data: codes.map((c) => ({
         code: c.code,
         durationDays: c.durationDays,
         maxUses: c.maxUses ?? 1,
         label: c.label,
+        tryoutId: c.tryoutId,
         expiresAt: c.expiresAt,
         createdById: c.createdById,
       })),

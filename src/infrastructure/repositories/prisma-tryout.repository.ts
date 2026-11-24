@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { ITryoutRepository } from "@/core/domain/repositories/tryout.repository.interface";
 import {
   TryoutEntity,
@@ -9,9 +10,13 @@ import {
 } from "@/core/domain/entities/tryout.entity";
 
 export class PrismaTryoutRepository implements ITryoutRepository {
-  async findPublishedTryout(): Promise<TryoutEntity | null> {
+  async findPublishedTryout(tryoutId?: string): Promise<TryoutEntity | null> {
+    const where: Prisma.TryoutWhereInput = { status: "PUBLISHED" };
+    if (tryoutId) {
+      where.id = tryoutId;
+    }
     const tryout = await prisma.tryout.findFirst({
-      where: { status: "PUBLISHED" },
+      where,
       orderBy: { createdAt: "desc" },
     });
     if (!tryout) return null;

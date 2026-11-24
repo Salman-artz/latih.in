@@ -8,8 +8,12 @@ import {
 } from "@/core/container";
 import { Role } from "@prisma/client";
 
-export async function startOrResumeAttempt(userId: string, userRole: Role = Role.USER) {
-  return await startOrResumeTryoutUseCase.execute(userId, userRole);
+export async function startOrResumeAttempt(
+  userId: string,
+  userRole: Role = Role.USER,
+  tryoutId?: string
+) {
+  return await startOrResumeTryoutUseCase.execute(userId, userRole, tryoutId);
 }
 
 export async function getAttemptForExam(userId: string, attemptId: string) {

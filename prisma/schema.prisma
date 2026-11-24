@@ -48,6 +48,7 @@ model RedeemCode {
   usedCount     Int            @default(0)
   expiresAt     DateTime?
   label         String?
+  tryoutId      String?
   isUsed        Boolean        @default(false)
   usedById      String?
   usedAt        DateTime?
@@ -56,6 +57,7 @@ model RedeemCode {
   createdById   String?
   createdAt     DateTime       @default(now())
   subscriptions Subscription[]
+  tryout        Tryout?        @relation(fields: [tryoutId], references: [id], onDelete: SetNull)
 
   @@index([isUsed, revokedAt])
 }
@@ -64,6 +66,7 @@ model Subscription {
   id          String             @id @default(cuid())
   userId      String
   codeId      String?
+  tryoutId    String?
   source      SubscriptionSource @default(REDEEM)
   startsAt    DateTime
   endsAt      DateTime
@@ -71,8 +74,9 @@ model Subscription {
   note        String?
   createdAt   DateTime           @default(now())
 
-  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  code RedeemCode? @relation(fields: [codeId], references: [id])
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code   RedeemCode? @relation(fields: [codeId], references: [id])
+  tryout Tryout?     @relation(fields: [tryoutId], references: [id], onDelete: SetNull)
 
   @@index([userId, endsAt])
 }
@@ -106,13 +110,15 @@ model MaterialProgress {
 }
 
 model Tryout {
-  id              String        @id @default(cuid())
+  id              String         @id @default(cuid())
   title           String
-  durationMinutes Int           @default(20)
-  status          ContentStatus @default(PUBLISHED)
-  createdAt       DateTime      @default(now())
+  durationMinutes Int            @default(20)
+  status          ContentStatus  @default(PUBLISHED)
+  createdAt       DateTime       @default(now())
   questions       Question[]
   attempts        Attempt[]
+  redeemCodes     RedeemCode[]
+  subscriptions   Subscription[]
 }
 
 model Question {

@@ -13,6 +13,8 @@ import {
   Loader2,
   AlertCircle,
   Clock,
+  Download,
+  Upload,
 } from "lucide-react";
 
 interface AdminStatementItem {
@@ -62,6 +64,7 @@ export default function AdminTryoutQuestionsPage({
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
 
   async function loadDetail() {
     setIsLoading(true);
@@ -220,6 +223,34 @@ export default function AdminTryoutQuestionsPage({
     }
   }
 
+  async function handleImportCsv(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch(`/api/admin/tryouts/${tryoutId}/questions/import`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error?.message || "Gagal mengimpor file CSV");
+      } else {
+        alert(data.message || `Berhasil mengimpor ${data.importedCount} butir soal!`);
+        loadDetail();
+      }
+    } catch {
+      alert("Terjadi kendala jaringan saat mengimpor CSV");
+    } finally {
+      setIsImporting(false);
+      e.target.value = "";
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="py-20 flex flex-col items-center justify-center space-y-2">
@@ -283,12 +314,51 @@ export default function AdminTryoutQuestionsPage({
             </div>
           </div>
 
-          <button
-            onClick={handleOpenAdd}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition shadow-sm self-start sm:self-auto"
-          >
-            <Plus className="w-4 h-4" /> Tambah Soal Baru
-          </button>
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+            <a
+              href={`/api/admin/tryouts/${tryoutId}/questions/template`}
+              download
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 text-xs font-semibold hover:bg-gray-50 transition shadow-sm"
+              title="Unduh format template CSV untuk pengisian soal secara massal"
+            >
+              <Download className="w-3.5 h-3.5" /> Template CSV
+            </a>
+
+            <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 text-xs font-semibold hover:bg-gray-50 transition shadow-sm cursor-pointer">
+              {isImporting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-blue" /> Mengimpor...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-3.5 h-3.5" /> Import CSV
+                </>
+              )}
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleImportCsv}
+                disabled={isImporting}
+                className="hidden"
+              />
+            </label>
+
+            <a
+              href={`/api/admin/tryouts/${tryoutId}/questions/export`}
+              download
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 text-xs font-semibold hover:bg-gray-50 transition shadow-sm"
+              title="Ekspor seluruh butir soal paket ini ke file CSV"
+            >
+              <Download className="w-3.5 h-3.5" /> Ekspor Soal
+            </a>
+
+            <button
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-brand-blue text-white text-xs sm:text-sm font-semibold hover:bg-blue-700 transition shadow-sm"
+            >
+              <Plus className="w-4 h-4" /> Tambah Soal
+            </button>
+          </div>
         </div>
       </div>
 
