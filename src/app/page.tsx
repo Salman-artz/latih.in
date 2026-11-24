@@ -18,13 +18,31 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const session = await getSession();
+  let session = null;
+  try {
+    session = await getSession();
+  } catch (e) {
+    console.error("HomePage getSession error:", e);
+  }
 
-  const dbMaterials = await prisma.material.findMany({
-    where: { status: "PUBLISHED" },
-    orderBy: { order: "asc" },
-    take: 3,
-  });
+  let dbMaterials: Array<{
+    id: string;
+    title: string;
+    description: string;
+    videoType?: string;
+    videoUrl?: string | null;
+    youtubeId?: string | null;
+  }> = [];
+
+  try {
+    dbMaterials = await prisma.material.findMany({
+      where: { status: "PUBLISHED" },
+      orderBy: { order: "asc" },
+      take: 3,
+    });
+  } catch (e) {
+    console.error("HomePage findMany materials error:", e);
+  }
 
   const displayMaterials =
     dbMaterials.length > 0

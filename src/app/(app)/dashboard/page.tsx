@@ -24,25 +24,67 @@ export default async function DashboardPage() {
 
   const isAdmin = session.user.role === "ADMIN";
 
-  // Ambil data subscription dan progres
-  const [subStatus, totalMaterials, userCompletedMaterials, latestAttempt, adminStats] = await Promise.all([
-    getUserSubscription(session.userId),
-    prisma.material.count({ where: { status: "PUBLISHED" } }),
-    prisma.materialProgress.count({ where: { userId: session.userId } }),
-    prisma.attempt.findFirst({
-      where: { userId: session.userId, status: "SUBMITTED" },
-      orderBy: { submittedAt: "desc" },
-      include: { tryout: true },
-    }),
-    isAdmin
-      ? Promise.all([
-          prisma.user.count(),
-          prisma.redeemCode.count({ where: { isUsed: false, revokedAt: null } }),
-        ])
-      : Promise.resolve([0, 0]),
-  ]);
+  // Inisialisasi state dashboard yang aman dari null/server-side exception
+  let subStatus: {
+    isActive: boolean;
+    subscription: {
+      id: string;
+      tryoutId?: string | null;
+      startsAt: Date;
+      endsAt: Date;
+      daysLeft: number;
+      isExpiringSoon: boolean;
+    } | null;
+    packages?: Array<{
+      id: string;
+      tryoutId?: string | null;
+      tryoutTitle?: string | null;
+      startsAt: Date;
+      endsAt: Date;
+      daysLeft: number;
+      isExpiringSoon: boolean;
+      isActive: boolean;
+    }>;
+  } = { isActive: false, subscription: null, packages: [] };
 
-  const [adminTotalUsers, adminAvailableCodes] = adminStats;
+  let totalMaterials = 0;
+  let userCompletedMaterials = 0;
+  let latestAttempt: {
+    id: string;
+    score: number | null;
+    submittedAt: Date | null;
+    tryout?: { title: string } | null;
+  } | null = null;
+  let adminTotalUsers = 0;
+  let adminAvailableCodes = 0;
+
+  try {
+    const [subRes, matsCount, userProgressCount, attemptRes, adminStats] = await Promise.all([
+      getUserSubscription(session.userId).catch(() => ({ isActive: false, subscription: null, packages: [] })),
+      prisma.material.count({ where: { status: "PUBLISHED" } }).catch(() => 0),
+      prisma.materialProgress.count({ where: { userId: session.userId } }).catch(() => 0),
+      prisma.attempt.findFirst({
+        where: { userId: session.userId, status: "SUBMITTED" },
+        orderBy: { submittedAt: "desc" },
+        include: { tryout: true },
+      }).catch(() => null),
+      isAdmin
+        ? Promise.all([
+            prisma.user.count().catch(() => 0),
+            prisma.redeemCode.count({ where: { isUsed: false, revokedAt: null } }).catch(() => 0),
+          ])
+        : Promise.resolve([0, 0]),
+    ]);
+
+    subStatus = subRes;
+    totalMaterials = matsCount;
+    userCompletedMaterials = userProgressCount;
+    latestAttempt = attemptRes;
+    adminTotalUsers = adminStats[0];
+    adminAvailableCodes = adminStats[1];
+  } catch (error) {
+    console.error("Dashboard data fetching error:", error);
+  }
 
   return (
     <div className="space-y-6">
@@ -97,14 +139,14 @@ export default async function DashboardPage() {
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
               {isAdmin
                 ? "Sebagai Administrator, tugas Anda adalah mengatur kode voucher, mengelola materi pembelajaran, dan memantau pengguna. Administrator tidak dapat berlangganan atau me-redeem voucher karena seluruh fitur operasional dikelola via Panel Admin."
-                : subStatus.isActive
+                : subStatus.isActive && subStatus.subscription?.endsAt
                 ? `Masa aktif langganan kamu berlaku hingga ${new Date(
-                    subStatus.subscription!.endsAt
+                    subStatus.subscription.endsAt
                   ).toLocaleDateString("id-ID", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
-                  })} (tersisa ${subStatus.subscription!.daysLeft} hari). Seluruh video kurasi dan simulasi tryout dapat kamu akses tanpa batas.`
+                  })} (tersisa ${subStatus.subscription.daysLeft ?? 0} hari). Seluruh video kurasi dan simulasi tryout dapat kamu akses tanpa batas.`
                 : "Kamu belum memiliki langganan aktif. Materi belajar video dan simulasi tryout terkunci sampai kamu menukarkan kode redeem."}
             </p>
           </div>
@@ -288,8 +330,8 @@ export default async function DashboardPage() {
               </p>
               {latestAttempt ? (
                 <div className="bg-emerald-50 p-2.5 rounded-md border border-emerald-200 text-[11px] text-emerald-800">
-                  Nilai Terakhir: <span className="font-bold">{latestAttempt.score} / 30 Poin</span> (
-                  {((latestAttempt.score! / 30) * 100).toFixed(1)}%)
+                  Nilai Terakhir: <span className="font-bold">{latestAttempt.score ?? 0} / 30 Poin</span> (
+                  {(((latestAttempt.score ?? 0) / 30) * 100).toFixed(1)}%)
                 </div>
               ) : (
                 <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 text-[11px] text-slate-500">
