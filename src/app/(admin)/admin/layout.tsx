@@ -7,7 +7,6 @@ import {
   KeyRound,
   Video,
   ArrowLeft,
-  Shield,
   BookOpen,
 } from "lucide-react";
 
@@ -37,9 +36,6 @@ export default async function AdminLayout({
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
               <Logo height={28} />
-              <span className="hidden sm:inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-md">
-                <Shield className="w-3.5 h-3.5" /> Administrator
-              </span>
             </div>
 
             {/* Admin Nav */}

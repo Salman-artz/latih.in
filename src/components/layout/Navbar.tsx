@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
-import { Menu, X, LogOut, Shield } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 
 interface NavbarProps {
   user?: {
@@ -105,9 +105,13 @@ export function Navbar({ user }: NavbarProps) {
                 {user?.role === "ADMIN" && (
                   <Link
                     href="/admin"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-300 rounded hover:bg-amber-100 transition"
+                    className={`text-sm font-medium transition ${
+                      pathname.startsWith("/admin")
+                        ? "text-brand-blue font-bold"
+                        : "text-gray-700 hover:text-brand-blue"
+                    }`}
                   >
-                    <Shield className="w-3.5 h-3.5 text-amber-600" /> Panel Admin
+                    Panel Admin
                   </Link>
                 )}
               </>
@@ -250,9 +254,9 @@ export function Navbar({ user }: NavbarProps) {
                 <Link
                   href="/admin"
                   onClick={() => setIsOpen(false)}
-                  className="px-3 py-2 text-sm font-semibold text-amber-700 bg-amber-50 rounded-md flex items-center gap-1.5"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-brand-blue-50 rounded-md"
                 >
-                  <Shield className="w-4 h-4 text-amber-600" /> Panel Admin
+                  Panel Admin
                 </Link>
               )}
             </div>
