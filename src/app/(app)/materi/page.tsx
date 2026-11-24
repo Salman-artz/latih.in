@@ -84,9 +84,19 @@ export default async function MateriListPage() {
               {/* Thumbnail Container */}
               <div className="aspect-video bg-slate-900 relative group overflow-hidden">
                 <img
-                  src={`https://img.youtube.com/vi/${item.youtubeId}/mqdefault.jpg`}
+                  src={
+                    item.videoType === "CLOUDINARY" && item.videoUrl
+                      ? item.videoUrl.replace(/\.[^/.]+$/, ".jpg")
+                      : item.youtubeId
+                      ? `https://img.youtube.com/vi/${item.youtubeId}/mqdefault.jpg`
+                      : "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80"
+                  }
                   alt={item.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-300 opacity-90"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80";
+                  }}
                 />
                 <div className="absolute inset-0 bg-brand-navy/30 flex items-center justify-center">
                   <div className="w-10 h-10 rounded-md bg-white/90 text-brand-navy flex items-center justify-center">

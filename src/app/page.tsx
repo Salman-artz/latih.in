@@ -309,6 +309,10 @@ export default async function HomePage() {
                         src={mod.thumbnailUrl}
                         alt={mod.title}
                         className="w-full h-full object-cover opacity-75 group-hover:opacity-90 group-hover:scale-105 transition duration-300"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80";
+                        }}
                       />
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
