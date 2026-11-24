@@ -68,35 +68,96 @@ export async function getAdminRedeemCodes({
     where.expiresAt = { lte: now };
   }
 
-    const [total, codes] = await Promise.all([
-    prisma.redeemCode.count({ where }),
-    prisma.redeemCode.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * limit,
-      take: limit,
-      include: {
-        tryout: {
-          select: {
-            id: true,
-            title: true,
+  let total = 0;
+  interface AdminRedeemCodeRecord {
+    id: string;
+    code: string;
+    durationDays: number;
+    maxUses: number;
+    usedCount: number;
+    isUsed: boolean;
+    label: string | null;
+    tryoutId: string | null;
+    tryout?: {
+      id: string;
+      title: string;
+    } | null;
+    expiresAt: Date | null;
+    usedAt: Date | null;
+    revokedAt: Date | null;
+    createdAt: Date;
+    subscriptions: Array<{
+      user: {
+        id: string;
+        name: string;
+        email: string;
+      };
+    }>;
+  }
+
+  let codes: AdminRedeemCodeRecord[] = [];
+
+  try {
+    const [t, c] = await Promise.all([
+      prisma.redeemCode.count({ where }),
+      prisma.redeemCode.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          tryout: {
+            select: {
+              id: true,
+              title: true,
+            },
           },
-        },
-        subscriptions: {
-          take: 5,
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
+          subscriptions: {
+            take: 5,
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
               },
             },
           },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
+    total = t;
+    codes = c as unknown as AdminRedeemCodeRecord[];
+  } catch (err) {
+    console.warn("getAdminRedeemCodes fallback query:", err);
+    try {
+      const [t, c] = await Promise.all([
+        prisma.redeemCode.count({ where }),
+        prisma.redeemCode.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip: (page - 1) * limit,
+          take: limit,
+          include: {
+            subscriptions: {
+              take: 5,
+              include: {
+                user: {
+                  select: { id: true, name: true, email: true },
+                },
+              },
+            },
+          },
+        }),
+      ]);
+      total = t;
+      codes = c as unknown as AdminRedeemCodeRecord[];
+    } catch {
+      total = 0;
+      codes = [];
+    }
+  }
 
   return {
     codes: codes.map((c) => {

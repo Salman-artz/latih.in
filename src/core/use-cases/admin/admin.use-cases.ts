@@ -29,15 +29,15 @@ export class GetAdminStatsUseCase {
       revokedCodes,
       tryoutStats,
     ] = await Promise.all([
-      this.userRepo.countAll(),
-      this.userRepo.countCreatedAfter(sevenDaysAgo),
-      this.subRepo.countActive(now),
-      this.subRepo.countExpiring(now, sevenDaysLater),
-      this.codeRepo.countAll(),
-      this.codeRepo.countAvailable(now),
-      this.codeRepo.countUsed(),
-      this.codeRepo.countRevoked(),
-      this.tryoutRepo.getSubmittedAttemptsStats(),
+      this.userRepo.countAll().catch(() => 0),
+      this.userRepo.countCreatedAfter(sevenDaysAgo).catch(() => 0),
+      this.subRepo.countActive(now).catch(() => 0),
+      this.subRepo.countExpiring(now, sevenDaysLater).catch(() => 0),
+      this.codeRepo.countAll().catch(() => 0),
+      this.codeRepo.countAvailable(now).catch(() => 0),
+      this.codeRepo.countUsed().catch(() => 0),
+      this.codeRepo.countRevoked().catch(() => 0),
+      this.tryoutRepo.getSubmittedAttemptsStats().catch(() => ({ count: 0, avgScore: 0 })),
     ]);
 
     return {

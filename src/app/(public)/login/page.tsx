@@ -52,7 +52,14 @@ function LoginForm() {
         return;
       }
 
-      window.location.href = callbackUrl;
+      const targetUrl =
+        callbackUrl && callbackUrl !== "/dashboard"
+          ? callbackUrl
+          : data.user?.role === "ADMIN"
+          ? "/admin"
+          : "/dashboard";
+
+      window.location.href = targetUrl;
     } catch {
       setErrorMsg("Gagal menghubungi server, periksa koneksi internet kamu");
       setIsLoading(false);

@@ -13,7 +13,24 @@ import {
 } from "lucide-react";
 
 export default async function AdminDashboardPage() {
-  const stats = await getAdminStats();
+  let stats = {
+    totalUsers: 0,
+    newUsersLast7Days: 0,
+    activeSubscriptions: 0,
+    expiringSubscriptions: 0,
+    totalCodes: 0,
+    availableCodes: 0,
+    usedCodes: 0,
+    revokedCodes: 0,
+    totalAttempts: 0,
+    avgScore: 0,
+  };
+
+  try {
+    stats = await getAdminStats();
+  } catch (err) {
+    console.error("AdminDashboardPage getAdminStats error:", err);
+  }
 
   return (
     <div className="space-y-8">

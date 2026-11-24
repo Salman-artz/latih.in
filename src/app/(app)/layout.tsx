@@ -10,7 +10,12 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
+  let session = null;
+  try {
+    session = await getSession();
+  } catch (err) {
+    console.error("AppLayout getSession error:", err);
+  }
 
   if (!session) {
     redirect("/login");
