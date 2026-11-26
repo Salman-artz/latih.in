@@ -19,7 +19,13 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-poppins);
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling & fluid scaling for large monitors (24"+) */
 html {
   scroll-behavior: smooth;
+}
+
+@media (min-width: 1536px) {
+  html {
+    font-size: clamp(16px, 0.94vw, 21px);
+  }
 }
