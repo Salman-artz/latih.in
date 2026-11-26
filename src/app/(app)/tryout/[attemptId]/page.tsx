@@ -62,6 +62,9 @@ export default function TryoutExamPage({
 
   const answersRef = useRef(answers);
   answersRef.current = answers;
+  const pendingAnswersRef = useRef<Record<string, boolean>>({});
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const inFlightSaveRef = useRef<Promise<boolean> | null>(null);
 
   // 1. Fetch Lembar Soal dari server
   useEffect(() => {
@@ -117,9 +120,91 @@ export default function TryoutExamPage({
     return () => clearInterval(timer);
   }, [exam]);
 
+  async function sendAnswersBatch(payload: { statementId: string; answer: boolean }[]): Promise<boolean> {
+    try {
+      const res = await fetch(`/api/tryout/${attemptId}/answers`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers: payload }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async function flushPendingAnswers(): Promise<boolean> {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+
+    if (inFlightSaveRef.current) {
+      await inFlightSaveRef.current;
+    }
+
+    const batch = { ...pendingAnswersRef.current };
+    const entries = Object.entries(batch);
+    if (entries.length === 0) return true;
+
+    pendingAnswersRef.current = {};
+    const payload = entries.map(([statementId, answer]) => ({ statementId, answer }));
+
+    const savePromise = sendAnswersBatch(payload);
+    inFlightSaveRef.current = savePromise;
+    const ok = await savePromise;
+    if (inFlightSaveRef.current === savePromise) {
+      inFlightSaveRef.current = null;
+    }
+
+    if (ok) {
+      if (Object.keys(pendingAnswersRef.current).length === 0) {
+        setSaveStatus("SAVED");
+      }
+      return true;
+    }
+
+    // Kembalikan batch yang gagal agar tidak hilang dan bisa dicoba ulang
+    pendingAnswersRef.current = { ...batch, ...pendingAnswersRef.current };
+    setSaveStatus("ERROR");
+    return false;
+  }
+
+  async function flushAllAnswersBeforeSubmit(): Promise<boolean> {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+
+    if (inFlightSaveRef.current) {
+      await inFlightSaveRef.current;
+    }
+
+    const allEntries = Object.entries(answersRef.current);
+    if (allEntries.length === 0) return true;
+
+    pendingAnswersRef.current = {};
+    const payload = allEntries.map(([statementId, answer]) => ({ statementId, answer }));
+
+    const savePromise = sendAnswersBatch(payload);
+    inFlightSaveRef.current = savePromise;
+    const ok = await savePromise;
+    if (inFlightSaveRef.current === savePromise) {
+      inFlightSaveRef.current = null;
+    }
+
+    if (ok) {
+      setSaveStatus("SAVED");
+    } else {
+      setSaveStatus("ERROR");
+    }
+    return ok;
+  }
+
   async function handleAutoSubmit() {
     setIsSubmitting(true);
     try {
+      await flushAllAnswersBeforeSubmit();
       await fetch(`/api/tryout/${attemptId}/submit`, { method: "POST" });
       router.push(`/tryout/${attemptId}/hasil`);
     } catch {
@@ -127,34 +212,20 @@ export default function TryoutExamPage({
     }
   }
 
-  // 3. Simpan jawaban otomatis (debounce)
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+  // 3. Simpan jawaban otomatis (debounce + batching agar klik cepat tidak menimpa)
   function handleSelectAnswer(statementId: string, value: boolean) {
-    const updated = { ...answers, [statementId]: value };
+    const updated = { ...answersRef.current, [statementId]: value };
+    answersRef.current = updated;
     setAnswers(updated);
+    pendingAnswersRef.current[statementId] = value;
     setSaveStatus("SAVING");
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
 
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        const payload = [{ statementId, answer: value }];
-        const res = await fetch(`/api/tryout/${attemptId}/answers`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers: payload }),
-        });
-        if (res.ok) {
-          setSaveStatus("SAVED");
-        } else {
-          setSaveStatus("ERROR");
-        }
-      } catch {
-        setSaveStatus("ERROR");
-      }
+    saveTimeoutRef.current = setTimeout(() => {
+      void flushPendingAnswers();
     }, 400);
   }
 
@@ -162,6 +233,18 @@ export default function TryoutExamPage({
   async function handleConfirmSubmit() {
     setIsSubmitting(true);
     try {
+      const savedAll = await flushAllAnswersBeforeSubmit();
+      if (!savedAll) {
+        setDialogState({
+          isOpen: true,
+          type: "danger",
+          title: "Gagal Menyimpan Jawaban Terakhir",
+          message: "Pastikan koneksi internet stabil lalu coba kumpulkan kembali.",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const res = await fetch(`/api/tryout/${attemptId}/submit`, {
         method: "POST",
       });
