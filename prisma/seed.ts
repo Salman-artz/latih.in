@@ -34,7 +34,9 @@ async function main() {
   });
   console.log(`✅ Admin terdaftar: ${admin.email}`);
 
-  // 3. Akun User Demo (tanpa langganan)
+  const demoEndDate = new Date("2027-01-31T23:59:59+07:00");
+
+  // 3. Akun User Demo (langganan aktif sampai 31 Januari 2027)
   const user = await prisma.user.upsert({
     where: { email: "user@demo.test" },
     update: {
@@ -51,9 +53,30 @@ async function main() {
       isActive: true,
     },
   });
-  console.log(`✅ User demo terdaftar: ${user.email}`);
 
-  // 4. 5 Kode Redeem Demo 30 Hari (disimpan ternormalisasi)
+  const existingDemoSub = await prisma.subscription.findFirst({
+    where: { userId: user.id, source: SubscriptionSource.MANUAL },
+  });
+  if (existingDemoSub) {
+    await prisma.subscription.update({
+      where: { id: existingDemoSub.id },
+      data: { endsAt: demoEndDate, note: "Demo aktif hingga 31 Januari 2027" },
+    });
+  } else {
+    await prisma.subscription.create({
+      data: {
+        userId: user.id,
+        source: SubscriptionSource.MANUAL,
+        startsAt: new Date(),
+        endsAt: demoEndDate,
+        grantedById: admin.id,
+        note: "Demo aktif hingga 31 Januari 2027",
+      },
+    });
+  }
+  console.log(`✅ User demo terdaftar: ${user.email} (aktif s/d 31 Jan 2027)`);
+
+  // 4. 5 Kode Redeem Demo (aktif s/d 31 Januari 2027)
   const rawCodes = [
     "LATIH-DEMO-0001",
     "LATIH-DEMO-0002",
@@ -67,13 +90,15 @@ async function main() {
     await prisma.redeemCode.upsert({
       where: { code: normalized },
       update: {
-        durationDays: 30,
+        durationDays: 66,
+        expiresAt: demoEndDate,
         label: "Demo Reviewer",
         createdById: admin.id,
       },
       create: {
         code: normalized,
-        durationDays: 30,
+        durationDays: 66,
+        expiresAt: demoEndDate,
         label: "Demo Reviewer",
         createdById: admin.id,
       },
