@@ -90,63 +90,107 @@ export default async function HomePage() {
 
       <main className="flex-grow bg-slate-50/50">
         {/* HERO SECTION */}
-        <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
-          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
-            <div className="max-w-3xl space-y-6">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-brand-navy leading-[1.15]">
-                Belajar dari video, <br />
-                latihan lewat <span className="text-brand-blue underline decoration-brand-blue/30 decoration-wavy">tryout</span>.
-              </h1>
+        <section className="border-b border-slate-200 bg-white py-12 sm:py-16 lg:py-20">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14 items-center">
+              <div className="lg:col-span-7 space-y-6">
+                <h1 className="text-3xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-brand-navy leading-[1.15]">
+                  Belajar dari video, <br />
+                  latihan lewat <span className="text-brand-blue underline decoration-brand-blue/30 decoration-wavy">tryout</span>.
+                </h1>
 
-              <p className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
-                Platform latihan terpadu untuk menguji penalaran dan literasi. Pahami konsep inti lewat video kurasi berkualitas, lalu uji kesiapanmu melalui paket tryout 10 stimulus berwaktu.
-              </p>
+                <p className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
+                  Platform latihan terpadu untuk menguji penalaran dan literasi. Pahami konsep inti lewat video kurasi berkualitas, lalu uji kesiapanmu melalui paket tryout 10 stimulus berwaktu.
+                </p>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-                {session ? (
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-brand-blue text-white font-semibold text-sm hover:bg-blue-700 transition"
-                  >
-                    Buka Dashboard Pengguna <ArrowRight className="w-4 h-4" />
-                  </Link>
-                ) : (
-                  <>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                  {session ? (
                     <Link
-                      href="/register"
-                      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-brand-blue text-white font-semibold text-sm hover:bg-blue-700 transition shadow-sm"
+                      href="/dashboard"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-brand-blue text-white font-semibold text-sm hover:bg-blue-700 transition"
                     >
-                      Daftar Akun Baru <ArrowRight className="w-4 h-4" />
+                      Buka Dashboard Pengguna <ArrowRight className="w-4 h-4" />
                     </Link>
-                    <Link
-                      href="/login"
-                      className="inline-flex items-center justify-center px-6 py-3.5 rounded-lg border border-slate-300 bg-white text-brand-navy font-semibold text-sm hover:bg-slate-50 transition"
-                    >
-                      Masuk ke Akun
-                    </Link>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <Link
+                        href="/register"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-brand-blue text-white font-semibold text-sm hover:bg-blue-700 transition shadow-sm"
+                      >
+                        Daftar Akun Baru <ArrowRight className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href="/login"
+                        className="inline-flex items-center justify-center px-6 py-3.5 rounded-lg border border-slate-300 bg-white text-brand-navy font-semibold text-sm hover:bg-slate-50 transition"
+                      >
+                        Masuk ke Akun
+                      </Link>
+                    </>
+                  )}
+                </div>
+
+                {/* USP Specification List - Crisp & Utilitarian */}
+                <div className="pt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-200">
+                  <div className="flex items-center gap-2.5 text-xs sm:text-sm font-medium text-slate-700">
+                    <div className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-200">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    </div>
+                    <span>10 Soal (30 Pernyataan B/S)</span>
+                  </div>
+                  <div className="flex items-center gap-2.5 text-xs sm:text-sm font-medium text-slate-700">
+                    <div className="w-6 h-6 rounded-md bg-brand-blue-50 text-brand-blue flex items-center justify-center flex-shrink-0 border border-brand-blue/20">
+                      <Clock className="w-3.5 h-3.5" />
+                    </div>
+                    <span>Timer 20 Menit Nyata</span>
+                  </div>
+                  <div className="flex items-center gap-2.5 text-xs sm:text-sm font-medium text-slate-700">
+                    <div className="w-6 h-6 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0 border border-slate-200">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                    </div>
+                    <span>Aktivasi Kode Redeem</span>
+                  </div>
+                </div>
               </div>
 
-              {/* USP Specification List - Crisp & Utilitarian */}
-              <div className="pt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-200">
-                <div className="flex items-center gap-2.5 text-xs sm:text-sm font-medium text-slate-700">
-                  <div className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-200">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+              {/* HERO VISUAL PREVIEW - Menyeimbangkan layar 15.6" & 24" */}
+              <div className="lg:col-span-5">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 sm:p-6 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2.5 py-1 rounded bg-brand-blue-50 text-brand-blue border border-brand-blue/20">
+                        Simulasi Soal #1
+                      </span>
+                      <span className="text-xs text-slate-500 hidden sm:inline">3 Pernyataan</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border border-slate-200 font-mono text-xs font-bold text-brand-navy">
+                      <Clock className="w-3.5 h-3.5 text-brand-blue" /> 19:45
+                    </span>
                   </div>
-                  <span>10 Soal (30 Pernyataan B/S)</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs sm:text-sm font-medium text-slate-700">
-                  <div className="w-6 h-6 rounded-md bg-brand-blue-50 text-brand-blue flex items-center justify-center flex-shrink-0 border border-brand-blue/20">
-                    <Clock className="w-3.5 h-3.5" />
+
+                  <div className="bg-white border border-slate-200 rounded-lg p-3.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Stimulus bacaan analitis untuk menguji pemahaman ide pokok, logika proposisional, serta pembedaan fakta dan opini secara terstruktur.
                   </div>
-                  <span>Timer 20 Menit Nyata</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs sm:text-sm font-medium text-slate-700">
-                  <div className="w-6 h-6 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0 border border-slate-200">
-                    <ShieldCheck className="w-3.5 h-3.5" />
+
+                  <div className="space-y-2.5">
+                    <div className="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
+                      <span className="text-xs text-slate-700 font-medium">1. Simpulan sesuai dengan teks stimulus</span>
+                      <span className="px-2.5 py-1 rounded bg-emerald-600 text-white text-[11px] font-bold flex-shrink-0">
+                        Benar
+                      </span>
+                    </div>
+                    <div className="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
+                      <span className="text-xs text-slate-700 font-medium">2. Pernyataan bertentangan dengan data</span>
+                      <span className="px-2.5 py-1 rounded bg-rose-600 text-white text-[11px] font-bold flex-shrink-0">
+                        Salah
+                      </span>
+                    </div>
+                    <div className="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
+                      <span className="text-xs text-slate-700 font-medium">3. Pembahasan &amp; skor otomatis tersedia</span>
+                      <span className="px-2.5 py-1 rounded bg-emerald-600 text-white text-[11px] font-bold flex-shrink-0">
+                        Benar
+                      </span>
+                    </div>
                   </div>
-                  <span>Aktivasi Kode Redeem</span>
                 </div>
               </div>
             </div>
@@ -155,7 +199,7 @@ export default async function HomePage() {
 
         {/* FITUR UTAMA - Clean Cards */}
         <section id="fitur" className="py-16 sm:py-20 border-b border-slate-200">
-          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12">
             <div className="max-w-2xl mb-12 space-y-2">
               <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
                 Struktur Pembelajaran
@@ -218,7 +262,7 @@ export default async function HomePage() {
 
         {/* CARA KERJA - Clean 4 Steps */}
         <section id="cara-kerja" className="py-16 sm:py-20 bg-white border-b border-slate-200">
-          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12">
             <div className="max-w-2xl mb-12 space-y-2">
               <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
                 Alur Pengerjaan
@@ -277,7 +321,7 @@ export default async function HomePage() {
 
         {/* CUPLIKAN MATERI */}
         <section id="materi" className="py-16 sm:py-20 border-b border-slate-200">
-          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
               <div>
                 <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
@@ -356,17 +400,21 @@ export default async function HomePage() {
 
         {/* FAQ - Utilitarian Accordion Style */}
         <section id="faq" className="py-16 sm:py-20 bg-white border-b border-slate-200">
-          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
-            <div className="mb-10 space-y-2">
-              <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
-                Bantuan & Informasi
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-brand-navy">
-                Pertanyaan yang Sering Diajukan (FAQ)
-              </h2>
-            </div>
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+              <div className="lg:col-span-4 space-y-2">
+                <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
+                  Bantuan &amp; Informasi
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-bold text-brand-navy">
+                  Pertanyaan yang Sering Diajukan (FAQ)
+                </h2>
+                <p className="text-sm text-slate-600">
+                  Informasi singkat mengenai kode redeem, format simulasi, dan keamanan jawaban.
+                </p>
+              </div>
 
-            <div className="divide-y divide-slate-200 border-y border-slate-200">
+              <div className="lg:col-span-8 divide-y divide-slate-200 border-y border-slate-200">
               <div className="py-5 space-y-1.5">
                 <h3 className="font-bold text-brand-navy text-sm sm:text-base flex items-center gap-2">
                   <HelpCircle className="w-4 h-4 text-brand-blue flex-shrink-0" />
@@ -406,13 +454,14 @@ export default async function HomePage() {
                   Sangat aman. Server secara selektif tidak mengirimkan kunci jawaban (`isTrue`) atau pembahasan ke peramban saat status attempt masih `IN_PROGRESS`.
                 </p>
               </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* BOTTOM ACTION BANNER - Solid Navy Brand */}
         <section className="py-12 sm:py-16 bg-brand-navy text-white">
-          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="space-y-1 text-center sm:text-left">
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                 Mulai Evaluasi Kemampuanmu Hari Ini
