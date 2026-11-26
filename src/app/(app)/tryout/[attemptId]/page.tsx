@@ -78,14 +78,14 @@ export default function TryoutExamPage({
     message: "",
   });
   const [violationCount, setViolationCount] = useState(0);
-  const [maxViolations, setMaxViolations] = useState(5);
+  const [maxViolations, setMaxViolations] = useState(3);
   const [needsFullscreenGate, setNeedsFullscreenGate] = useState(false);
   const [proctoringArmed, setProctoringArmed] = useState(false);
   const [isPrivacyBlurred, setIsPrivacyBlurred] = useState(false);
   const [violationModal, setViolationModal] = useState<ViolationModalState>({
     isOpen: false,
     count: 0,
-    max: 5,
+    max: 3,
     reason: "",
     autoSubmitted: false,
   });
@@ -97,7 +97,7 @@ export default function TryoutExamPage({
   const inFlightSaveRef = useRef<Promise<boolean> | null>(null);
 
   const violationCountRef = useRef(0);
-  const maxViolationsRef = useRef(5);
+  const maxViolationsRef = useRef(3);
   const lastViolationAtRef = useRef(0);
   const lastFullscreenTransitionRef = useRef(0);
   const isIntentionalExitRef = useRef(false);
@@ -132,7 +132,7 @@ export default function TryoutExamPage({
         setExam(data);
         setRemainingTime(data.remainingSeconds);
         setViolationCount(data.violationCount ?? 0);
-        setMaxViolations(data.maxViolations ?? 5);
+        setMaxViolations(data.maxViolations ?? 3);
 
         // Inisialisasi peta jawaban dari database
         const initialMap: Record<string, boolean> = {};
