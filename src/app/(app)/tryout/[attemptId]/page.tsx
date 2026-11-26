@@ -103,12 +103,18 @@ export default function TryoutExamPage({
   const isIntentionalExitRef = useRef(false);
   const isSubmittingRef = useRef(false);
   const proctoringArmedRef = useRef(false);
+  const isViolationModalOpenRef = useRef(false);
+  const needsFullscreenGateRef = useRef(false);
+  const isReportingViolationRef = useRef(false);
+  const proctoringCooldownUntilRef = useRef(0);
   const baselineViewportRef = useRef<{ width: number; height: number } | null>(null);
 
   violationCountRef.current = violationCount;
   maxViolationsRef.current = maxViolations;
   isSubmittingRef.current = isSubmitting;
   proctoringArmedRef.current = proctoringArmed;
+  isViolationModalOpenRef.current = violationModal.isOpen;
+  needsFullscreenGateRef.current = needsFullscreenGate;
 
   // 1. Fetch Lembar Soal dari server
   useEffect(() => {
@@ -316,16 +322,29 @@ export default function TryoutExamPage({
   }
 
   async function reportViolation(type: ViolationType, reason: string) {
-    if (isIntentionalExitRef.current || isSubmittingRef.current || !proctoringArmedRef.current) {
+    if (
+      isIntentionalExitRef.current ||
+      isSubmittingRef.current ||
+      !proctoringArmedRef.current ||
+      isViolationModalOpenRef.current ||
+      needsFullscreenGateRef.current ||
+      isReportingViolationRef.current
+    ) {
       return;
     }
 
     const now = Date.now();
+    if (now < proctoringCooldownUntilRef.current) {
+      return;
+    }
+
     // Debounce 1,5 detik agar beberapa event bersamaan hanya dihitung 1x
     if (now - lastViolationAtRef.current < 1500) {
       return;
     }
     lastViolationAtRef.current = now;
+    isReportingViolationRef.current = true;
+    isViolationModalOpenRef.current = true;
 
     // Jika ini akan menjadi strike terakhir, flush jawaban terlebih dahulu sebelum server auto-submit
     if (violationCountRef.current + 1 >= maxViolationsRef.current) {
@@ -340,7 +359,10 @@ export default function TryoutExamPage({
         body: JSON.stringify({ type, detail: reason }),
       });
 
-      if (!res.ok) return;
+      if (!res.ok) {
+        isViolationModalOpenRef.current = false;
+        return;
+      }
       const data = await res.json();
 
       setViolationCount(data.violationCount);
@@ -377,6 +399,8 @@ export default function TryoutExamPage({
         reason,
         autoSubmitted: false,
       });
+    } finally {
+      isReportingViolationRef.current = false;
     }
   }
 
@@ -446,15 +470,17 @@ export default function TryoutExamPage({
 
     // Deteksi split-screen / perubahan dimensi layar mendadak
     function handleResize() {
-      if (Date.now() - lastFullscreenTransitionRef.current < 600) return;
+      if (Date.now() - lastFullscreenTransitionRef.current < 1200) return;
+      if (isViolationModalOpenRef.current || needsFullscreenGateRef.current) return;
+      const availW = window.screen?.availWidth || window.innerWidth;
+      const isNarrowSplit = window.innerWidth < availW * 0.78;
       const base = baselineViewportRef.current;
       if (!base) {
         baselineViewportRef.current = { width: window.innerWidth, height: window.innerHeight };
         return;
       }
       const widthDrop = base.width - window.innerWidth;
-      const heightDrop = base.height - window.innerHeight;
-      if (widthDrop > 180 || heightDrop > 180) {
+      if (isNarrowSplit && widthDrop > 180) {
         baselineViewportRef.current = { width: window.innerWidth, height: window.innerHeight };
         void reportViolation("SPLIT_SCREEN", "Terdeteksi perubahan ukuran layar mendadak (split-screen).");
       }
@@ -1023,6 +1049,8 @@ export default function TryoutExamPage({
                 <button
                   type="button"
                   onClick={() => {
+                    proctoringCooldownUntilRef.current = Date.now() + 1200;
+                    isViolationModalOpenRef.current = false;
                     setViolationModal((prev) => ({ ...prev, isOpen: false }));
                     void attemptEnterFullscreen(false);
                   }}
