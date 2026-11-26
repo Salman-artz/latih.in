@@ -155,18 +155,13 @@ export default async function HomePage() {
               {/* HERO VISUAL SUMMARY - Menyeimbangkan layar 15.6" & 24" tanpa simulasi soal */}
               <div className="lg:col-span-5">
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-                    <div>
-                      <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">
-                        Ekosistem Belajar
-                      </p>
-                      <h3 className="text-base sm:text-lg font-bold text-brand-navy">
-                        Persiapan Terarah dalam 1 Platform
-                      </h3>
-                    </div>
-                    <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
-                      Terpadu
-                    </span>
+                  <div className="border-b border-slate-200 pb-4">
+                    <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">
+                      Ekosistem Belajar
+                    </p>
+                    <h3 className="text-base sm:text-lg font-bold text-brand-navy">
+                      Persiapan Terarah dalam 1 Platform
+                    </h3>
                   </div>
 
                   <div className="space-y-3">
