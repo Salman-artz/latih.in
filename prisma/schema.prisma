@@ -148,20 +148,34 @@ model Statement {
 }
 
 model Attempt {
-  id          String        @id @default(cuid())
-  userId      String
-  tryoutId    String
-  status      AttemptStatus @default(IN_PROGRESS)
-  startedAt   DateTime      @default(now())
-  submittedAt DateTime?
-  score       Int?
-  isTest      Boolean       @default(false)
+  id             String        @id @default(cuid())
+  userId         String
+  tryoutId       String
+  status         AttemptStatus @default(IN_PROGRESS)
+  startedAt      DateTime      @default(now())
+  submittedAt    DateTime?
+  score          Int?
+  isTest         Boolean       @default(false)
+  violationCount Int           @default(0)
 
-  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tryout  Tryout          @relation(fields: [tryoutId], references: [id], onDelete: Cascade)
-  answers AttemptAnswer[]
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tryout     Tryout             @relation(fields: [tryoutId], references: [id], onDelete: Cascade)
+  answers    AttemptAnswer[]
+  violations AttemptViolation[]
 
   @@index([userId, status])
+}
+
+model AttemptViolation {
+  id        String   @id @default(cuid())
+  attemptId String
+  type      String
+  detail    String?
+  createdAt DateTime @default(now())
+
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId, createdAt])
 }
 
 model AttemptAnswer {

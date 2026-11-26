@@ -3,6 +3,8 @@ import {
   AttemptEntity,
   ExamSheet,
   ExamResult,
+  ViolationType,
+  RecordViolationResult,
 } from "../entities/tryout.entity";
 
 export interface ITryoutRepository {
@@ -12,6 +14,13 @@ export interface ITryoutRepository {
   createAttempt(data: { userId: string; tryoutId: string; isTest?: boolean }): Promise<AttemptEntity>;
   getExamSheet(attemptId: string, userId: string): Promise<ExamSheet | null>;
   saveAnswers(attemptId: string, answers: { statementId: string; answer: boolean }[]): Promise<number>;
+  recordViolation(
+    attemptId: string,
+    userId: string,
+    type: ViolationType,
+    detail?: string,
+    maxViolations?: number
+  ): Promise<RecordViolationResult>;
   submitAttempt(attemptId: string, userId: string): Promise<{ attemptId: string; score: number; max: number; percent: number }>;
   getExamResult(attemptId: string, userId: string, isAdmin?: boolean): Promise<ExamResult | null>;
   findUserAttemptHistory(userId: string): Promise<{

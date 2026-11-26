@@ -1,5 +1,6 @@
 import { ITryoutRepository } from "@/core/domain/repositories/tryout.repository.interface";
 import { ISubscriptionRepository } from "@/core/domain/repositories/subscription.repository.interface";
+import { ViolationType } from "@/core/domain/entities/tryout.entity";
 import { AppError } from "@/lib/errors";
 
 export class StartOrResumeTryoutUseCase {
@@ -77,6 +78,19 @@ export class SaveExamAnswersUseCase {
 
     const saved = await this.tryoutRepo.saveAnswers(attemptId, answers);
     return { saved };
+  }
+}
+
+export class RecordExamViolationUseCase {
+  constructor(private tryoutRepo: ITryoutRepository) {}
+
+  async execute(userId: string, attemptId: string, type: ViolationType, detail?: string) {
+    const attempt = await this.tryoutRepo.findAttemptById(attemptId);
+    if (!attempt || attempt.userId !== userId) {
+      throw new AppError("Attempt tidak ditemukan", 404, "NOT_FOUND");
+    }
+
+    return await this.tryoutRepo.recordViolation(attemptId, userId, type, detail, 3);
   }
 }
 

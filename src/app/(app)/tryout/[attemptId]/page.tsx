@@ -12,8 +12,11 @@ import {
   Loader2,
   Check,
   X,
+  ShieldAlert,
+  Maximize2,
 } from "lucide-react";
 import { ModalDialog, ModalDialogState } from "@/components/ui/ModalDialog";
+import type { ViolationType } from "@/core/domain/entities/tryout.entity";
 
 interface StatementItem {
   id: string;
@@ -35,7 +38,22 @@ interface ExamData {
   startedAt: string;
   durationMinutes: number;
   remainingSeconds: number;
+  violationCount: number;
+  maxViolations: number;
+  participant: {
+    id: string;
+    name: string;
+    email: string;
+  };
   questions: QuestionItem[];
+}
+
+interface ViolationModalState {
+  isOpen: boolean;
+  count: number;
+  max: number;
+  reason: string;
+  autoSubmitted: boolean;
 }
 
 export default function TryoutExamPage({
@@ -59,12 +77,37 @@ export default function TryoutExamPage({
     isOpen: false,
     message: "",
   });
+  const [violationCount, setViolationCount] = useState(0);
+  const [maxViolations, setMaxViolations] = useState(3);
+  const [needsFullscreenGate, setNeedsFullscreenGate] = useState(false);
+  const [proctoringArmed, setProctoringArmed] = useState(false);
+  const [violationModal, setViolationModal] = useState<ViolationModalState>({
+    isOpen: false,
+    count: 0,
+    max: 3,
+    reason: "",
+    autoSubmitted: false,
+  });
 
   const answersRef = useRef(answers);
   answersRef.current = answers;
   const pendingAnswersRef = useRef<Record<string, boolean>>({});
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const inFlightSaveRef = useRef<Promise<boolean> | null>(null);
+
+  const violationCountRef = useRef(0);
+  const maxViolationsRef = useRef(3);
+  const lastViolationAtRef = useRef(0);
+  const lastFullscreenTransitionRef = useRef(0);
+  const isIntentionalExitRef = useRef(false);
+  const isSubmittingRef = useRef(false);
+  const proctoringArmedRef = useRef(false);
+  const baselineViewportRef = useRef<{ width: number; height: number } | null>(null);
+
+  violationCountRef.current = violationCount;
+  maxViolationsRef.current = maxViolations;
+  isSubmittingRef.current = isSubmitting;
+  proctoringArmedRef.current = proctoringArmed;
 
   // 1. Fetch Lembar Soal dari server
   useEffect(() => {
@@ -81,6 +124,8 @@ export default function TryoutExamPage({
 
         setExam(data);
         setRemainingTime(data.remainingSeconds);
+        setViolationCount(data.violationCount ?? 0);
+        setMaxViolations(data.maxViolations ?? 3);
 
         // Inisialisasi peta jawaban dari database
         const initialMap: Record<string, boolean> = {};
@@ -93,6 +138,9 @@ export default function TryoutExamPage({
         }
         setAnswers(initialMap);
         setInitialLoading(false);
+
+        // Upayakan auto-fullscreen saat mulai; jika diblokir browser (tanpa gesture), tampilkan gate
+        void attemptEnterFullscreen(true);
       } catch {
         setErrorMsg("Koneksi gagal saat memuat tryout");
         setInitialLoading(false);
@@ -201,13 +249,245 @@ export default function TryoutExamPage({
     return ok;
   }
 
+  async function attemptEnterFullscreen(initialCheck = false) {
+    if (typeof document === "undefined") return;
+    const rootEl = document.documentElement;
+    const fsSupported = Boolean(rootEl.requestFullscreen);
+
+    if (!fsSupported) {
+      // Browser seperti iOS Safari tidak mendukung Fullscreen API pada elemen;
+      // aktifkan pengawasan langsung tanpa mengunci user di gate fullscreen.
+      baselineViewportRef.current = { width: window.innerWidth, height: window.innerHeight };
+      setNeedsFullscreenGate(false);
+      setProctoringArmed(true);
+      return;
+    }
+
+    if (document.fullscreenElement) {
+      baselineViewportRef.current = { width: window.innerWidth, height: window.innerHeight };
+      setNeedsFullscreenGate(false);
+      setProctoringArmed(true);
+      await lockEscapeKey();
+      return;
+    }
+
+    try {
+      lastFullscreenTransitionRef.current = Date.now();
+      await rootEl.requestFullscreen();
+      await lockEscapeKey();
+      baselineViewportRef.current = { width: window.innerWidth, height: window.innerHeight };
+      setNeedsFullscreenGate(false);
+      setProctoringArmed(true);
+    } catch {
+      if (initialCheck) {
+        setNeedsFullscreenGate(true);
+        setProctoringArmed(false);
+      }
+    }
+  }
+
+  async function lockEscapeKey() {
+    try {
+      const nav = navigator as Navigator & {
+        keyboard?: { lock?: (keyCodes?: string[]) => Promise<void>; unlock?: () => void };
+      };
+      if (nav.keyboard?.lock) {
+        await nav.keyboard.lock(["Escape"]);
+      }
+    } catch {
+      // Abaikan jika browser tidak mendukung Keyboard Lock API
+    }
+  }
+
+  function releaseFullscreenAndLocks() {
+    isIntentionalExitRef.current = true;
+    try {
+      const nav = navigator as Navigator & {
+        keyboard?: { unlock?: () => void };
+      };
+      nav.keyboard?.unlock?.();
+      if (typeof document !== "undefined" && document.fullscreenElement) {
+        void document.exitFullscreen().catch(() => {});
+      }
+    } catch {
+      // Abaikan
+    }
+  }
+
+  async function reportViolation(type: ViolationType, reason: string) {
+    if (isIntentionalExitRef.current || isSubmittingRef.current || !proctoringArmedRef.current) {
+      return;
+    }
+
+    const now = Date.now();
+    // Debounce 1,5 detik agar beberapa event bersamaan hanya dihitung 1x
+    if (now - lastViolationAtRef.current < 1500) {
+      return;
+    }
+    lastViolationAtRef.current = now;
+
+    // Jika ini akan menjadi strike terakhir, flush jawaban terlebih dahulu sebelum server auto-submit
+    if (violationCountRef.current + 1 >= maxViolationsRef.current) {
+      isIntentionalExitRef.current = true;
+      await flushAllAnswersBeforeSubmit();
+    }
+
+    try {
+      const res = await fetch(`/api/tryout/${attemptId}/violations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, detail: reason }),
+      });
+
+      if (!res.ok) return;
+      const data = await res.json();
+
+      setViolationCount(data.violationCount);
+      setMaxViolations(data.maxViolations);
+
+      if (data.autoSubmitted) {
+        releaseFullscreenAndLocks();
+        setViolationModal({
+          isOpen: true,
+          count: data.violationCount,
+          max: data.maxViolations,
+          reason,
+          autoSubmitted: true,
+        });
+        setTimeout(() => {
+          router.push(`/tryout/${attemptId}/hasil`);
+        }, 1800);
+        return;
+      }
+
+      setViolationModal({
+        isOpen: true,
+        count: data.violationCount,
+        max: data.maxViolations,
+        reason,
+        autoSubmitted: false,
+      });
+    } catch {
+      // Tetap tampilkan modal peringatan jika offline sesaat
+      setViolationModal({
+        isOpen: true,
+        count: violationCountRef.current,
+        max: maxViolationsRef.current,
+        reason,
+        autoSubmitted: false,
+      });
+    }
+  }
+
+  // 2b. Penguncian Navigasi, Deteksi Pelanggaran Real-Time, & Proteksi Shortcut
+  useEffect(() => {
+    if (!exam) return;
+
+    // Blokir tombol Back browser / gesture swipe
+    window.history.pushState({ examLock: true }, "", window.location.href);
+    function handlePopState() {
+      if (isIntentionalExitRef.current) return;
+      window.history.pushState({ examLock: true }, "", window.location.href);
+      setDialogState({
+        isOpen: true,
+        type: "alert",
+        title: "Navigasi Dinonaktifkan",
+        message: "Tombol kembali dinonaktifkan selama ujian berlangsung. Gunakan tombol Kumpulkan Tryout jika sudah selesai.",
+      });
+    }
+
+    // Peringatan tutup/refresh tab
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      if (isIntentionalExitRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    }
+
+    // Deteksi pindah tab / aplikasi
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        void reportViolation("TAB_SWITCH", "Berpindah tab browser atau meminimalkan aplikasi.");
+      }
+    }
+
+    // Deteksi kehilangan fokus jendela
+    function handleWindowBlur() {
+      void reportViolation("WINDOW_BLUR", "Jendela ujian kehilangan fokus (klik di luar layar ujian).");
+    }
+
+    // Deteksi keluar mode layar penuh
+    function handleFullscreenChange() {
+      lastFullscreenTransitionRef.current = Date.now();
+      if (document.fullscreenElement) {
+        baselineViewportRef.current = { width: window.innerWidth, height: window.innerHeight };
+        return;
+      }
+      if (!isIntentionalExitRef.current && proctoringArmedRef.current) {
+        void reportViolation("EXIT_FULLSCREEN", "Keluar dari mode layar penuh (fullscreen).");
+      }
+    }
+
+    // Deteksi split-screen / perubahan dimensi layar mendadak
+    function handleResize() {
+      if (Date.now() - lastFullscreenTransitionRef.current < 600) return;
+      const base = baselineViewportRef.current;
+      if (!base) {
+        baselineViewportRef.current = { width: window.innerWidth, height: window.innerHeight };
+        return;
+      }
+      const widthDrop = base.width - window.innerWidth;
+      const heightDrop = base.height - window.innerHeight;
+      if (widthDrop > 180 || heightDrop > 180) {
+        baselineViewportRef.current = { width: window.innerWidth, height: window.innerHeight };
+        void reportViolation("SPLIT_SCREEN", "Terdeteksi perubahan ukuran layar mendadak (split-screen).");
+      }
+    }
+
+    // Blokir shortcut DevTools, Print, Save, View Source
+    function handleKeyDown(e: KeyboardEvent) {
+      const key = e.key.toLowerCase();
+      const ctrlOrMeta = e.ctrlKey || e.metaKey;
+      const isDevTools =
+        e.key === "F12" ||
+        (ctrlOrMeta && e.shiftKey && ["i", "j", "c"].includes(key)) ||
+        (ctrlOrMeta && ["u", "p", "s"].includes(key));
+
+      if (isDevTools) {
+        e.preventDefault();
+        e.stopPropagation();
+        void reportViolation("DEVTOOLS_OR_PRINT", "Mencoba membuka DevTools, mencetak, atau menyimpan halaman soal.");
+      }
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleWindowBlur);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("keydown", handleKeyDown, true);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleWindowBlur);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [exam]);
+
   async function handleAutoSubmit() {
+    isIntentionalExitRef.current = true;
     setIsSubmitting(true);
     try {
       await flushAllAnswersBeforeSubmit();
       await fetch(`/api/tryout/${attemptId}/submit`, { method: "POST" });
+      releaseFullscreenAndLocks();
       router.push(`/tryout/${attemptId}/hasil`);
     } catch {
+      releaseFullscreenAndLocks();
       router.push(`/tryout/${attemptId}/hasil`);
     }
   }
@@ -259,6 +539,7 @@ export default function TryoutExamPage({
         setIsSubmitting(false);
         return;
       }
+      releaseFullscreenAndLocks();
       router.push(`/tryout/${attemptId}/hasil`);
     } catch {
       setDialogState({
@@ -307,13 +588,48 @@ export default function TryoutExamPage({
   const answeredCount = Object.keys(answers).length;
   const emptyCount = totalStatements - answeredCount;
 
+  const watermarkText = `${exam.participant.name} • ${exam.participant.email} • ${exam.participant.id}`;
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-12">
-      {/* TOP BAR: TIMER & AUTOSAVE STATUS */}
+    <div
+      className="max-w-5xl mx-auto space-y-6 pb-12 select-none relative"
+      onContextMenu={(e) => e.preventDefault()}
+      onCopy={(e) => {
+        e.preventDefault();
+        void reportViolation("COPY_ATTEMPT", "Mencoba menyalin teks soal.");
+      }}
+      onCut={(e) => e.preventDefault()}
+      onPaste={(e) => e.preventDefault()}
+    >
+      {/* DYNAMIC WATERMARK OVERLAY */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-20 overflow-hidden select-none opacity-[0.06] flex flex-wrap items-center justify-center gap-12 -rotate-12 scale-125"
+      >
+        {Array.from({ length: 18 }).map((_, idx) => (
+          <span
+            key={idx}
+            className="text-xs sm:text-sm font-bold text-slate-900 whitespace-nowrap tracking-wider"
+          >
+            {watermarkText}
+          </span>
+        ))}
+      </div>
+
+      {/* TOP BAR: TIMER, STRIKE COUNTER & AUTOSAVE STATUS */}
       <div className="bg-white px-4 sm:px-6 py-3.5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between sticky top-16 z-30 backdrop-blur-md">
         <div className="flex items-center space-x-3">
           <span className="text-xs font-bold px-2.5 py-1 bg-brand-blue-50 text-brand-blue rounded-md border border-brand-blue/20">
             Soal {currentQIndex + 1} / {exam.questions.length}
+          </span>
+          <span
+            className={`text-xs font-bold px-2.5 py-1 rounded-md border ${
+              violationCount > 0
+                ? "bg-rose-50 text-rose-700 border-rose-200"
+                : "bg-slate-50 text-slate-600 border-slate-200"
+            }`}
+          >
+            Pelanggaran: {violationCount}/{maxViolations}
           </span>
           <span className="hidden sm:inline-block text-xs text-slate-500">
             {saveStatus === "SAVING" && "Menyimpan perubahan..."}
@@ -587,6 +903,71 @@ export default function TryoutExamPage({
         state={dialogState}
         onClose={() => setDialogState((prev) => ({ ...prev, isOpen: false }))}
       />
+
+      {/* GATE MODE LAYAR PENUH */}
+      {needsFullscreenGate && !violationModal.isOpen && (
+        <div className="fixed inset-0 z-50 bg-brand-navy/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl border border-slate-200 text-center space-y-4">
+            <div className="w-12 h-12 rounded-md bg-brand-blue-50 text-brand-blue mx-auto flex items-center justify-center border border-brand-blue/20">
+              <Maximize2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-brand-navy">Mode Layar Penuh Wajib Aktif</h3>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Untuk menjaga integritas tryout, ujian hanya dapat dikerjakan dalam mode layar penuh.
+              Berpindah tab, keluar layar penuh, atau membuka split-screen akan dicatat sebagai pelanggaran
+              (maksimal <strong>{maxViolations}x</strong> sebelum otomatis dikumpulkan).
+            </p>
+            <button
+              type="button"
+              onClick={() => void attemptEnterFullscreen(false)}
+              className="w-full py-2.5 px-4 rounded-md bg-brand-blue hover:bg-blue-700 text-white text-sm font-semibold shadow-sm transition"
+            >
+              Aktifkan Layar Penuh &amp; Lanjutkan Ujian
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* CUSTOM MODAL PERINGATAN PELANGGARAN */}
+      {violationModal.isOpen && (
+        <div className="fixed inset-0 z-50 bg-brand-navy/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl border border-rose-200 text-center space-y-4">
+            <div className="w-12 h-12 rounded-md bg-rose-50 text-rose-600 mx-auto flex items-center justify-center border border-rose-200">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-rose-700">
+              {violationModal.autoSubmitted
+                ? "Batas Pelanggaran Tercapai"
+                : `Peringatan Pelanggaran (${violationModal.count}/${violationModal.max})`}
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              {violationModal.reason}
+            </p>
+            {violationModal.autoSubmitted ? (
+              <p className="text-xs text-rose-600 font-semibold">
+                Ujian otomatis dikumpulkan dan skor sedang dihitung. Mengalihkan ke halaman hasil...
+              </p>
+            ) : (
+              <>
+                <p className="text-xs text-slate-500">
+                  Sisa kesempatan: <strong>{Math.max(0, violationModal.max - violationModal.count)}x</strong>. Jika mencapai{" "}
+                  <strong>{violationModal.max}x</strong>, ujian akan otomatis disubmit.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setViolationModal((prev) => ({ ...prev, isOpen: false }));
+                    void attemptEnterFullscreen(false);
+                  }}
+                  className="w-full py-2.5 px-4 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold shadow-sm transition"
+                >
+                  Kembali ke Ujian (Layar Penuh)
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

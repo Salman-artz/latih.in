@@ -25,6 +25,14 @@ export interface TryoutEntity {
   questions?: QuestionEntity[];
 }
 
+export type ViolationType =
+  | "TAB_SWITCH"
+  | "WINDOW_BLUR"
+  | "EXIT_FULLSCREEN"
+  | "SPLIT_SCREEN"
+  | "DEVTOOLS_OR_PRINT"
+  | "COPY_ATTEMPT";
+
 export interface AttemptEntity {
   id: string;
   userId: string;
@@ -34,6 +42,7 @@ export interface AttemptEntity {
   submittedAt?: Date | null;
   score?: number | null;
   isTest: boolean;
+  violationCount: number;
 }
 
 export interface ExamSheetStatement {
@@ -56,7 +65,26 @@ export interface ExamSheet {
   startedAt: Date;
   durationMinutes: number;
   remainingSeconds: number;
+  violationCount: number;
+  maxViolations: number;
+  participant: {
+    id: string;
+    name: string;
+    email: string;
+  };
   questions: ExamSheetQuestion[];
+}
+
+export interface RecordViolationResult {
+  violationCount: number;
+  maxViolations: number;
+  autoSubmitted: boolean;
+  scoreResult?: {
+    attemptId: string;
+    score: number;
+    max: number;
+    percent: number;
+  };
 }
 
 export interface ExamResultStatement {

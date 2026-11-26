@@ -21,6 +21,7 @@ import {
   StartOrResumeTryoutUseCase,
   GetExamSheetUseCase,
   SaveExamAnswersUseCase,
+  RecordExamViolationUseCase,
   SubmitTryoutUseCase,
   GetExamResultUseCase,
   GetAttemptHistoryUseCase,
@@ -56,6 +57,7 @@ export const toggleMaterialProgressUseCase = new ToggleMaterialProgressUseCase(m
 export const startOrResumeTryoutUseCase = new StartOrResumeTryoutUseCase(tryoutRepository, subscriptionRepository);
 export const getExamSheetUseCase = new GetExamSheetUseCase(tryoutRepository);
 export const saveExamAnswersUseCase = new SaveExamAnswersUseCase(tryoutRepository);
+export const recordExamViolationUseCase = new RecordExamViolationUseCase(tryoutRepository);
 export const submitTryoutUseCase = new SubmitTryoutUseCase(tryoutRepository);
 export const getExamResultUseCase = new GetExamResultUseCase(tryoutRepository);
 export const getAttemptHistoryUseCase = new GetAttemptHistoryUseCase(tryoutRepository);

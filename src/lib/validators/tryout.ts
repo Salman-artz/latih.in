@@ -12,3 +12,17 @@ export const saveAnswersSchema = z.object({
 });
 
 export type SaveAnswersInput = z.infer<typeof saveAnswersSchema>;
+
+export const recordViolationSchema = z.object({
+  type: z.enum([
+    "TAB_SWITCH",
+    "WINDOW_BLUR",
+    "EXIT_FULLSCREEN",
+    "SPLIT_SCREEN",
+    "DEVTOOLS_OR_PRINT",
+    "COPY_ATTEMPT",
+  ]),
+  detail: z.string().max(500).optional(),
+});
+
+export type RecordViolationInput = z.infer<typeof recordViolationSchema>;

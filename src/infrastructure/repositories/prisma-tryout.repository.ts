@@ -7,6 +7,8 @@ import {
   ExamSheet,
   ExamResult,
   AttemptStatus,
+  ViolationType,
+  RecordViolationResult,
 } from "@/core/domain/entities/tryout.entity";
 
 export class PrismaTryoutRepository implements ITryoutRepository {
@@ -66,6 +68,7 @@ export class PrismaTryoutRepository implements ITryoutRepository {
     const attempt = await prisma.attempt.findUnique({
       where: { id: attemptId },
       include: {
+        user: { select: { id: true, name: true, email: true } },
         tryout: {
           include: {
             questions: {
@@ -101,6 +104,13 @@ export class PrismaTryoutRepository implements ITryoutRepository {
       startedAt: attempt.startedAt,
       durationMinutes: attempt.tryout.durationMinutes,
       remainingSeconds,
+      violationCount: attempt.violationCount,
+      maxViolations: 3,
+      participant: {
+        id: attempt.user.id,
+        name: attempt.user.name,
+        email: attempt.user.email,
+      },
       questions: attempt.tryout.questions.map((q) => ({
         id: q.id,
         order: q.order,
@@ -126,6 +136,65 @@ export class PrismaTryoutRepository implements ITryoutRepository {
       )
     );
     return answers.length;
+  }
+
+  async recordViolation(
+    attemptId: string,
+    userId: string,
+    type: ViolationType,
+    detail?: string,
+    maxViolations = 3
+  ): Promise<RecordViolationResult> {
+    const updatedCount = await prisma.$transaction(async (tx) => {
+      const attempt = await tx.attempt.findUnique({
+        where: { id: attemptId },
+        select: { id: true, userId: true, status: true, violationCount: true },
+      });
+
+      if (!attempt || attempt.userId !== userId) {
+        throw new Error("NOT_FOUND");
+      }
+
+      if (attempt.status === "SUBMITTED") {
+        return { count: attempt.violationCount, alreadySubmitted: true };
+      }
+
+      await tx.attemptViolation.create({
+        data: { attemptId, type, detail },
+      });
+
+      const updated = await tx.attempt.update({
+        where: { id: attemptId },
+        data: { violationCount: { increment: 1 } },
+        select: { violationCount: true },
+      });
+
+      return { count: updated.violationCount, alreadySubmitted: false };
+    });
+
+    if (updatedCount.alreadySubmitted) {
+      return {
+        violationCount: updatedCount.count,
+        maxViolations,
+        autoSubmitted: true,
+      };
+    }
+
+    if (updatedCount.count >= maxViolations) {
+      const scoreResult = await this.submitAttempt(attemptId, userId);
+      return {
+        violationCount: updatedCount.count,
+        maxViolations,
+        autoSubmitted: true,
+        scoreResult,
+      };
+    }
+
+    return {
+      violationCount: updatedCount.count,
+      maxViolations,
+      autoSubmitted: false,
+    };
   }
 
   async submitAttempt(attemptId: string, userId: string): Promise<{ attemptId: string; score: number; max: number; percent: number }> {

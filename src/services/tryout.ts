@@ -2,10 +2,12 @@ import {
   startOrResumeTryoutUseCase,
   getExamSheetUseCase,
   saveExamAnswersUseCase,
+  recordExamViolationUseCase,
   submitTryoutUseCase,
   getExamResultUseCase,
   getAttemptHistoryUseCase,
 } from "@/core/container";
+import { ViolationType } from "@/core/domain/entities/tryout.entity";
 import { Role } from "@prisma/client";
 
 export async function startOrResumeAttempt(
@@ -26,6 +28,15 @@ export async function saveAnswers(
   answers: { statementId: string; answer: boolean }[]
 ) {
   return await saveExamAnswersUseCase.execute(userId, attemptId, answers);
+}
+
+export async function recordViolation(
+  userId: string,
+  attemptId: string,
+  type: ViolationType,
+  detail?: string
+) {
+  return await recordExamViolationUseCase.execute(userId, attemptId, type, detail);
 }
 
 export async function submitAttempt(userId: string, attemptId: string) {
