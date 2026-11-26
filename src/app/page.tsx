@@ -152,43 +152,73 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              {/* HERO VISUAL PREVIEW - Menyeimbangkan layar 15.6" & 24" */}
+              {/* HERO VISUAL SUMMARY - Menyeimbangkan layar 15.6" & 24" tanpa simulasi soal */}
               <div className="lg:col-span-5">
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 sm:p-6 shadow-sm space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold px-2.5 py-1 rounded bg-brand-blue-50 text-brand-blue border border-brand-blue/20">
-                        Simulasi Soal #1
-                      </span>
-                      <span className="text-xs text-slate-500 hidden sm:inline">3 Pernyataan</span>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+                    <div>
+                      <p className="text-xs font-bold text-brand-blue uppercase tracking-wider">
+                        Ekosistem Belajar
+                      </p>
+                      <h3 className="text-base sm:text-lg font-bold text-brand-navy">
+                        Persiapan Terarah dalam 1 Platform
+                      </h3>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border border-slate-200 font-mono text-xs font-bold text-brand-navy">
-                      <Clock className="w-3.5 h-3.5 text-brand-blue" /> 19:45
+                    <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+                      Terpadu
                     </span>
                   </div>
 
-                  <div className="bg-white border border-slate-200 rounded-lg p-3.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                    Stimulus bacaan analitis untuk menguji pemahaman ide pokok, logika proposisional, serta pembedaan fakta dan opini secara terstruktur.
+                  <div className="space-y-3">
+                    <div className="bg-white border border-slate-200 rounded-lg p-3.5 flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-md bg-brand-blue-50 text-brand-blue flex items-center justify-center flex-shrink-0 border border-brand-blue/20">
+                        <PlayCircle className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-brand-navy">Video Materi Kurasi</p>
+                        <p className="text-xs text-slate-600">
+                          Pahami konsep inti penalaran &amp; literasi secara bertahap.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-lg p-3.5 flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-md bg-slate-100 text-brand-navy flex items-center justify-center flex-shrink-0 border border-slate-200">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-brand-navy">Tryout Berwaktu Nyata</p>
+                        <p className="text-xs text-slate-600">
+                          Timer tersinkron server dengan penyimpanan jawaban otomatis.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-lg p-3.5 flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-200">
+                        <Award className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-brand-navy">Evaluasi &amp; Pembahasan Instan</p>
+                        <p className="text-xs text-slate-600">
+                          Lihat skor akhir, status jawaban, dan pembahasan lengkap tiap butir.
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-2.5">
-                    <div className="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
-                      <span className="text-xs text-slate-700 font-medium">1. Simpulan sesuai dengan teks stimulus</span>
-                      <span className="px-2.5 py-1 rounded bg-emerald-600 text-white text-[11px] font-bold flex-shrink-0">
-                        Benar
-                      </span>
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200 text-center">
+                    <div className="bg-white border border-slate-200 rounded-lg py-2.5 px-2">
+                      <p className="text-sm font-extrabold text-brand-navy">Video</p>
+                      <p className="text-[11px] text-slate-500">Materi Terarah</p>
                     </div>
-                    <div className="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
-                      <span className="text-xs text-slate-700 font-medium">2. Pernyataan bertentangan dengan data</span>
-                      <span className="px-2.5 py-1 rounded bg-rose-600 text-white text-[11px] font-bold flex-shrink-0">
-                        Salah
-                      </span>
+                    <div className="bg-white border border-slate-200 rounded-lg py-2.5 px-2">
+                      <p className="text-sm font-extrabold text-brand-blue">20 Menit</p>
+                      <p className="text-[11px] text-slate-500">Durasi Nyata</p>
                     </div>
-                    <div className="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
-                      <span className="text-xs text-slate-700 font-medium">3. Pembahasan &amp; skor otomatis tersedia</span>
-                      <span className="px-2.5 py-1 rounded bg-emerald-600 text-white text-[11px] font-bold flex-shrink-0">
-                        Benar
-                      </span>
+                    <div className="bg-white border border-slate-200 rounded-lg py-2.5 px-2">
+                      <p className="text-sm font-extrabold text-emerald-700">100%</p>
+                      <p className="text-[11px] text-slate-500">Pembahasan</p>
                     </div>
                   </div>
                 </div>
