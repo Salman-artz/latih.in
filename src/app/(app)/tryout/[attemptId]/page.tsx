@@ -618,18 +618,36 @@ export default function TryoutExamPage({
     );
   }
 
-  const currentQuestion = exam.questions[currentQIndex];
+  const currentQuestion = exam.questions?.[currentQIndex];
+  if (!currentQuestion) {
+    return (
+      <div className="max-w-md mx-auto py-12 text-center space-y-4">
+        <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto" />
+        <h2 className="text-lg font-bold text-brand-navy">Soal Tidak Tersedia</h2>
+        <p className="text-sm text-gray-600">Paket tryout ini belum memiliki butir soal.</p>
+        <button
+          onClick={() => router.push("/tryout")}
+          className="px-5 py-2.5 rounded-md bg-brand-blue text-white text-sm font-semibold"
+        >
+          Kembali ke Menu Tryout
+        </button>
+      </div>
+    );
+  }
+
   const minutes = Math.floor(remainingTime / 60);
   const seconds = remainingTime % 60;
   const timeFormatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   const isTimeLow = remainingTime < 180; // kurang dari 3 menit
 
-  // Hitung total terjawab dari 30 pernyataan
-  const totalStatements = 30;
+  // Hitung total terjawab dari seluruh pernyataan
+  const totalStatements = exam.questions.reduce((acc, q) => acc + q.statements.length, 0) || 30;
   const answeredCount = Object.keys(answers).length;
   const emptyCount = totalStatements - answeredCount;
 
-  const watermarkText = `${exam.participant.name} • ${exam.participant.email} • ${exam.participant.id}`;
+  const watermarkText = exam.participant
+    ? `${exam.participant.name} • ${exam.participant.email} • ${exam.participant.id}`
+    : "latih.in";
 
   const shouldBlurContent = isPrivacyBlurred || needsFullscreenGate || violationModal.isOpen;
 
