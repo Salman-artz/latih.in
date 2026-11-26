@@ -11,6 +11,36 @@ import {
   RecordViolationResult,
 } from "@/core/domain/entities/tryout.entity";
 
+let proctoringSchemaReady: Promise<void> | null = null;
+
+async function ensureProctoringSchema(): Promise<void> {
+  if (!proctoringSchemaReady) {
+    proctoringSchemaReady = (async () => {
+      await prisma.$executeRawUnsafe(
+        `ALTER TABLE "Attempt" ADD COLUMN IF NOT EXISTS "violationCount" INTEGER NOT NULL DEFAULT 0;`
+      );
+      await prisma.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "AttemptViolation" (
+          "id" TEXT NOT NULL,
+          "attemptId" TEXT NOT NULL,
+          "type" TEXT NOT NULL,
+          "detail" TEXT,
+          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "AttemptViolation_pkey" PRIMARY KEY ("id"),
+          CONSTRAINT "AttemptViolation_attemptId_fkey" FOREIGN KEY ("attemptId") REFERENCES "Attempt"("id") ON DELETE CASCADE ON UPDATE CASCADE
+        );
+      `);
+      await prisma.$executeRawUnsafe(
+        `CREATE INDEX IF NOT EXISTS "AttemptViolation_attemptId_createdAt_idx" ON "AttemptViolation"("attemptId", "createdAt");`
+      );
+    })().catch((err) => {
+      proctoringSchemaReady = null;
+      throw err;
+    });
+  }
+  return proctoringSchemaReady;
+}
+
 export class PrismaTryoutRepository implements ITryoutRepository {
   async findPublishedTryout(tryoutId?: string): Promise<TryoutEntity | null> {
     const where: Prisma.TryoutWhereInput = { status: "PUBLISHED" };
@@ -29,6 +59,7 @@ export class PrismaTryoutRepository implements ITryoutRepository {
   }
 
   async findActiveAttempt(userId: string, tryoutId: string): Promise<AttemptEntity | null> {
+    await ensureProctoringSchema();
     const att = await prisma.attempt.findFirst({
       where: { userId, tryoutId, status: "IN_PROGRESS" },
       orderBy: { startedAt: "desc" },
@@ -41,6 +72,7 @@ export class PrismaTryoutRepository implements ITryoutRepository {
   }
 
   async findAttemptById(attemptId: string): Promise<AttemptEntity | null> {
+    await ensureProctoringSchema();
     const att = await prisma.attempt.findUnique({ where: { id: attemptId } });
     if (!att) return null;
     return {
@@ -50,6 +82,7 @@ export class PrismaTryoutRepository implements ITryoutRepository {
   }
 
   async createAttempt(data: { userId: string; tryoutId: string; isTest?: boolean }): Promise<AttemptEntity> {
+    await ensureProctoringSchema();
     const att = await prisma.attempt.create({
       data: {
         userId: data.userId,
@@ -65,6 +98,7 @@ export class PrismaTryoutRepository implements ITryoutRepository {
   }
 
   async getExamSheet(attemptId: string, userId: string): Promise<ExamSheet | null> {
+    await ensureProctoringSchema();
     const attempt = await prisma.attempt.findUnique({
       where: { id: attemptId },
       include: {
@@ -145,6 +179,7 @@ export class PrismaTryoutRepository implements ITryoutRepository {
     detail?: string,
     maxViolations = 5
   ): Promise<RecordViolationResult> {
+    await ensureProctoringSchema();
     const updatedCount = await prisma.$transaction(async (tx) => {
       const attempt = await tx.attempt.findUnique({
         where: { id: attemptId },
