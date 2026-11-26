@@ -130,8 +130,8 @@ export default function TryoutExamPage({
 
         // Inisialisasi peta jawaban dari database
         const initialMap: Record<string, boolean> = {};
-        for (const q of data.questions) {
-          for (const s of q.statements) {
+        for (const q of data.questions ?? []) {
+          for (const s of q.statements ?? []) {
             if (s.userAnswer !== null && s.userAnswer !== undefined) {
               initialMap[s.id] = s.userAnswer;
             }
