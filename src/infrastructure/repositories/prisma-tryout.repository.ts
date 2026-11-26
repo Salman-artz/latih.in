@@ -105,7 +105,7 @@ export class PrismaTryoutRepository implements ITryoutRepository {
       durationMinutes: attempt.tryout.durationMinutes,
       remainingSeconds,
       violationCount: attempt.violationCount,
-      maxViolations: 3,
+      maxViolations: 5,
       participant: {
         id: attempt.user.id,
         name: attempt.user.name,
@@ -143,7 +143,7 @@ export class PrismaTryoutRepository implements ITryoutRepository {
     userId: string,
     type: ViolationType,
     detail?: string,
-    maxViolations = 3
+    maxViolations = 5
   ): Promise<RecordViolationResult> {
     const updatedCount = await prisma.$transaction(async (tx) => {
       const attempt = await tx.attempt.findUnique({

@@ -78,13 +78,14 @@ export default function TryoutExamPage({
     message: "",
   });
   const [violationCount, setViolationCount] = useState(0);
-  const [maxViolations, setMaxViolations] = useState(3);
+  const [maxViolations, setMaxViolations] = useState(5);
   const [needsFullscreenGate, setNeedsFullscreenGate] = useState(false);
   const [proctoringArmed, setProctoringArmed] = useState(false);
+  const [isPrivacyBlurred, setIsPrivacyBlurred] = useState(false);
   const [violationModal, setViolationModal] = useState<ViolationModalState>({
     isOpen: false,
     count: 0,
-    max: 3,
+    max: 5,
     reason: "",
     autoSubmitted: false,
   });
@@ -96,7 +97,7 @@ export default function TryoutExamPage({
   const inFlightSaveRef = useRef<Promise<boolean> | null>(null);
 
   const violationCountRef = useRef(0);
-  const maxViolationsRef = useRef(3);
+  const maxViolationsRef = useRef(5);
   const lastViolationAtRef = useRef(0);
   const lastFullscreenTransitionRef = useRef(0);
   const isIntentionalExitRef = useRef(false);
@@ -125,7 +126,7 @@ export default function TryoutExamPage({
         setExam(data);
         setRemainingTime(data.remainingSeconds);
         setViolationCount(data.violationCount ?? 0);
-        setMaxViolations(data.maxViolations ?? 3);
+        setMaxViolations(data.maxViolations ?? 5);
 
         // Inisialisasi peta jawaban dari database
         const initialMap: Record<string, boolean> = {};
@@ -406,13 +407,23 @@ export default function TryoutExamPage({
     // Deteksi pindah tab / aplikasi
     function handleVisibilityChange() {
       if (document.hidden) {
+        setIsPrivacyBlurred(true);
         void reportViolation("TAB_SWITCH", "Berpindah tab browser atau meminimalkan aplikasi.");
+      } else {
+        setIsPrivacyBlurred(false);
       }
     }
 
     // Deteksi kehilangan fokus jendela
     function handleWindowBlur() {
+      setIsPrivacyBlurred(true);
       void reportViolation("WINDOW_BLUR", "Jendela ujian kehilangan fokus (klik di luar layar ujian).");
+    }
+
+    function handleWindowFocus() {
+      if (!document.hidden) {
+        setIsPrivacyBlurred(false);
+      }
     }
 
     // Deteksi keluar mode layar penuh
@@ -443,19 +454,37 @@ export default function TryoutExamPage({
       }
     }
 
-    // Blokir shortcut DevTools, Print, Save, View Source
+    // Blokir shortcut DevTools, Print, Save, View Source, & Screenshot
     function handleKeyDown(e: KeyboardEvent) {
       const key = e.key.toLowerCase();
       const ctrlOrMeta = e.ctrlKey || e.metaKey;
-      const isDevTools =
+      const isDevToolsOrPrint =
         e.key === "F12" ||
         (ctrlOrMeta && e.shiftKey && ["i", "j", "c"].includes(key)) ||
         (ctrlOrMeta && ["u", "p", "s"].includes(key));
+      const isScreenshotShortcut =
+        e.key === "PrintScreen" ||
+        (e.metaKey && e.shiftKey && ["3", "4", "5"].includes(key));
 
-      if (isDevTools) {
+      if (isScreenshotShortcut) {
+        e.preventDefault();
+        e.stopPropagation();
+        void reportViolation("DEVTOOLS_OR_PRINT", "Terdeteksi percobaan screenshot halaman soal.");
+        return;
+      }
+
+      if (isDevToolsOrPrint) {
         e.preventDefault();
         e.stopPropagation();
         void reportViolation("DEVTOOLS_OR_PRINT", "Mencoba membuka DevTools, mencetak, atau menyimpan halaman soal.");
+      }
+    }
+
+    function handleKeyUp(e: KeyboardEvent) {
+      if (e.key === "PrintScreen") {
+        e.preventDefault();
+        e.stopPropagation();
+        void reportViolation("DEVTOOLS_OR_PRINT", "Terdeteksi percobaan screenshot halaman soal (PrintScreen).");
       }
     }
 
@@ -463,18 +492,22 @@ export default function TryoutExamPage({
     window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("focus", handleWindowFocus);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     window.addEventListener("resize", handleResize);
     window.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("keyup", handleKeyUp, true);
 
     return () => {
       window.removeEventListener("popstate", handlePopState);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("blur", handleWindowBlur);
+      window.removeEventListener("focus", handleWindowFocus);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("keyup", handleKeyUp, true);
     };
   }, [exam]);
 
@@ -590,6 +623,8 @@ export default function TryoutExamPage({
 
   const watermarkText = `${exam.participant.name} • ${exam.participant.email} • ${exam.participant.id}`;
 
+  const shouldBlurContent = isPrivacyBlurred || needsFullscreenGate || violationModal.isOpen;
+
   return (
     <div
       className="max-w-5xl mx-auto space-y-6 pb-12 select-none relative"
@@ -651,7 +686,11 @@ export default function TryoutExamPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      <div
+        className={`grid grid-cols-1 lg:grid-cols-4 gap-6 items-start transition duration-150 ${
+          shouldBlurContent ? "blur-md" : ""
+        }`}
+      >
         {/* AREA SOAL & PERNYATAAN (KIRI) */}
         <div className="lg:col-span-3 space-y-6">
           <div className="bg-white p-5 sm:p-8 rounded-lg border border-slate-200 shadow-sm space-y-6">

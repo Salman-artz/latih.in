@@ -90,7 +90,7 @@ export class RecordExamViolationUseCase {
       throw new AppError("Attempt tidak ditemukan", 404, "NOT_FOUND");
     }
 
-    return await this.tryoutRepo.recordViolation(attemptId, userId, type, detail, 3);
+    return await this.tryoutRepo.recordViolation(attemptId, userId, type, detail, 5);
   }
 }
 
