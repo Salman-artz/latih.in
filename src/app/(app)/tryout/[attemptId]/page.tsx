@@ -426,6 +426,12 @@ export default function TryoutExamPage({
       }
     }
 
+    function handlePageHide() {
+      if (isIntentionalExitRef.current) return;
+      setIsPrivacyBlurred(true);
+      void reportViolation("TAB_SWITCH", "Halaman ujian disembunyikan atau ditinggalkan.");
+    }
+
     // Deteksi keluar mode layar penuh
     function handleFullscreenChange() {
       lastFullscreenTransitionRef.current = Date.now();
@@ -490,6 +496,7 @@ export default function TryoutExamPage({
 
     window.addEventListener("popstate", handlePopState);
     window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("pagehide", handlePageHide);
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("blur", handleWindowBlur);
     window.addEventListener("focus", handleWindowFocus);
@@ -501,6 +508,7 @@ export default function TryoutExamPage({
     return () => {
       window.removeEventListener("popstate", handlePopState);
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("pagehide", handlePageHide);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("blur", handleWindowBlur);
       window.removeEventListener("focus", handleWindowFocus);
@@ -628,7 +636,9 @@ export default function TryoutExamPage({
   return (
     <div
       className="max-w-5xl mx-auto space-y-6 pb-12 select-none relative"
+      style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none" }}
       onContextMenu={(e) => e.preventDefault()}
+      onDragStart={(e) => e.preventDefault()}
       onCopy={(e) => {
         e.preventDefault();
         void reportViolation("COPY_ATTEMPT", "Mencoba menyalin teks soal.");
