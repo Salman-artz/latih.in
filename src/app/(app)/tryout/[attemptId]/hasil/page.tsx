@@ -36,7 +36,7 @@ export default async function TryoutResultPage({
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-16">
+    <div className="w-full space-y-6 pb-16">
       {/* SCORE HEADER HERO - Solid Navy */}
       <div className="bg-brand-navy text-white rounded-lg p-6 sm:p-8 shadow-sm border border-slate-800 text-center space-y-6">
         <div className="space-y-1">

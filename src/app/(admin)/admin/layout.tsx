@@ -37,7 +37,7 @@ export default async function AdminLayout({
     <div className="min-h-screen flex flex-col bg-slate-50 text-brand-navy">
       {/* Admin Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
               <Logo height={28} />
@@ -89,7 +89,7 @@ export default async function AdminLayout({
       </header>
 
       {/* Main Admin Content */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-grow w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-8">
         {children}
       </main>
     </div>

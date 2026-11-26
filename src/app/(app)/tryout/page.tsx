@@ -74,7 +74,7 @@ export default async function TryoutIndexPage() {
   });
 
   return (
-    <div className="max-w-4xl mx-auto py-4 space-y-8">
+    <div className="w-full py-4 space-y-8">
       {/* Title */}
       <div className="text-center space-y-2">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-navy">

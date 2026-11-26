@@ -679,7 +679,7 @@ export default function TryoutExamPage({
 
   return (
     <div
-      className="max-w-5xl mx-auto space-y-6 pb-12 select-none relative"
+      className="w-full space-y-6 pb-12 select-none relative"
       style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none" }}
       onContextMenu={(e) => e.preventDefault()}
       onDragStart={(e) => e.preventDefault()}

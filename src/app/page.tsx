@@ -91,7 +91,7 @@ export default async function HomePage() {
       <main className="flex-grow bg-slate-50/50">
         {/* HERO SECTION */}
         <section className="border-b border-slate-200 bg-white py-16 sm:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
             <div className="max-w-3xl space-y-6">
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-brand-navy leading-[1.15]">
                 Belajar dari video, <br />
@@ -155,7 +155,7 @@ export default async function HomePage() {
 
         {/* FITUR UTAMA - Clean Cards */}
         <section id="fitur" className="py-16 sm:py-20 border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
             <div className="max-w-2xl mb-12 space-y-2">
               <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
                 Struktur Pembelajaran
@@ -218,7 +218,7 @@ export default async function HomePage() {
 
         {/* CARA KERJA - Clean 4 Steps */}
         <section id="cara-kerja" className="py-16 sm:py-20 bg-white border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
             <div className="max-w-2xl mb-12 space-y-2">
               <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
                 Alur Pengerjaan
@@ -277,7 +277,7 @@ export default async function HomePage() {
 
         {/* CUPLIKAN MATERI */}
         <section id="materi" className="py-16 sm:py-20 border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
               <div>
                 <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
@@ -356,7 +356,7 @@ export default async function HomePage() {
 
         {/* FAQ - Utilitarian Accordion Style */}
         <section id="faq" className="py-16 sm:py-20 bg-white border-b border-slate-200">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12">
             <div className="mb-10 space-y-2">
               <span className="text-xs font-bold text-brand-blue uppercase tracking-wider">
                 Bantuan & Informasi
@@ -412,7 +412,7 @@ export default async function HomePage() {
 
         {/* BOTTOM ACTION BANNER - Solid Navy Brand */}
         <section className="py-12 sm:py-16 bg-brand-navy text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="space-y-1 text-center sm:text-left">
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                 Mulai Evaluasi Kemampuanmu Hari Ini
